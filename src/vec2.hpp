@@ -1,0 +1,23 @@
+#ifndef VECTOR2_H
+#define VECTOR2_H
+
+template <typename T>
+struct vec2
+{
+    T x;
+    T y;
+};
+
+template <typename T>
+vec2<T> operator+(vec2<T> vec_0, vec2<T> vec_1)
+{
+    return vec2<T>{vec_0.x + vec_1.x, vec_0.y + vec_1.y};
+}
+
+template <typename T>
+vec2<T> operator-(vec2<T> vec_0, vec2<T> vec_1)
+{
+    return vec2<T>{vec_0.x - vec_1.x, vec_0.y - vec_1.y};
+}
+
+#endif
