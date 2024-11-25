@@ -9,12 +9,18 @@
 #include "./texture.hpp"
 #include "./timer.hpp"
 
+#include "./texman.hpp"
+#include "./tiles.hpp"
+
 class Game
 {
 private:
     SDL_Window* _Window {NULL};
     SDL_Renderer* _Renderer {NULL};
     Texture _Screen{};
+
+    TexMan _TexMan{};
+    World _World{};
 
 public:
     Game()
@@ -99,6 +105,8 @@ public:
             std::cout << "Failed to create blank target texture for screen!\n";
             success = false;
         }
+        _TexMan.load(_Window, _Renderer);
+        _World.loadFromFile("data/maps/0.json");
         if (success)
             std::cout << "Loaded!\n";
         return success;
