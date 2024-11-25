@@ -145,6 +145,11 @@ public:
             // clear screen
             SDL_SetRenderDrawColor(_Renderer, 0x00, 0x00, 0x00, 0xFF);
             SDL_RenderClear(_Renderer);
+
+            // do rendering here
+
+            _World.render(0, 0, _Window, _Renderer, &_TexMan);
+
             // render screen
             SDL_SetRenderTarget(_Renderer, NULL);
             _Screen.renderClean(0, 0, _Renderer);

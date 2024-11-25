@@ -26,7 +26,7 @@ struct Tile
 {
     vec2<int> pos; // relative position. real position = pos.x * TILE_SIZE, pos.y * TILE_SIZE
     uint8_t type; // tile type. grass, etc
-    uint8_t variant; // variant in tileset 0-15
+    uint8_t variant{15}; // variant in tileset 0-15
 };
 
 struct Chunk
@@ -101,6 +101,7 @@ public:
                 {
                     int chunk_idx{targetY * LEVEL_WIDTH + targetX};
                     Chunk* chunk{&(_Chunks[chunk_idx])};
+                    renderChunk(chunk, scrollX, scrollY, window, renderer, texman);
                 }
             }
         }
@@ -110,7 +111,13 @@ public:
     {
         for (const auto& tile : chunk->tiles)
         {
-            
+            /*
+            variant = w * y + x
+            x = variant % w
+            y = (variant - x) / w
+            */
+            SDL_Rect clip{(tile.variant % 4) * TILE_SIZE, static_cast<int>((tile.variant - (tile.variant % 4)) / 4) * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+            texman->tileGrassTex.render(tile.pos.x * TILE_SIZE - scrollX, tile.pos.y * TILE_SIZE - scrollY, renderer, &clip);
         }
     }
 };
