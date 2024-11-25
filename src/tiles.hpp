@@ -65,7 +65,6 @@ public:
     {
         std::ifstream f{path};
         json data = json::parse(f);
-        //std::cout << data["level"]["tiles"][1]["pos"][0] << '\n';
         // clear chunks
         for (std::size_t i{0}; i < LEVEL_WIDTH * LEVEL_HEIGHT; ++i)
         {
