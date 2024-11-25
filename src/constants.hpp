@@ -2,6 +2,7 @@
 #define CONSTANTS_H
 
 constexpr int TILE_SIZE {8};
+constexpr int CHUNK_SIZE {16};
 
 constexpr int WINDOW_WIDTH {630};
 constexpr int WINDOW_HEIGHT {630};
