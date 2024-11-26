@@ -194,6 +194,14 @@ public:
         SDL_RenderCopyEx(renderer, mTexture, clip, &renderQuad, angle, center, flip);
     }
 
+    void renderClean(int x, int y, SDL_Renderer* renderer, int scale_factor)
+    {
+        SDL_Rect renderQuad {x, y, mWidth, mHeight};
+        renderQuad.w *= scale_factor;
+        renderQuad.h *= scale_factor;
+        SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
+    }
+
     void renderClean(int x, int y, SDL_Renderer* renderer)
     {
         SDL_Rect renderQuad {x, y, mWidth, mHeight};

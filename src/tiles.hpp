@@ -26,7 +26,7 @@ struct Tile
 {
     vec2<int> pos; // relative position. real position = pos.x * TILE_SIZE, pos.y * TILE_SIZE
     uint8_t type; // tile type. grass, etc
-    uint8_t variant{15}; // variant in tileset 0-15
+    uint8_t variant{0}; // variant in tileset 0-15
 };
 
 struct Chunk
@@ -59,6 +59,27 @@ public:
             Chunk* chunk {&(_Chunks[chunk_idx])};
             return chunk;
         }
+        return nullptr;
+    }
+
+    Tile* getTileAt(const double x, const double y)
+    {
+        Chunk* chunk{getChunkAt(x, y)};
+        if (chunk != nullptr)
+        {
+            for (std::size_t i{0}; i < chunk->tiles.size(); ++i)
+            {
+                Tile* tile = &(chunk->tiles[i]);
+                int tileX {static_cast<int>(std::floor(x / (double)TILE_SIZE))};
+                int tileY {static_cast<int>(std::floor(y / (double)TILE_SIZE))};
+                //std::cout << tileX << '\t' << tileY << '\n';
+                if (tileX == tile->pos.x && tileY == tile->pos.y)
+                {
+                    return tile;
+                }
+            }
+        }
+        return nullptr;
     }
 
     void loadFromFile(const char* path, bool clear = false)
@@ -116,7 +137,7 @@ public:
             y = (variant - x) / w
             */
             SDL_Rect clip{(tile.variant % 4) * TILE_SIZE, static_cast<int>((tile.variant - (tile.variant % 4)) / 4) * TILE_SIZE, TILE_SIZE, TILE_SIZE};
-            texman->tileGrassTex.render(tile.pos.x * TILE_SIZE - scrollX, tile.pos.y * TILE_SIZE - scrollY, renderer, &clip);
+            texman->tileGrassTex.render(tile.pos.x * TILE_SIZE * SCALE_FACTOR - scrollX, tile.pos.y * TILE_SIZE * SCALE_FACTOR  - scrollY, renderer, &clip);
         }
     }
 };

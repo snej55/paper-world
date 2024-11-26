@@ -123,6 +123,9 @@ public:
         fpsTimer.start();
         float time_step {1.0};
 
+        int mouseX, mouseY;
+        int windowX, windowY;
+
         float frames{1.0f};
         do {
             while (SDL_PollEvent(&e) != 0)
@@ -130,8 +133,13 @@ public:
                 if (e.type == SDL_QUIT)
                 {
                     running = false;
+                } else if (e.type == SDL_MOUSEMOTION)
+                {
+                    SDL_GetGlobalMouseState(&mouseX, &mouseY);
                 }
             }
+
+            SDL_GetWindowPosition(_Window, &windowX, &windowY);
 
             // calculate dt
             // timer.getTicks() and last_time are both Uint32 so must cast to float
@@ -150,14 +158,21 @@ public:
 
             _World.render(0, 0, _Window, _Renderer, &_TexMan);
 
+            Tile* tile {_World.getTileAt(mouseX - windowX, mouseY - windowY)};
+            if (tile != nullptr)
+            {
+                std::cout << tile->pos << '\n';
+            }
+            std::cout << mouseX - windowX << '\t' << mouseY - windowY << '\n';
+
             // render screen
             SDL_SetRenderTarget(_Renderer, NULL);
-            _Screen.renderClean(0, 0, _Renderer);
+            _Screen.renderClean(0, 0, _Renderer, 2);
 
             SDL_RenderPresent(_Renderer);
 
             float avgFPS {frames / (fpsTimer.getTicks() / 1000.0f)};
-            std::cout << avgFPS << '\n';
+            //std::cout << avgFPS << '\n';
 
             ++frames;
         } while (running);
