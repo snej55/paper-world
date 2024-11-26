@@ -157,14 +157,6 @@ public:
             // do rendering here
 
             _World.render(0, 0, _Window, _Renderer, &_TexMan);
-
-            Tile* tile {_World.getTileAt(mouseX - windowX, mouseY - windowY)};
-            if (tile != nullptr)
-            {
-                std::cout << tile->pos << '\n';
-            }
-            std::cout << mouseX - windowX << '\t' << mouseY - windowY << '\n';
-
             // render screen
             SDL_SetRenderTarget(_Renderer, NULL);
             _Screen.renderClean(0, 0, _Renderer, 2);
