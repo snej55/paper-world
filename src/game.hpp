@@ -8,9 +8,11 @@
 #include "./constants.hpp"
 #include "./texture.hpp"
 #include "./timer.hpp"
+#include "./vec2.hpp"
 
 #include "./texman.hpp"
 #include "./tiles.hpp"
+#include "./player.hpp"
 
 class Game
 {
@@ -21,6 +23,8 @@ private:
 
     TexMan _TexMan{};
     World _World{};
+    // ignore error squiggle
+    Player _Player{{40.0, 40.0}, {6.0, 8.0}};
 
 public:
     Game()
@@ -126,6 +130,8 @@ public:
         int mouseX, mouseY;
         int windowX, windowY;
 
+        vec2<double> scroll;
+
         float frames{1.0f};
         do {
             while (SDL_PollEvent(&e) != 0)
@@ -136,6 +142,52 @@ public:
                 } else if (e.type == SDL_MOUSEMOTION)
                 {
                     SDL_GetGlobalMouseState(&mouseX, &mouseY);
+                    mouseX -= windowX;
+                    mouseY -= windowY;
+                } else if (e.type == SDL_KEYDOWN)
+                {
+                    Controller* controller {_Player.getController()};
+                    switch (e.key.keysym.sym)
+                    {
+                        case SDLK_UP:
+                            if (!(controller->getControl(Control::UP)))
+                            {
+                                controller->setJumping(0.0);
+                                controller->setControl(Control::UP, true);
+                            }
+                            break;
+                        case SDLK_DOWN:
+                            controller->setControl(Control::DOWN, true);
+                            break;
+                        case SDLK_LEFT:
+                            controller->setControl(Control::LEFT, true);
+                            break;
+                        case SDLK_RIGHT:
+                            controller->setControl(Control::RIGHT, true);
+                            break;
+                        default:
+                            break;
+                    }
+                } else if (e.type == SDL_KEYUP)
+                {
+                    Controller* controller {_Player.getController()};
+                    switch (e.key.keysym.sym)
+                    {
+                        case SDLK_UP:
+                            controller->setControl(Control::UP, false);
+                            break;
+                        case SDLK_DOWN:
+                            controller->setControl(Control::DOWN, false);
+                            break;
+                        case SDLK_LEFT:
+                            controller->setControl(Control::LEFT, false);
+                            break;
+                        case SDLK_RIGHT:
+                            controller->setControl(Control::RIGHT, false);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
 
@@ -150,13 +202,26 @@ public:
             timer.start();
             // set screen as render target
             _Screen.setAsRenderTarget(_Renderer);
-            // clear screen
+            // clear screen (0x1f, 0x24, 0x4b)
             SDL_SetRenderDrawColor(_Renderer, 0x00, 0x00, 0x00, 0xFF);
             SDL_RenderClear(_Renderer);
 
+            // do updateing here
+            vec2<int> render_scroll{static_cast<int>(scroll.x), static_cast<int>(scroll.y)};
+            _Player.update(time_step, _World);
             // do rendering here
 
-            _World.render(0, 0, _Window, _Renderer, &_TexMan);
+            
+            _World.render(render_scroll.x, render_scroll.y, _Window, _Renderer, &_TexMan);
+            _Player.render(render_scroll.x, render_scroll.y, _Renderer);
+            /*std::array<SDL_Rect, 9> rects;
+            vec2<double> pos {(double)mouseX / 2, (double)mouseY / 2};
+            _World.getTilesAroundPos(pos, rects);
+            for (int i{0}; i < 9; ++i)
+            {
+                SDL_SetRenderDrawColor(_Renderer, 0xFF, 0x00, 0x00, 0xFF);
+                SDL_RenderFillRect(_Renderer, &(rects[i]));
+            }*/
             // render screen
             SDL_SetRenderTarget(_Renderer, NULL);
             _Screen.renderClean(0, 0, _Renderer, 2);

@@ -6,6 +6,9 @@
 template <typename T>
 struct vec2
 {
+    //operator vec2<int>() const {
+    //    return vec2<int>{(int)x, (int)y};
+    //}
     T x;
     T y;
 };

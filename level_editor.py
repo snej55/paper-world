@@ -1,4 +1,4 @@
-import pygame, sys, time, json, math
+import pygame, sys, time, json, math, random
 
 TILE_SIZE = 8
 CHUNK_SIZE = 9
@@ -11,9 +11,13 @@ CONVERT_TYPES = {
     1: 'rock'
 }
 AUTO_TILE_TYPES = {'grass', 'rock'}
+AUTO_TILE_MAP = {'0011': 1, '1011': 2, '1001': 3, '0001': 4, '0111': 5, '1111': 6, '1101': 7, '0101': 8, 
+                '0110': 9, '1110': 10, '1100': 11, '0100': 12, '0010': 13, '1010': 14, '1000': 15, '0000': 16}
 
 class Editor:
     def __init__(self):
+        self.path = 'data/maps/0.json'
+
         self.display = pygame.display.set_mode((1000, 800))
         self.screen = pygame.Surface((500, 400))
         self.dt = 1
@@ -30,7 +34,7 @@ class Editor:
         self.controls = {'right': False, 'left': False, 'up': False, 'down': False, 'l_shift': False}
 
         self.tile_map = {}
-        self.load('data/maps/0.json')
+        self.load(self.path)
 
         self.click = False
         self.right_click = False
@@ -44,6 +48,8 @@ class Editor:
         self.tile_variant = 0
 
         self.grid = True
+
+        self.particles = []
     
     def load(self, path):
         f = open(path, 'r')
@@ -54,6 +60,18 @@ class Editor:
             tile_loc = f"{tile['pos'][0]};{tile['pos'][1]}"
             self.tile_map[tile_loc] = {'type': CONVERT_TYPES[tile['type']], 'variant': tile['variant']}
     
+    def save(self, path):
+        with open(path, 'w') as f:
+            tiles = []
+            for loc in self.tile_map:
+                tile_type = 0
+                for key in CONVERT_TYPES:
+                    if self.tile_map[loc]['type'] == CONVERT_TYPES[key]:
+                        tile_type = key
+                tiles.append({'pos': [int(c) for c in loc.split(';')], 'type': tile_type, 'variant': self.tile_map[loc]['variant']})
+            json.dump({'level': {'tiles': tiles}}, f)
+            f.close()
+
     def load_tileset(self, sheet):
         tiles = []
         for y in range(4):
@@ -64,6 +82,23 @@ class Editor:
                 tiles.append(tile_surf.copy())
         return tiles
     
+    def auto_tile(self):
+        for loc in self.tile_map:
+            tile = self.tile_map[loc]
+            aloc = ''
+            tile_pos = [int(i) * TILE_SIZE for i in loc.split(';')]
+            for shift in [(-1, 0), (0, -1), (1, 0), (0, 1)]:
+                check_loc = str(math.floor(tile_pos[0] / TILE_SIZE) + shift[0]) + ';' + str(math.floor(tile_pos[1] / TILE_SIZE) + shift[1])
+                if check_loc in self.tile_map:
+                    if self.tile_map[check_loc]['type'] in AUTO_TILE_TYPES:
+                        aloc += '1'
+                    else:
+                        aloc += '0'
+                else:
+                    aloc += '0'
+            if tile['type'] in AUTO_TILE_TYPES:
+                tile['variant'] = AUTO_TILE_MAP[aloc] - 1
+
     def close(self):
         self.running = False
         pygame.quit()
@@ -90,7 +125,23 @@ class Editor:
             if 0 <= mouse_pos[0] < LEVEL_WIDTH * CHUNK_SIZE and 0 <= mouse_pos[1] < LEVEL_HEIGHT * CHUNK_SIZE:
                 tile_loc = f"{mouse_pos[0]};{mouse_pos[1]}"
                 if tile_loc in self.tile_map:
+                    for y in range(TILE_SIZE):
+                        for x in range(TILE_SIZE):
+                            angle = random.random() * math.pi * 2
+                            #self.particles.append([[mouse_pos[0] * TILE_SIZE + random.random() * TILE_SIZE, mouse_pos[1] * TILE_SIZE + random.random() * TILE_SIZE], [random.random() * 2 - 1, random.random() * 4 - 3], 0, random.choice([(96, 174, 123), (60, 107, 100), (31, 36, 75), (101, 64, 83), (168, 96, 93), (209, 166, 126), (246, 231, 156), (182, 207, 142)])])
+                            self.particles.append([[mouse_pos[0] * TILE_SIZE + x, mouse_pos[1] * TILE_SIZE + y], [math.sin(angle), math.cos(angle)], 0, self.assets[self.tile_map[tile_loc]['type']][self.tile_map[tile_loc]['variant']].get_at((x, y))])
                     del self.tile_map[tile_loc]
+        
+        for i, particle in sorted(enumerate(self.particles), reverse=True):
+            particle[0][0] += particle[1][0] * self.dt
+            particle[0][1] += particle[1][1] * self.dt
+            particle[1][1] += 0.3 * self.dt
+            particle[2] += 0.2 * self.dt
+            if particle[2] > 10:
+                self.particles.pop(i)
+            else:
+                color = pygame.Color(particle[3])
+                self.screen.set_at((particle[0][0] - self.scroll.x, particle[0][1] - self.scroll.y), color)
 
     def draw_tiles(self):
         for x in range(math.floor(self.scroll.x / TILE_SIZE), math.floor((self.scroll.x + self.screen.get_width()) // TILE_SIZE + 1)):
@@ -147,6 +198,10 @@ class Editor:
                         self.controls['down'] = True
                     if event.key == pygame.K_LSHIFT:
                         self.controls['l_shift'] = True
+                    if event.key == pygame.K_t:
+                        self.auto_tile()
+                    if event.key == pygame.K_o:
+                        self.save(self.path)
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_RIGHT:
                         self.controls['right'] = False

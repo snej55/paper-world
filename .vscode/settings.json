@@ -73,5 +73,6 @@
         "xtree": "cpp",
         "xutility": "cpp"
     },
-    "makefile.configureOnOpen": true
+    "makefile.configureOnOpen": true,
+    "C_Cpp.errorSquiggles": "disabled"
 }

@@ -1,7 +1,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include "./lib/SDL2/SDL.h"
+#include <SDL2/SDL.h>
 
 namespace Util {
     inline bool checkCollision(const SDL_Rect* rect_0, const SDL_Rect* rect_1)
