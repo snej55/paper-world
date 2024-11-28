@@ -207,19 +207,30 @@ public:
             SDL_RenderClear(_Renderer);
 
             // do updateing here
-            vec2<int> render_scroll{static_cast<int>(scroll.x), static_cast<int>(scroll.y)};
-            _Player.update(time_step, _World);
+            vec2<double> player_pos{_Player.getPos()};
+            if (_Player.getAd() > 120)
+            {
+                scroll.x += std::max(-2.0, std::min((player_pos.x - static_cast<double>(SCR_WIDTH) / 2.0 - scroll.x) / 20.0, 2.0)) * time_step;
+                scroll.y += std::min(2.0, std::max(-2.0, (player_pos.y - static_cast<double>(SCR_HEIGHT) / 2.0 - scroll.y) / 30.0)) * time_step;
+
+                _Player.update(time_step, _World);
+            }
+            _Player.tickAd(time_step);
             // do rendering here
 
             
+            vec2<int> render_scroll{static_cast<int>(scroll.x), static_cast<int>(scroll.y)};
             _World.render(render_scroll.x, render_scroll.y, _Window, _Renderer, &_TexMan);
-            _Player.render(render_scroll.x, render_scroll.y, _Renderer);
+            if (_Player.getAd() > 120)
+                _Player.render(render_scroll.x, render_scroll.y, _Renderer);
             /*std::array<SDL_Rect, 9> rects;
-            vec2<double> pos {(double)mouseX / 2, (double)mouseY / 2};
-            _World.getTilesAroundPos(pos, rects);
+            vec2<double> pos {(double)mouseX / 2 + scroll.x, (double)mouseY / 2 + scroll.y};
+            _World.getDangerAroundPos(pos, rects);
             for (int i{0}; i < 9; ++i)
             {
                 SDL_SetRenderDrawColor(_Renderer, 0xFF, 0x00, 0x00, 0xFF);
+                rects[i].x -= scroll.x;
+                rects[i].y -= scroll.y;
                 SDL_RenderFillRect(_Renderer, &(rects[i]));
             }*/
             // render screen
@@ -229,7 +240,7 @@ public:
             SDL_RenderPresent(_Renderer);
 
             float avgFPS {frames / (fpsTimer.getTicks() / 1000.0f)};
-            //std::cout << avgFPS << '\n';
+            std::cout << avgFPS << '\n';
 
             ++frames;
         } while (running);

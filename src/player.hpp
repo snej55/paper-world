@@ -41,6 +41,7 @@ class Player
 private:
     vec2<double> _pos;
     vec2<int> _dimensions;
+    vec2<double> _spawn_pos;
 
     vec2<double> _vel{0.0, 0.0};
     double _friction {0.48};
@@ -51,11 +52,17 @@ private:
     SDL_Rect _rect {0.0, 0.0, 1.0, 1.0};
     Controller _Controller{};
 
+    double _ad {100};
+    double _death_time{120};
+
 public:
     Player(vec2<double> pos, vec2<int> dimensions);
 
     SDL_Rect* getRect();
     Controller* getController();
+    vec2<double>& getPos();
+    double getAd() {return _ad;}
+    void tickAd(const double& time_step) {_ad += time_step;}
 
     void update(const double& time_step, World& world);
     void updateVel(const double& time_step);

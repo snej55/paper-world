@@ -176,12 +176,13 @@ class Editor:
         mouse_pos = pygame.mouse.get_pos()
         mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x) / TILE_SIZE), math.floor((mouse_pos[1] / 2 + self.scroll.y) / TILE_SIZE)]
         self.screen.blit(self.select_surf, (mouse_pos[0] * TILE_SIZE - self.scroll.x, mouse_pos[1] * TILE_SIZE - self.scroll.y))
-        self.screen.blit(self.assets[self.tile_list[self.tile_type]][self.tile_variant], (mouse_pos[0] * TILE_SIZE - self.scroll.x, mouse_pos[1] * TILE_SIZE - self.scroll.y))
+        if not self.right_click:
+            self.screen.blit(self.assets[self.tile_list[self.tile_type]][self.tile_variant], (mouse_pos[0] * TILE_SIZE - self.scroll.x, mouse_pos[1] * TILE_SIZE - self.scroll.y))
 
     def run(self):
         while self.running:
             self.dt = time.time() - self.last_time
-            self.dt *= 60
+            self.dt *= 6
             self.last_time = time.time()
             self.screen.fill((0, 0, 0))
             for event in pygame.event.get():

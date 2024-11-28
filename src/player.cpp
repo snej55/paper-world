@@ -3,7 +3,7 @@
 #include <cmath>
 
 Player::Player(vec2<double> pos, vec2<int> dimensions)
-    : _pos{pos}, _dimensions{dimensions}
+    : _pos{pos}, _dimensions{dimensions}, _spawn_pos{pos}
 {
     _rect.x = _pos.x;
     _rect.y = _pos.y;
@@ -19,6 +19,11 @@ SDL_Rect* Player::getRect()
 Controller* Player::getController()
 {
     return &_Controller;
+}
+
+vec2<double>& Player::getPos()
+{
+    return _pos;
 }
 
 void Player::update(const double& time_step, World& world)
@@ -63,11 +68,12 @@ void Player::updateVel(const double& time_step)
     {
         if (_falling < 9.0)
         {
-            _vel.y = -2.8;
+            _vel.y = -3.3;
             _falling = 99.0;
             _Controller.setJumping(99.0f);
         }
     }
+    _vel.y = std::min(8.0, _vel.y);
 }
 
 void Player::handlePhysics(const double& time_step, vec2<double> frame_movement, World& world)
@@ -114,8 +120,23 @@ void Player::handlePhysics(const double& time_step, vec2<double> frame_movement,
                 _rect.y = tile_rect->y + tile_rect->h;
             }
             _vel.y = 0.0;
+            _pos.y = _rect.y;
         }
-        _pos.y = _rect.y;
+    }
+
+    // check for danger
+    world.getDangerAroundPos(_pos, rects);
+    for (int i{0}; i < 9; ++i)
+    {
+        SDL_Rect* tile_rect {&(rects[i])};
+        if (Util::checkCollision(&_rect, tile_rect))
+        {
+            // we died
+            std::cout << "ow!\n";
+            _ad = 0;
+            _pos = _spawn_pos;
+            break;
+        }
     }
 }
 

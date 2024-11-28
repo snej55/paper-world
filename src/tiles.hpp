@@ -113,6 +113,74 @@ public:
         }
     }
 
+    void getDangerAroundPos(vec2<double>& pos, std::array<SDL_Rect, 9>& rects)
+    {
+        for (auto& e : rects)
+        {
+            // some random thing player will never collide with - hopefully :)
+            e = SDL_Rect{-99, -99, 1, 1};
+        }
+        for (int y{0}; y < 3; ++y)
+        {
+            for (int x{0}; x < 3; ++x)
+            {
+                Tile* tile {getTileAt(pos.x - TILE_SIZE + TILE_SIZE * x, pos.y - TILE_SIZE + TILE_SIZE * y)};
+                if (tile != nullptr)
+                {
+                    // Util::elementIn<T, N>(val, arr) -> bool
+                    if (Util::elementIn<TileType, std::size(DANGER_TILES)>(tile->type, DANGER_TILES))
+                    {
+                        rects[y * 3 + x] = getDangerRect(tile);
+                    }
+                }
+            }
+        }
+    }
+
+    SDL_Rect getDangerRect(Tile* tile)
+    {
+        SDL_Rect rect;
+        if (tile != nullptr)
+        {
+            switch (tile->type)
+            {
+                case (TileType::SPIKE):
+                    switch (tile->variant) 
+                    {
+                        case (0):
+                            rect.x = tile->pos.x * TILE_SIZE;
+                            rect.y = tile->pos.y * TILE_SIZE + 5;
+                            rect.w = 8;
+                            rect.h = 3;
+                            return rect;
+                        case (1):
+                            rect.x = tile->pos.x * TILE_SIZE + 5;
+                            rect.y = tile->pos.y * TILE_SIZE;
+                            rect.w = 3;
+                            rect.h = 8;
+                            return rect;
+                        case (2):
+                            rect.x = tile->pos.x * TILE_SIZE;
+                            rect.y = tile->pos.y * TILE_SIZE;
+                            rect.w = 8;
+                            rect.h = 3;
+                            return rect;
+                        case (3):
+                            rect.x = tile->pos.x * TILE_SIZE;
+                            rect.y = tile->pos.y * TILE_SIZE;
+                            rect.w = 3;
+                            rect.h = 8;
+                            return rect;
+                        default:
+                            return SDL_Rect{-110, -110, 1, 1};
+                    }
+                default:
+                    return SDL_Rect{-110, -110, 1, 1};
+            }
+        }
+        return SDL_Rect{-110, -110, 1, 1};
+    }
+
     TileType getTileType(int type)
     {
         switch(type)
