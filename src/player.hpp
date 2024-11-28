@@ -47,7 +47,7 @@ private:
     double _gravity {0.3};
 
     double _falling {99.9};
-    double _jumping {99.9};
+    double _veljump {99.9};
 
     SDL_Rect _rect {0.0, 0.0, 1.0, 1.0};
     Controller _Controller{};
