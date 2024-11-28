@@ -8,7 +8,8 @@ LEVEL_HEIGHT = 7
 # saved levels store tile types as integers
 CONVERT_TYPES = {
     0: 'grass',
-    1: 'rock'
+    1: 'rock', 
+    2: 'spike',
 }
 AUTO_TILE_TYPES = {'grass', 'rock'}
 AUTO_TILE_MAP = {'0011': 1, '1011': 2, '1001': 3, '0001': 4, '0111': 5, '1111': 6, '1101': 7, '0101': 8, 
@@ -27,7 +28,8 @@ class Editor:
 
         self.assets = {
             'grass': self.load_tileset(pygame.image.load('data/images/tiles/grass.png').convert()),
-            'rock': self.load_tileset(pygame.image.load('data/images/tiles/rock.png').convert())
+            'rock': self.load_tileset(pygame.image.load('data/images/tiles/rock.png').convert()),
+            'spike': self.load_tileset(pygame.image.load('data/images/tiles/spike.png').convert())
         }
 
         self.scroll = pygame.Vector2(0, 0)

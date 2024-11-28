@@ -11,6 +11,7 @@
 #include <cmath> // for calculating tile/chunk coords (std::floor)
 
 #include "./vec2.hpp"
+#include "./util.hpp"
 #include "./constants.hpp"
 
 #include "./texman.hpp"
@@ -21,8 +22,12 @@ enum class TileType
 {
     GRASS,
     ROCK,
+    SPIKE,
     NONE,
 };
+
+constexpr TileType SOLID_TILES[2] {TileType::GRASS, TileType::ROCK};
+constexpr TileType DANGER_TILES[1] {TileType::SPIKE};
 
 struct Tile
 {
@@ -98,7 +103,10 @@ public:
                 Tile* tile {getTileAt(pos.x - TILE_SIZE + TILE_SIZE * x, pos.y - TILE_SIZE + TILE_SIZE * y)};
                 if (tile != nullptr)
                 {
-                    rects[y * 3 + x] = SDL_Rect{tile->pos.x * TILE_SIZE, tile->pos.y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+                    if (Util::elementIn<TileType, std::size(SOLID_TILES)>(tile->type, SOLID_TILES))
+                    {
+                        rects[y * 3 + x] = SDL_Rect{tile->pos.x * TILE_SIZE, tile->pos.y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+                    }
                 }
                 //rects[y * 3 + x] = 
             }
@@ -113,6 +121,8 @@ public:
                 return TileType::GRASS;
             case 1:
                 return TileType::ROCK;
+            case 2:
+                return TileType::SPIKE;
             default:
                 return TileType::NONE;
         }
@@ -171,9 +181,21 @@ public:
                 return &(texman->tileGrassTex);
             case (TileType::ROCK):
                 return &(texman->tileRockTex);
+            case (TileType::SPIKE):
+                return &(texman->tileSpikeTex);
             default:
                 return nullptr;
         }
+    }
+
+    SDL_Rect getClipRect(const Tile& tile)
+    {
+        if (tile.type == TileType::SPIKE)
+        {
+            SDL_Rect clip{tile.variant * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE};
+        }
+        SDL_Rect clip{(tile.variant % 4) * TILE_SIZE, static_cast<int>((tile.variant - (tile.variant % 4)) / 4) * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+        return clip;
     }
 
     void renderChunk(Chunk* chunk, const int scrollX, const int scrollY, SDL_Window* window, SDL_Renderer* renderer, TexMan* texman)
@@ -185,7 +207,7 @@ public:
             x = variant % w
             y = (variant - x) / w
             */
-            SDL_Rect clip{(tile.variant % 4) * TILE_SIZE, static_cast<int>((tile.variant - (tile.variant % 4)) / 4) * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+            SDL_Rect clip{getClipRect(tile)};
             getTileTex(tile, texman)->render(tile.pos.x * TILE_SIZE * SCALE_FACTOR - scrollX, tile.pos.y * TILE_SIZE * SCALE_FACTOR  - scrollY, renderer, &clip);
         }
     }

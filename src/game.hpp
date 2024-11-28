@@ -125,7 +125,7 @@ public:
         timer.start();
         Timer fpsTimer;
         fpsTimer.start();
-        float time_step {1.0};
+        double time_step {1.0};
 
         int mouseX, mouseY;
         int windowX, windowY;
@@ -198,7 +198,7 @@ public:
             // divide by 1000.0f to convert from millis to sec
             // times by 60 for 60fps
             // reset last_time
-            time_step = timer.getTicks() / 1000.0f * 60.0f;
+            time_step = timer.getTicks() / 1000.0 * 60.0;
             timer.start();
             // set screen as render target
             _Screen.setAsRenderTarget(_Renderer);

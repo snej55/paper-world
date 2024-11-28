@@ -9,6 +9,7 @@ public:
     // Tiles
     Texture tileGrassTex{};
     Texture tileRockTex{};
+    Texture tileSpikeTex{};
 
     TexMan()
     {
@@ -18,6 +19,7 @@ public:
     {
         tileGrassTex.free();
         tileRockTex.free();
+        tileSpikeTex.free();
     }
 
     void confirm(bool val, bool& success)
@@ -33,6 +35,7 @@ public:
         bool success{true};
         confirm(tileGrassTex.loadFromFile("data/images/tiles/grass.png", window, renderer), success);
         confirm(tileRockTex.loadFromFile("data/images/tiles/rock.png", window, renderer), success);
+        confirm(tileSpikeTex.loadFromFile("data/images/tiles/spike.png", window, renderer), success);
         return success;
     }
 };

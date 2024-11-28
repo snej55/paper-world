@@ -24,7 +24,6 @@ Controller* Player::getController()
 void Player::update(const double& time_step, World& world)
 {
     _falling += time_step;
-    _veljump += time_step;
     _Controller.update(time_step);
 
     updateVel(time_step);
@@ -43,28 +42,30 @@ void Player::updateVel(const double& time_step)
     _vel.x *= _friction;
     if (_Controller.getControl(Control::LEFT))
     {
-        _vel.x -= 1.2;
+        _vel.x -= 1.1;
     }
     if (_Controller.getControl(Control::RIGHT))
     {
-        _vel.x += 1.2;
+        _vel.x += 1.1;
     }
     // y velocity
-    if (_vel.y < 0)
+    if (_vel.y >= -1.0 && _vel.y <= 0.0)
     {
         _gravity = 0.2;
+    } else if (_vel.y < 0)
+    {
+        _gravity = 0.22;
     } else {
         _gravity = 0.25;
     }
     _vel.y += _gravity;
     if (_Controller.getJumping() < 10.0)
     {
-        if (_falling < 10.0)
+        if (_falling < 9.0)
         {
-            _vel.y = -3;
+            _vel.y = -2.8;
             _falling = 99.0;
             _Controller.setJumping(99.0f);
-            _veljump = 0.0;
         }
     }
 }
