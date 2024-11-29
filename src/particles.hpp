@@ -16,7 +16,7 @@ struct Particle
     vec2<double> pos;
     vec2<double> vel;
     double size;
-    SDL_Color color{0xFF, 0, 0, 0};
+    SDL_Color color;
 };
 
 class ParticleSpawner
@@ -33,13 +33,14 @@ private:
     const bool _solid;
 
     vec2<double> _vel{0.0, 0.0};
+    SDL_Color _color {0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE};
 
 public:
     ParticleSpawner(const int total_particles, int spawning, vec2<double> pos, vec2<double> friction, const double gravity, const double decay, const bool solid);
     ~ParticleSpawner();
 
     int getSpawning() {return _spawning;}
-    void setSpawning(int spawning, vec2<double> vel);
+    void setSpawning(int spawning, vec2<double> vel, SDL_Color color);
 
     bool isDead(Particle* particle);
 

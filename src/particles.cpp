@@ -18,10 +18,11 @@ ParticleSpawner::~ParticleSpawner()
     delete _particles;
 }
 
-void ParticleSpawner::setSpawning(int spawning, vec2<double> vel)
+void ParticleSpawner::setSpawning(int spawning, vec2<double> vel, SDL_Color color)
 {
     _spawning = spawning;
     _vel = vel;
+    _color = color;
 }
 
 bool ParticleSpawner::isDead(Particle* particle)
@@ -83,7 +84,7 @@ void ParticleSpawner::update(const double& time_step, vec2<double> pos, const in
             if (_spawning > 0)
             {
                 --_spawning;
-                _particles[i] = new Particle{pos, vec2<double>{Util::random() * _vel.x - _vel.x / 2.0, Util::random() * _vel.y - _vel.y / 2.0}, 5.0};
+                _particles[i] = new Particle{pos, vec2<double>{Util::random() * _vel.x - _vel.x / 2.0, Util::random() * _vel.y - _vel.y / 2.0}, 5.0, _color};
             }
         } else {
             if (isDead(particle))
@@ -92,7 +93,7 @@ void ParticleSpawner::update(const double& time_step, vec2<double> pos, const in
                 {
                     --_spawning;
                     delete particle;
-                    _particles[i] = new Particle{pos, vec2<double>{Util::random() * _vel.x - _vel.x / 2.0, Util::random() * _vel.y - _vel.y / 2.0}, 5.0};
+                    _particles[i] = new Particle{pos, vec2<double>{Util::random() * _vel.x - _vel.x / 2.0, Util::random() * _vel.y - _vel.y / 2.0}, 5.0, _color};
                 }
             } else {
                 updateParticle(particle, time_step, world);

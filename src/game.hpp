@@ -15,7 +15,7 @@
 #include "./player.hpp"
 #include "./particles.hpp"
 
-constexpr SDL_Color palette[8] {{0xa8, 0x60, 0x5d}, {0xd1, 0xa6, 0x7e}, {0xf6, 0xe7, 0x9c}, {0xb6, 0xcf, 0x8e}, {0x60, 0xae, 0x7b}, {0x3c, 0x6b, 0x64}, {0x1f, 0x24, 0x4b}, {0x65, 0x40, 0x53}};
+constexpr SDL_Color PALETTE[8] {{0xa8, 0x60, 0x5d}, {0xd1, 0xa6, 0x7e}, {0xf6, 0xe7, 0x9c}, {0xb6, 0xcf, 0x8e}, {0x60, 0xae, 0x7b}, {0x3c, 0x6b, 0x64}, {0x1f, 0x24, 0x4b}, {0x65, 0x40, 0x53}};
 
 class Game
 {
@@ -162,7 +162,7 @@ public:
                             break;
                         case SDLK_DOWN:
                             controller->setControl(Control::DOWN, true);
-                            _Particles.setSpawning(10, {5.0, 5.0});
+                            _Particles.setSpawning(10, {5.0, 5.0}, Util::pickRandom<SDL_Color, 8>(PALETTE));
                             break;
                         case SDLK_LEFT:
                             controller->setControl(Control::LEFT, true);
