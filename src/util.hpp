@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <array>
+#include <cstdlib>
 
 namespace Util {
     inline bool checkCollision(const SDL_Rect* rect_0, const SDL_Rect* rect_1)
@@ -21,6 +22,17 @@ namespace Util {
             }
         }
         return false;
+    }
+
+    template <typename T, int N>
+    inline T pickRandom(const T arr[N])
+    {
+        return arr[static_cast<std::size_t>(std::rand() % N)];
+    }
+
+    inline double random()
+    {
+        return static_cast<double>((double)std::rand() / (RAND_MAX));
     }
 }
 

@@ -13,6 +13,9 @@
 #include "./texman.hpp"
 #include "./tiles.hpp"
 #include "./player.hpp"
+#include "./particles.hpp"
+
+constexpr SDL_Color palette[8] {{0xa8, 0x60, 0x5d}, {0xd1, 0xa6, 0x7e}, {0xf6, 0xe7, 0x9c}, {0xb6, 0xcf, 0x8e}, {0x60, 0xae, 0x7b}, {0x3c, 0x6b, 0x64}, {0x1f, 0x24, 0x4b}, {0x65, 0x40, 0x53}};
 
 class Game
 {
@@ -25,6 +28,7 @@ private:
     World _World{};
     // ignore error squiggle
     Player _Player{{40.0, 40.0}, {6.0, 8.0}};
+    ParticleSpawner _Particles{2000, 0, {50.0, 50.0}, {1.0, 1.0}, 0.1, 0.02, true};
 
 public:
     Game()
@@ -158,6 +162,7 @@ public:
                             break;
                         case SDLK_DOWN:
                             controller->setControl(Control::DOWN, true);
+                            _Particles.setSpawning(10, {5.0, 5.0});
                             break;
                         case SDLK_LEFT:
                             controller->setControl(Control::LEFT, true);
@@ -221,6 +226,7 @@ public:
             
             vec2<int> render_scroll{static_cast<int>(scroll.x), static_cast<int>(scroll.y)};
             _World.render(render_scroll.x, render_scroll.y, _Window, _Renderer, &_TexMan);
+            _Particles.update(time_step, {50.0, 50.0}, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan.particle);
             if (_Player.getAd() > 120)
                 _Player.render(render_scroll.x, render_scroll.y, _Renderer);
             /*std::array<SDL_Rect, 9> rects;

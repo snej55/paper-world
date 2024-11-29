@@ -63,7 +63,7 @@ void Player::updateVel(const double& time_step)
     } else {
         _gravity = 0.25;
     }
-    _vel.y += _gravity;
+    _vel.y += _gravity * time_step;
     if (_Controller.getJumping() < 10.0)
     {
         if (_falling < 9.0)
