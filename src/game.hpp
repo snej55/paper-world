@@ -28,7 +28,8 @@ private:
     World _World{};
     // ignore error squiggle
     Player _Player{{40.0, 40.0}, {6.0, 8.0}};
-    ParticleSpawner _Particles{2000, 0, {50.0, 50.0}, {1.0, 1.0}, 0.1, 0.02, true};
+    ParticleSpawner _Particles{10000, 0, {50.0, 50.0}, {1.0, 1.0}, 0.1, 0.02, true};
+    SmokeSpawner _Smoke{10000, 0, {100.0, 100.0}, 0.2, true};
 
 public:
     Game()
@@ -162,13 +163,14 @@ public:
                             break;
                         case SDLK_DOWN:
                             controller->setControl(Control::DOWN, true);
-                            _Particles.setSpawning(10, {5.0, 5.0}, Util::pickRandom<SDL_Color, 8>(PALETTE));
                             break;
                         case SDLK_LEFT:
                             controller->setControl(Control::LEFT, true);
                             break;
                         case SDLK_RIGHT:
                             controller->setControl(Control::RIGHT, true);
+                            break;
+                        case SDLK_p:
                             break;
                         default:
                             break;
@@ -197,13 +199,14 @@ public:
             }
 
             SDL_GetWindowPosition(_Window, &windowX, &windowY);
-
+            _Smoke.setSpawning(50, {2, 5}, Util::pickRandom<SDL_Color, 8>(PALETTE));
             // calculate dt
             // timer.getTicks() and last_time are both Uint32 so must cast to float
             // divide by 1000.0f to convert from millis to sec
             // times by 60 for 60fps
             // reset last_time
             time_step = timer.getTicks() / 1000.0 * 60.0;
+            time_step = std::min(time_step, 3.0);
             timer.start();
             // set screen as render target
             _Screen.setAsRenderTarget(_Renderer);
@@ -229,6 +232,7 @@ public:
             _Particles.update(time_step, {50.0, 50.0}, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan.particle);
             if (_Player.getAd() > 120)
                 _Player.render(render_scroll.x, render_scroll.y, _Renderer);
+            _Smoke.update(time_step, player_pos, render_scroll.x, render_scroll.y, _Renderer, &_TexMan.particle);
             /*std::array<SDL_Rect, 9> rects;
             vec2<double> pos {(double)mouseX / 2 + scroll.x, (double)mouseY / 2 + scroll.y};
             _World.getDangerAroundPos(pos, rects);

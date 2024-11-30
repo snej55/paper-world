@@ -50,4 +50,40 @@ public:
     void update(const double& time_step, vec2<double> pos, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex);
 };
 
+struct Smoke
+{
+    vec2<double> pos;
+    vec2<double> vel;
+    double size;
+    double angle;
+    double target_angle;
+    SDL_Color color;
+};
+
+class SmokeSpawner
+{
+private:
+    const int _total;
+    int _spawning;
+    Smoke** _smoke;
+    vec2<double> _pos;
+    const double _decay;
+    const bool _solid;
+    vec2<double> _vel{0.0, 0.0};
+    SDL_Color _color {0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE};
+
+public:
+    SmokeSpawner(const int total_particles, int spawning, vec2<double> pos, const double decay, const bool solid);
+    ~SmokeSpawner();
+
+    int getSpawning() {return _spawning;}
+    void setSpawning(int spawning, vec2<double> vel, SDL_Color color);
+
+    bool isDead(Smoke* smoke);
+
+    void updateSmoke(Smoke* smoke, const double& time_step);
+    void renderSmoke(Smoke* smoke, const int scrollX, const int scrollY, SDL_Renderer* renderer, Texture* tex);
+
+    void update(const double& time_step, vec2<double> pos, const int scrollX, const int scrollY, SDL_Renderer* renderer, Texture* tex);
+};
 #endif
