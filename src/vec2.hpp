@@ -32,4 +32,28 @@ std::ostream& operator<< (std::ostream& out, const vec2<T> vec)
     return out;
 }
 
+template <typename T, typename U>
+vec2<T> operator*(vec2<T> vec, U mult)
+{
+    return vec2<T>{vec.x * mult, vec.y * mult};
+}
+
+template <typename T, typename U>
+vec2<T> operator*(U mult, vec2<T> vec)
+{
+    return vec2<T>{vec.x * mult, vec.y * mult};
+}
+
+template <typename T, typename U>
+vec2<T> operator*=(vec2<T> vec, U mult)
+{
+    return vec2<T>{vec.x * mult, vec.y * mult};
+}
+
+template <typename T, typename U>
+vec2<T> operator*=(U mult, vec2<T> vec)
+{
+    return vec2<T>{vec.x * mult, vec.y * mult};
+}
+
 #endif

@@ -9,6 +9,7 @@ Player::Player(vec2<double> pos, vec2<int> dimensions)
     _rect.y = _pos.y;
     _rect.w = _dimensions.x;
     _rect.h = _dimensions.y;
+    _Particles.setPalette<5>(_Palette);
 }
 
 SDL_Rect* Player::getRect()
@@ -26,13 +27,32 @@ vec2<double>& Player::getPos()
     return _pos;
 }
 
-void Player::update(const double& time_step, World& world)
+vec2<double> Player::getCenter()
+{
+    return {_pos.x + _dimensions.x / 2.0, _pos.y + _dimensions.y / 2.0};
+}
+
+void Player::die(double* screen_shake)
+{
+    _ad = 0;
+    _Particles.setPos(getCenter());
+    _Smoke.setPos(getCenter());
+    _Particles.setSpawning(100, {16.0, 8.0}, _Palette[0]);
+    _Smoke.setSpawning(100, {1, 2}, {0xAA, 0xAA, 0xAA});
+    _pos = _spawn_pos;
+    *screen_shake = std::max(*screen_shake, 16.0);
+}
+
+void Player::update(const double& time_step, World& world, double* screen_shake)
 {
     _falling += time_step;
     _Controller.update(time_step);
 
-    updateVel(time_step);
-    handlePhysics(time_step, _vel, world);
+    if (_ad > 120)
+    {
+        updateVel(time_step);
+        handlePhysics(time_step, _vel, world, screen_shake);
+    }
 }
 
 void Player::updateVel(const double& time_step)
@@ -76,7 +96,7 @@ void Player::updateVel(const double& time_step)
     _vel.y = std::min(8.0, _vel.y);
 }
 
-void Player::handlePhysics(const double& time_step, vec2<double> frame_movement, World& world)
+void Player::handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake)
 {
     _pos.x += frame_movement.x * time_step;
     _rect.x = _pos.x;
@@ -132,12 +152,16 @@ void Player::handlePhysics(const double& time_step, vec2<double> frame_movement,
         if (Util::checkCollision(&_rect, tile_rect))
         {
             // we died
-            std::cout << "ow!\n";
-            _ad = 0;
-            _pos = _spawn_pos;
+            die(screen_shake);
             break;
         }
     }
+}
+
+void Player::updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex)
+{
+    _Particles.update(time_step, scrollX, scrollY, renderer, world, tex);
+    _Smoke.update(time_step, scrollX, scrollY, renderer, world, tex);
 }
 
 void Player::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)

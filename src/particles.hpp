@@ -34,6 +34,8 @@ private:
 
     vec2<double> _vel{0.0, 0.0};
     SDL_Color _color {0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE};
+    SDL_Color* _palette = nullptr;
+    int _palette_length {0};
 
 public:
     ParticleSpawner(const int total_particles, int spawning, vec2<double> pos, vec2<double> friction, const double gravity, const double decay, const bool solid);
@@ -42,12 +44,25 @@ public:
     int getSpawning() {return _spawning;}
     void setSpawning(int spawning, vec2<double> vel, SDL_Color color);
 
+    void setPos(vec2<double> pos) {_pos = pos;}
+
+    template <int N>
+    void setPalette(const SDL_Color palette[N])
+    {
+        _palette = new SDL_Color[N];
+        for (std::size_t i{0}; i < N; ++i)
+        {
+            _palette[i] = palette[i];
+        }
+        _palette_length = N;
+    }
+
     bool isDead(Particle* particle);
 
     void updateParticle(Particle* particle, const double& time_step, World* world);
     void renderParticle(Particle* particle, const int scrollX, const int scrollY, SDL_Renderer* renderer, Texture* tex);
 
-    void update(const double& time_step, vec2<double> pos, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex);
+    void update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex);
 };
 
 struct Smoke
@@ -79,11 +94,13 @@ public:
     int getSpawning() {return _spawning;}
     void setSpawning(int spawning, vec2<double> vel, SDL_Color color);
 
+    void setPos(vec2<double> pos) {_pos = pos;}
+
     bool isDead(Smoke* smoke);
 
-    void updateSmoke(Smoke* smoke, const double& time_step);
+    void updateSmoke(Smoke* smoke, const double& time_step, World* world);
     void renderSmoke(Smoke* smoke, const int scrollX, const int scrollY, SDL_Renderer* renderer, Texture* tex);
 
-    void update(const double& time_step, vec2<double> pos, const int scrollX, const int scrollY, SDL_Renderer* renderer, Texture* tex);
+    void update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex);
 };
 #endif

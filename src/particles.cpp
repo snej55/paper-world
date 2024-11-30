@@ -9,6 +9,7 @@ ParticleSpawner::ParticleSpawner(const int total_particles, int spawning, vec2<d
         _particles[i] = nullptr;
     }
 }
+
 ParticleSpawner::~ParticleSpawner()
 {
     for (std::size_t i{0}; i < _total; ++i)
@@ -18,6 +19,7 @@ ParticleSpawner::~ParticleSpawner()
         _particles[i] = nullptr;
     }
     delete _particles;
+    delete _palette;
 }
 
 void ParticleSpawner::setSpawning(int spawning, vec2<double> vel, SDL_Color color)
@@ -47,7 +49,7 @@ void ParticleSpawner::updateParticle(Particle* particle, const double& time_step
             {
                 particle->pos.x -= particle->vel.x * time_step;
                 particle->vel.x *= -0.7;
-                particle->vel.y *= 0.9;
+                particle->vel *= 0.98;
             }
         }
     }
@@ -61,7 +63,7 @@ void ParticleSpawner::updateParticle(Particle* particle, const double& time_step
             {
                 particle->pos.y -= particle->vel.y * time_step;
                 particle->vel.y *= -0.7;
-                particle->vel.x *= 0.9;
+                particle->vel *= 0.98;
             }
         }
     }
@@ -77,7 +79,7 @@ void ParticleSpawner::renderParticle(Particle* particle, const int scrollX, cons
     tex->render((int)particle->pos.x - scrollX, (int)particle->pos.y - scrollY, renderer);
 }
 
-void ParticleSpawner::update(const double& time_step, vec2<double> pos, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex)
+void ParticleSpawner::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex)
 {
     for (std::size_t i{0}; i < _total; ++i)
     {
@@ -87,7 +89,12 @@ void ParticleSpawner::update(const double& time_step, vec2<double> pos, const in
             if (_spawning > 0)
             {
                 --_spawning;
-                _particles[i] = new Particle{pos, vec2<double>{Util::random() * _vel.x - _vel.x / 2.0, Util::random() * _vel.y - _vel.y / 2.0}, 5.0, _color};
+                SDL_Color color {_color};
+                if (_palette != nullptr)
+                {
+                    color = _palette[static_cast<std::size_t>(std::rand() % _palette_length)];
+                }
+                _particles[i] = new Particle{_pos, vec2<double>{Util::random() * _vel.x - _vel.x / 2.0, Util::random() * _vel.y - _vel.y / 2.0}, 5.0, color};
             }
         } else {
             if (isDead(particle))
@@ -96,7 +103,12 @@ void ParticleSpawner::update(const double& time_step, vec2<double> pos, const in
                 {
                     --_spawning;
                     delete particle;
-                    _particles[i] = new Particle{pos, vec2<double>{Util::random() * _vel.x - _vel.x / 2.0, Util::random() * _vel.y - _vel.y / 2.0}, 5.0, _color};
+                    SDL_Color color {_color};
+                    if (_palette != nullptr)
+                    {
+                         color = _palette[static_cast<std::size_t>(std::rand() % _palette_length)];
+                    }
+                    _particles[i] = new Particle{_pos, vec2<double>{Util::random() * _vel.x - _vel.x / 2.0, Util::random() * _vel.y - _vel.y / 2.0}, 5.0, color};
                 }
             } else {
                 updateParticle(particle, time_step, world);
@@ -139,14 +151,42 @@ bool SmokeSpawner::isDead(Smoke* smoke)
     return smoke->size >= 15.0;
 }
 
-void SmokeSpawner::updateSmoke(Smoke* smoke, const double& time_step)
+void SmokeSpawner::updateSmoke(Smoke* smoke, const double& time_step, World* world)
 {
-    smoke->vel.y *= 0.989;
-    smoke->vel.x *= 0.989;
-    smoke->angle += std::min(4.0, (smoke->target_angle - smoke->angle) / 10.0) * time_step * (15.0 - std::min(smoke->size, 15.0)) / 15.0;
+    smoke->vel.y *= 0.98;
+    smoke->vel.x *= 0.98;
+    smoke->angle += std::min(7.0, (smoke->target_angle - smoke->angle) / 15.0) * time_step;
     smoke->size += _decay * time_step;
     smoke->pos.x += smoke->vel.x * time_step;
+    if (_solid)
+    {
+        Tile* tile {world->getTileAt(smoke->pos.x, smoke->pos.y)};
+        if (tile != nullptr)
+        {
+            if (tile->type != TileType::SPIKE)
+            {
+                smoke->pos.x -= smoke->vel.x * time_step;
+                smoke->vel.x *= -0.8;
+            }
+        }
+    }
+    if (_solid)
+    {
+        smoke->vel.y += 0.01 * time_step;
+    }
     smoke->pos.y += smoke->vel.y * time_step;
+    if (_solid)
+    {
+        Tile* tile {world->getTileAt(smoke->pos.x, smoke->pos.y)};
+        if (tile != nullptr)
+        {
+            if (tile->type != TileType::SPIKE)
+            {
+                smoke->pos.y -= smoke->vel.y * time_step;
+                smoke->vel.y *= -0.8;
+            }
+        }
+    }
 }
 
 void SmokeSpawner::renderSmoke(Smoke* smoke, const int scrollX, const int scrollY, SDL_Renderer* renderer, Texture* tex)
@@ -158,7 +198,7 @@ void SmokeSpawner::renderSmoke(Smoke* smoke, const int scrollX, const int scroll
     tex->render((int)smoke->pos.x - scrollX - smoke->size / 2, (int)smoke->pos.y - scrollY - smoke->size / 2, renderer, smoke->angle, NULL, SDL_FLIP_NONE, NULL, smoke->size);
 }
 
-void SmokeSpawner::update(const double& time_step, vec2<double> pos, const int scrollX, const int scrollY, SDL_Renderer* renderer, Texture* tex)
+void SmokeSpawner::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex)
 {
     for (std::size_t i{0}; i < _total; ++i)
     {
@@ -169,7 +209,9 @@ void SmokeSpawner::update(const double& time_step, vec2<double> pos, const int s
             {
                 --_spawning;
                 double angle{Util::random() * 360.0};
-                _smoke[i] = new Smoke{pos, vec2<double>{Util::random() * _vel.x - _vel.x / 2.0, -Util::random() * _vel.y}, 1.0, angle, angle + 360 * Util::random() + 3600, _color};
+                double speed{Util::random() + 1};
+                double sangle{Util::random() * M_PI * 2};
+                _smoke[i] = new Smoke{_pos, vec2<double>{std::cos(sangle) * speed, std::sin(sangle) * speed}, 1.0, angle, angle + 360 * Util::random() + 360, _color};
             }
         } else {
             if (isDead(smoke))
@@ -179,10 +221,14 @@ void SmokeSpawner::update(const double& time_step, vec2<double> pos, const int s
                     --_spawning;
                     delete smoke;
                     double angle{Util::random() * 360.0};
-                    _smoke[i] = new Smoke{pos, vec2<double>{Util::random() * _vel.x - _vel.x / 2.0, -Util::random() * _vel.y - 2.0}, 1.0, angle, angle + 360 * Util::random() + 360, _color};
+                    double speed{Util::random() + 1};
+                    double sangle{Util::random() * M_PI * 2};
+                    SDL_Color color{_color};
+                    color.b += std::rand() % 5;
+                    _smoke[i] = new Smoke{_pos, vec2<double>{std::cos(sangle) * speed, std::sin(sangle) * speed}, 1.0, angle, angle + 360 * Util::random() + 360, _color};
                 }
             } else {
-                updateSmoke(smoke, time_step);
+                updateSmoke(smoke, time_step, world);
                 renderSmoke(smoke, scrollX, scrollY, renderer, tex);
             }
         }
