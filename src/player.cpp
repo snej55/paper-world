@@ -37,8 +37,10 @@ void Player::die(double* screen_shake)
     _ad = 0;
     _Particles.setPos(getCenter());
     _Smoke.setPos(getCenter());
-    _Particles.setSpawning(100, {16.0, 8.0}, _Palette[0]);
+    _Fire.setPos(getCenter());
+    _Particles.setSpawning(128, {16.0, 8.0}, _Palette[0]);
     _Smoke.setSpawning(100, {1, 2}, {0xAA, 0xAA, 0xAA});
+    _Fire.setSpawning(100);
     _pos = _spawn_pos;
     *screen_shake = std::max(*screen_shake, 16.0);
 }
@@ -158,10 +160,11 @@ void Player::handlePhysics(const double& time_step, vec2<double> frame_movement,
     }
 }
 
-void Player::updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex)
+void Player::updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman)
 {
-    _Particles.update(time_step, scrollX, scrollY, renderer, world, tex);
-    _Smoke.update(time_step, scrollX, scrollY, renderer, world, tex);
+    _Particles.update(time_step, scrollX, scrollY, renderer, world, texman);
+    _Smoke.update(time_step, scrollX, scrollY, renderer, world, &texman->particle);
+    _Fire.update(time_step, scrollX, scrollY, renderer, world, &texman->particleFire);
 }
 
 void Player::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)

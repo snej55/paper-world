@@ -60,9 +60,9 @@ public:
     bool isDead(Particle* particle);
 
     void updateParticle(Particle* particle, const double& time_step, World* world);
-    void renderParticle(Particle* particle, const int scrollX, const int scrollY, SDL_Renderer* renderer, Texture* tex);
+    void renderParticle(Particle* particle, const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman);
 
-    void update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex);
+    void update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman);
 };
 
 struct Smoke
@@ -103,4 +103,39 @@ public:
 
     void update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex);
 };
+
+struct Fire
+{
+    vec2<double> pos;
+    vec2<double> vel;
+    double frame{0};
+};
+
+class FireSpawner
+{
+private:
+    const int _total;
+    int _spawning;
+    Fire** _fire;
+    vec2<double> _pos;
+    const double _decay;
+    const bool _solid;
+
+public:
+    FireSpawner(const int total_particles, int spawning, vec2<double> pos, const double decay, const bool solid);
+    ~FireSpawner();
+
+    int getSpawning() {return _spawning;}
+    void setSpawning(int spawning) {_spawning = spawning;}
+
+    void setPos(vec2<double> pos) {_pos = pos;}
+
+    bool isDead(Fire* fire);
+
+    void updateFire(Fire* fire, const double& time_step, World* world);
+    void renderFire(Fire* fire, const int scrollX, const int scrollY, SDL_Renderer* renderer, Texture* tex);
+    
+    void update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex);
+};
+
 #endif

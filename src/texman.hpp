@@ -12,6 +12,7 @@ public:
     Texture tileSpikeTex{};
 
     Texture particle{};
+    Texture particleFire{};
 
     TexMan()
     {
@@ -23,6 +24,7 @@ public:
         tileRockTex.free();
         tileSpikeTex.free();
         particle.free();
+        particleFire.free();
     }
 
     void confirm(bool val, bool& success)
@@ -40,6 +42,7 @@ public:
         confirm(tileRockTex.loadFromFile("data/images/tiles/rock.png", window, renderer), success);
         confirm(tileSpikeTex.loadFromFile("data/images/tiles/spike.png", window, renderer), success);
         confirm(particle.loadFromFile("data/images/particles/particle.png", window, renderer), success);
+        confirm(particleFire.loadFromFile("data/images/particles/fire.png", window, renderer), success);
         return success;
     }
 };

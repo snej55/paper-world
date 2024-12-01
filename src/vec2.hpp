@@ -20,6 +20,12 @@ vec2<T> operator+(vec2<T> vec_0, vec2<T> vec_1)
 }
 
 template <typename T>
+vec2<T> operator+=(vec2<T> vec_0, vec2<T> vec_1)
+{
+    return vec2<T>{vec_0.x + vec_1.x, vec_0.y + vec_1.y};
+}
+
+template <typename T>
 vec2<T> operator-(vec2<T> vec_0, vec2<T> vec_1)
 {
     return vec2<T>{vec_0.x - vec_1.x, vec_0.y - vec_1.y};

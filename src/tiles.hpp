@@ -220,14 +220,14 @@ public:
         f.close();
     }
 
-    void render(const int scrollX, const int scrollY, SDL_Window* window, SDL_Renderer* renderer, TexMan* texman)
+    void render(const int scrollX, const int scrollY, SDL_Window* window, SDL_Renderer* renderer, TexMan* texman, const int width, const int height)
     {
         // location in relative chunk coords
         int chunkX {std::floor((double)scrollX / (double)TILE_SIZE / (double)CHUNK_SIZE)};
         int chunkY {std::floor((double)scrollY / (double)TILE_SIZE / (double)CHUNK_SIZE)};
-        for (int y{0}; y < std::floor(SCR_HEIGHT / TILE_SIZE) + 1; ++y)
+        for (int y{0}; y < std::floor(height / TILE_SIZE) + 1; ++y)
         {
-            for (int x{0}; x < std::floor(SCR_WIDTH / TILE_SIZE) + 1; ++x)
+            for (int x{0}; x < std::floor(width / TILE_SIZE) + 1; ++x)
             {
                 int targetX = chunkX - 1 + x;
                 int targetY = chunkY - 1 + y;

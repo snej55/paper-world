@@ -70,16 +70,20 @@ void ParticleSpawner::updateParticle(Particle* particle, const double& time_step
     particle->size -= _decay * time_step;
 }
 
-void ParticleSpawner::renderParticle(Particle* particle, const int scrollX, const int scrollY, SDL_Renderer* renderer,  Texture* tex)
+void ParticleSpawner::renderParticle(Particle* particle, const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman)
 {
+    // texman->particleFire.setBlendMode(SDL_BLENDMODE_ADD);
+    // texman->particleFire.setAlpha(particle->color.a);
+    // SDL_Rect clip{0, 0, 5, 5};
+    // texman->particleFire.render(static_cast<int>(particle->pos.x - 2.5) - scrollX, static_cast<int>(particle->pos.y - 2.5) - scrollY, renderer, &clip);
     particle->color.a = static_cast<uint8_t>(static_cast<int>(particle->size / 5.0 * 255.0));
-    tex->setColor(particle->color.r, particle->color.g, particle->color.b);
-    tex->setAlpha(particle->color.a);
-    tex->setBlendMode(SDL_BLENDMODE_ADD);
-    tex->render((int)particle->pos.x - scrollX, (int)particle->pos.y - scrollY, renderer);
+    texman->particle.setColor(particle->color.r, particle->color.g, particle->color.b);
+    texman->particle.setAlpha(particle->color.a);
+    texman->particle.setBlendMode(SDL_BLENDMODE_ADD);
+    texman->particle.render((int)particle->pos.x - scrollX, (int)particle->pos.y - scrollY, renderer);
 }
 
-void ParticleSpawner::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex)
+void ParticleSpawner::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman)
 {
     for (std::size_t i{0}; i < _total; ++i)
     {
@@ -112,7 +116,7 @@ void ParticleSpawner::update(const double& time_step, const int scrollX, const i
                 }
             } else {
                 updateParticle(particle, time_step, world);
-                renderParticle(particle, scrollX, scrollY, renderer, tex);
+                renderParticle(particle, scrollX, scrollY, renderer, texman);
             }
         }
     }
@@ -153,8 +157,8 @@ bool SmokeSpawner::isDead(Smoke* smoke)
 
 void SmokeSpawner::updateSmoke(Smoke* smoke, const double& time_step, World* world)
 {
-    smoke->vel.y *= 0.98;
-    smoke->vel.x *= 0.98;
+    smoke->vel.y += (smoke->vel.y * 0.98 - smoke->vel.y) * time_step;
+    smoke->vel.x += (smoke->vel.x * 0.98 - smoke->vel.x) * time_step;
     smoke->angle += std::min(7.0, (smoke->target_angle - smoke->angle) / 15.0) * time_step;
     smoke->size += _decay * time_step;
     smoke->pos.x += smoke->vel.x * time_step;
@@ -230,6 +234,82 @@ void SmokeSpawner::update(const double& time_step, const int scrollX, const int 
             } else {
                 updateSmoke(smoke, time_step, world);
                 renderSmoke(smoke, scrollX, scrollY, renderer, tex);
+            }
+        }
+    }
+}
+
+FireSpawner::FireSpawner(const int total_particles, int spawning, vec2<double> pos, const double decay, const bool solid)
+ : _total{total_particles}, _spawning{spawning}, _pos{pos}, _decay{decay}, _solid{solid}
+{
+    _fire = new Fire*[total_particles];
+    for (std::size_t i{0}; i < total_particles; ++i)
+    {
+        _fire[i] = nullptr;
+    }
+}
+
+FireSpawner::~FireSpawner()
+{
+    for (std::size_t i{0}; i < _total; ++i)
+    {
+        if (_fire[i] != nullptr)
+            delete _fire[i];
+        _fire[i] = nullptr;
+    }
+    delete _fire;
+}
+
+bool FireSpawner::isDead(Fire* fire)
+{
+    return fire->frame >= 8.0;
+}
+
+void FireSpawner::updateFire(Fire* fire, const double& time_step, World* world)
+{
+    fire->pos.x += fire->vel.x * time_step;
+    fire->pos.y += fire->vel.y * time_step;
+    fire->frame += _decay * time_step;
+}
+
+void FireSpawner::renderFire(Fire* fire, const int scrollX, const int scrollY, SDL_Renderer* renderer, Texture* tex)
+{
+    SDL_Rect clip{0, 0, 5, 5};
+    const int step{(int)std::min(7.0, fire->frame)};
+    clip.x = step * 5;
+    tex->setAlpha(0x88);
+    tex->setBlendMode(SDL_BLENDMODE_ADD);
+    tex->render(static_cast<int>(fire->pos.x - 2.5) - scrollX, static_cast<int>(fire->pos.y - 2.5) - scrollY, renderer, &clip);
+}
+
+void FireSpawner::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex)
+{
+    for (std::size_t i{0}; i < _total; ++i)
+    {
+        Fire* fire {_fire[i]};
+        if (fire == nullptr)
+        {
+            if (_spawning > 0)
+            {
+                --_spawning;
+                double dist{Util::random() * 16.0 - 8.0};
+                double angle{Util::random() * M_PI * 2};
+                _fire[i] = new Fire{{_pos.x + std::cos(angle) * dist, _pos.y + std::sin(angle) * dist}, {0, -1.0 * Util::random() - 1.0}, std::rand() % 7};
+            }
+        } else {
+            if (isDead(fire))
+            {
+                if (_spawning > 0)
+                {
+                    --_spawning;
+                    delete fire;
+                    double dist{Util::random() * 16.0 - 8.0};
+                    double angle{Util::random() * M_PI * 2};
+                    _fire[i] = new Fire{{_pos.x + std::cos(angle) * dist, _pos.y + std::sin(angle) * dist}, {0, -1.0 * Util::random() - 1.0}, std::rand() % 7};
+                }
+            } else {
+                updateFire(fire, time_step, world);
+                renderFire(fire, scrollX, scrollY, renderer, tex);
             }
         }
     }

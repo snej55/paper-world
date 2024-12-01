@@ -57,8 +57,9 @@ private:
     double _ad {100};
     double _death_time{120};
 
-    ParticleSpawner _Particles{10000, 0, {50.0, 50.0}, {1.0, 1.0}, 0.125, 0.02, true};
+    ParticleSpawner _Particles{10000, 0, {50.0, 50.0}, {1.0, 1.0}, 0.125, 0.002, true};
     SmokeSpawner _Smoke{10000, 0, {100.0, 100.0}, 0.15, true};
+    FireSpawner _Fire{10000, 0, {200.0, 200.0}, 0.2, true};
 
 public:
     Player(vec2<double> pos, vec2<int> dimensions);
@@ -68,14 +69,29 @@ public:
     vec2<double>& getPos();
     vec2<double> getCenter();
     double getAd() {return _ad;}
-    void tickAd(const double& time_step) {_ad += time_step;}
+    void tickAd(const double& time_step)
+    {
+        if (_ad < 60.0)
+        {
+            _Smoke.setSpawning(std::max(_Smoke.getSpawning(), 2), {1, 2}, {0x88, 0x88, 0xBB});
+        }
+        if (_ad < 20.0)
+        {
+            _Fire.setSpawning(std::max(_Fire.getSpawning(), 10));
+        }
+        if (_ad < 2 && _ad > 0)
+        {
+            _Particles.setSpawning(48, {1.0, 20.0}, _Palette[0]);
+        }
+        _ad += time_step;
+    }
 
     void die(double* screen_shake);
 
     void update(const double& time_step, World& world, double* screen_shake);
     void updateVel(const double& time_step);
     void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake);
-    void updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex);
+    void updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* tex);
 
     void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
 };
