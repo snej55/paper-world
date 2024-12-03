@@ -14,6 +14,7 @@
 #include "./tiles.hpp"
 #include "./player.hpp"
 #include "./particles.hpp"
+#include "./entities.hpp"
 
 constexpr SDL_Color PALETTE[8] {{0xa8, 0x60, 0x5d}, {0xd1, 0xa6, 0x7e}, {0xf6, 0xe7, 0x9c}, {0xb6, 0xcf, 0x8e}, {0x60, 0xae, 0x7b}, {0x3c, 0x6b, 0x64}, {0x1f, 0x24, 0x4b}, {0x65, 0x40, 0x53}};
 
@@ -28,6 +29,8 @@ private:
     World _World{};
     // ignore error squiggle
     Player _Player{{40.0, 40.0}, {6.0, 8.0}};
+    Entity _Entity{{50.0, 20.0}, {0.0, 0.0}, {8, 8}, 0.1, false};
+
     int _Width {SCR_WIDTH};
     int _Height {SCR_HEIGHT};
 
@@ -246,11 +249,14 @@ public:
             }
             _Player.update(time_step, _World, &screen_shake);
             _Player.tickAd(time_step);
+
+            _Entity.update(time_step, _World, &screen_shake);
             // do rendering here
 
             screen_shake = std::max(0.0, screen_shake - time_step);
             vec2<int> render_scroll{static_cast<int>(scroll.x + Util::random() * screen_shake - screen_shake / 2.0), static_cast<int>(scroll.y + Util::random() * screen_shake - screen_shake / 2.0)};
             _World.render(render_scroll.x, render_scroll.y, _Window, _Renderer, &_TexMan, _Width, _Height);
+            _Entity.render(render_scroll.x, render_scroll.y, _Renderer);
             if (_Player.getAd() > 120)
                 _Player.render(render_scroll.x, render_scroll.y, _Renderer);
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
