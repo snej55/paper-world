@@ -48,7 +48,7 @@ void ParticleSpawner::updateParticle(Particle* particle, const double& time_step
             if (tile->type != TileType::SPIKE)
             {
                 particle->pos.x -= particle->vel.x * time_step;
-                particle->vel.x *= -0.7;
+                particle->vel.x *= -0.5;
                 particle->vel *= 0.98;
             }
         }
@@ -62,7 +62,7 @@ void ParticleSpawner::updateParticle(Particle* particle, const double& time_step
             if (tile->type != TileType::SPIKE)
             {
                 particle->pos.y -= particle->vel.y * time_step;
-                particle->vel.y *= -0.7;
+                particle->vel.y *= -0.5;
                 particle->vel *= 0.98;
             }
         }

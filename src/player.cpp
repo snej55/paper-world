@@ -32,8 +32,29 @@ vec2<double> Player::getCenter()
     return {_pos.x + _dimensions.x / 2.0, _pos.y + _dimensions.y / 2.0};
 }
 
+void Player::damage(double amount, double* screen_shake)
+{
+    // we can add buffs later
+    if (_recover > _recover_time)
+    {
+        *screen_shake = std::max(*screen_shake, 8.0);
+        _health -= amount;
+        _Particles.setPos(getCenter());
+        _Smoke.setPos(getCenter());
+        _Fire.setPos(getCenter());
+        _Particles.setSpawning(64, {8.0, 12.0}, _Palette[0]);
+        _Smoke.setSpawning(50, {1, 2}, {0xAA, 0xAA, 0xAA});
+        _recover = 0.0;
+        if (_health < 0.0)
+        {
+            die(screen_shake);
+        }
+    }
+}
+
 void Player::die(double* screen_shake)
 {
+    _health = _max_health;
     _ad = 0;
     _Particles.setPos(getCenter());
     _Smoke.setPos(getCenter());
@@ -42,6 +63,8 @@ void Player::die(double* screen_shake)
     _Smoke.setSpawning(100, {1, 2}, {0xAA, 0xAA, 0xAA});
     _Fire.setSpawning(100);
     _pos = _spawn_pos;
+    _rect.x = _pos.x;
+    _rect.y = _pos.y;
     *screen_shake = std::max(*screen_shake, 16.0);
 }
 
@@ -170,7 +193,13 @@ void Player::updateParticles(const double& time_step, const int scrollX, const i
 void Player::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
 {
     SDL_Rect renderRect{_pos.x - scrollX, _pos.y - scrollY, _dimensions.x, _dimensions.y};
-    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);
+    if (_recover < _recover_time)
+    {
+        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    } else {
+        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);
+    }
+
     SDL_RenderFillRect(renderer, &renderRect);
 }
 

@@ -4,6 +4,9 @@
 #include <SDL2/SDL.h>
 #include <array>
 #include <cstdlib>
+#include <cmath>
+
+#include "./vec2.hpp"
 
 namespace Util {
     inline bool checkCollision(const SDL_Rect* rect_0, const SDL_Rect* rect_1)
@@ -33,6 +36,12 @@ namespace Util {
     inline double random()
     {
         return static_cast<double>((double)std::rand() / (RAND_MAX));
+    }
+
+    template <typename T>
+    inline double distance(vec2<T> vec1, vec2<T> vec2)
+    {
+        return std::sqrt(std::pow(vec1.y - vec2.y, 2) + std::pow(vec1.x - vec2.x, 2));
     }
 }
 

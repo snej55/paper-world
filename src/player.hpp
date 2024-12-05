@@ -57,9 +57,14 @@ private:
     double _ad {100};
     double _death_time{120};
 
-    ParticleSpawner _Particles{10000, 0, {50.0, 50.0}, {1.0, 1.0}, 0.125, 0.002, true};
+    ParticleSpawner _Particles{10000, 0, {50.0, 50.0}, {1.0, 1.0}, 0.125, 0.01, true};
     SmokeSpawner _Smoke{10000, 0, {100.0, 100.0}, 0.15, true};
     FireSpawner _Fire{10000, 0, {200.0, 200.0}, 0.2, true};
+
+    double _max_health{100.0};
+    double _health{100.0};
+    double _recover{100.0}; // times since damaged
+    double _recover_time{40.0};
 
 public:
     Player(vec2<double> pos, vec2<int> dimensions);
@@ -68,6 +73,14 @@ public:
     Controller* getController();
     vec2<double>& getPos();
     vec2<double> getCenter();
+
+    double getHealth() {return _health;}
+    void setHealth(double val) {_health = val;}
+    double getRecover() {return _recover;}
+    void setRecover(double val) {_recover = val;}
+
+    void damage(double amount, double* screen_shake);
+
     double getAd() {return _ad;}
     void tickAd(const double& time_step)
     {
@@ -84,6 +97,7 @@ public:
             _Particles.setSpawning(48, {1.0, 20.0}, _Palette[0]);
         }
         _ad += time_step;
+        _recover += time_step;
     }
 
     void die(double* screen_shake);

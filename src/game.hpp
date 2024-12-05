@@ -29,7 +29,7 @@ private:
     World _World{};
     // ignore error squiggle
     Player _Player{{40.0, 40.0}, {6.0, 8.0}};
-    Entity _Entity{{50.0, 20.0}, {0.0, 0.0}, {8, 8}, 0.1, false};
+    Entity _Entity{{50.0, 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false};
 
     int _Width {SCR_WIDTH};
     int _Height {SCR_HEIGHT};
@@ -251,6 +251,8 @@ public:
             _Player.tickAd(time_step);
 
             _Entity.update(time_step, _World, &screen_shake);
+            _Entity.touchPlayer(&_Player, &screen_shake);
+            _Entity.followPlayer(&_Player, &_World);
             // do rendering here
 
             screen_shake = std::max(0.0, screen_shake - time_step);
@@ -270,6 +272,7 @@ public:
                 rects[i].y -= scroll.y;
                 SDL_RenderFillRect(_Renderer, &(rects[i]));
             }*/
+           renderPlayerHealthBar();
             // render screen
             SDL_SetRenderTarget(_Renderer, NULL);
             _Screen.renderClean(0, 0, _Renderer, 2);
@@ -287,6 +290,19 @@ public:
         std::stringstream caption;
         caption << "Paper World at " << avgFPS << " FPS (Avg)";
         SDL_SetWindowTitle(_Window, caption.str().c_str());
+    }
+
+    void renderPlayerHealthBar()
+    {
+        SDL_SetRenderDrawColor(_Renderer, 0x1f, 0x24, 0x4b, 0xFF);
+        SDL_Rect fillRect {4, 4, 100, 10};
+        SDL_RenderFillRect(_Renderer, &fillRect);
+        SDL_SetRenderDrawColor(_Renderer, 0xb6, 0xcf, 0x8e, 0xFF);
+        fillRect = SDL_Rect{5, 5, static_cast<int>(98.0 * _Player.getHealth() / 100.0), 4};
+        SDL_RenderFillRect(_Renderer, &fillRect);
+        SDL_SetRenderDrawColor(_Renderer, 0x3c, 0x6b, 0x64, 0xFF);
+        fillRect = SDL_Rect{5, 9, static_cast<int>(98.0 * _Player.getHealth() / 100.0), 4};
+        SDL_RenderFillRect(_Renderer, &fillRect);
     }
 };
 
