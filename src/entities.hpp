@@ -45,6 +45,7 @@ public:
     SDL_Rect* getRect() {return &_rect;}
     bool getShouldDie() {return _should_die;}
     bool getFlipped() {return _flipped;}
+    bool getPeaceful() {return _peaceful;}
 
     virtual void die(double* screen_shake)
     {
@@ -193,5 +194,65 @@ public:
         }
     }
 };
+
+template <int N>
+class EntityManager
+{
+private:
+    int _total;
+    Entity** _Entities;
+
+    vec2<double> _pos;
+
+public:
+    EntityManager(vec2<double> pos, Entity* entities[N])
+     : _total{N}, _pos{pos}
+    {
+        _Entities = new Entity*[N];
+        for (std::size_t i{0}; i < N; ++i)
+        {
+            _Entities[i] = entities[i];
+        }
+    }
+
+    ~EntityManager()
+    {
+        for (std::size_t i{0}; i < _total; ++i)
+        {
+            delete _Entities[i];
+        }
+        delete _Entities;
+    }
+
+    virtual void addEntity(Entity* entity)
+    {
+        _Entities[_total] = entity;
+        ++_total;
+    }
+
+    virtual void updateEntities(const double& time_step, World* world, double* screen_shake, Player* player)
+    {
+        const int num{_total};
+        for (std::size_t i{0}; i < num; ++i)
+        {
+            if (i < _total)
+            {
+                Entity* entity {_Entities[i]};
+                entity->update(time_step, world, screen_shake);
+                if (!(entity->_peaceful))
+                {
+                    entity->followPlayer(player, world);
+                    entity->touchPlayer(player, screen_shake);
+                }
+                if (entity->getShouldDie())
+                {
+                    Util::swap(&_Entities[i], &_Entities[_total - 1])
+                    delete _Entities[_total - 1];
+                    --_total;
+                }
+            }
+        }
+    }
+}
 
 #endif

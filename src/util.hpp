@@ -43,6 +43,14 @@ namespace Util {
     {
         return std::sqrt(std::pow(vec1.y - vec2.y, 2) + std::pow(vec1.x - vec2.x, 2));
     }
+
+    template <typename T>
+    inline void swap(T** val1, T** val2)
+    {
+        T* temp {*val1}; // create temp for value of val1
+        *val1 = *val2; // swap addresses
+        *val2 = temp;
+    }
 }
 
 #endif
