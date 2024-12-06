@@ -1,3 +1,7 @@
+// TODO: 
+// 1. Add entities to level editor
+// 2. Create slime entity
+
 #ifndef GAME_H
 #define GAME_H
 
@@ -29,7 +33,7 @@ private:
     World _World{};
     // ignore error squiggle
     Player _Player{{40.0, 40.0}, {6.0, 8.0}};
-    Entity* _Entity = new Entity{{50.0, 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false};
+    Entity* _Entity = new Entity{{50.0, 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false, "default"};
     Entity* _Entities[1] {_Entity};
     EntityManager _EntityManager{{50.0, 50.0}, 1, _Entities};
 
@@ -178,7 +182,7 @@ public:
                             controller->setControl(Control::RIGHT, true);
                             break;
                         case SDLK_p:
-                            _Entity = new Entity{{static_cast<double>(std::rand() % 100 + 50), 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false};
+                            _Entity = new Entity{{static_cast<double>(std::rand() % 100 + 50), 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false, "default"};
                             _EntityManager.addEntity(_Entity);
                         default:
                             break;

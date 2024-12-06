@@ -1,3 +1,5 @@
+# requires pygame/pygame-ce installed (via pip3, distro's package manager or something else)
+
 import pygame, sys, time, json, math, random
 
 TILE_SIZE = 8

@@ -2,6 +2,9 @@
 #define ENTITIES_H
 
 #include <SDL2/SDL.h>
+#include <JSON/json.hpp>
+
+#include <string>
 
 #include "./util.hpp"
 #include "./vec2.hpp"
@@ -16,6 +19,7 @@ private:
     vec2<int> _dimensions;
     double _gravity;
     bool _peaceful;
+    std::string _name;
 
     double _falling{99.0};
     double _top_speed{1.0};
@@ -31,8 +35,8 @@ private:
     bool _flipped{false};
 
 public:
-    Entity(vec2<double> pos, vec2<double> vel, vec2<int> dimensions, double gravity, bool peaceful)
-     : _pos{pos}, _vel{vel}, _dimensions{dimensions}, _gravity{gravity}, _peaceful{peaceful}
+    Entity(vec2<double> pos, vec2<double> vel, vec2<int> dimensions, double gravity, bool peaceful, std::string name)
+     : _pos{pos}, _vel{vel}, _dimensions{dimensions}, _gravity{gravity}, _peaceful{peaceful}, _name{name}
     { 
         _rect.x = pos.x;
         _rect.y = pos.y;
@@ -46,6 +50,7 @@ public:
     bool getShouldDie() {return _should_die;}
     bool getFlipped() {return _flipped;}
     bool getPeaceful() {return _peaceful;}
+    std::string_view getName() {return _name;}
 
     virtual void die(double* screen_shake)
     {
@@ -211,6 +216,7 @@ public:
         for (std::size_t i{0}; i < total; ++i)
         {
             _Entities[i] = entities[i];
+            std::cout << _Entities[i]->getName();
         }
     }
 
@@ -265,6 +271,17 @@ public:
             }
         }
     }
+};
+
+// "Manager of the Managers" Entity-Manager-Manager
+class EMManager
+{
+private:
+    std::vector<EntityManager> _Managers;
+    // entities will be std::vector<std::vector<Entity*>> entities; in void loadEntities();
+
+public:
+
 };
 
 #endif
