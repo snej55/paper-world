@@ -16,6 +16,7 @@ CONVERT_TYPES = {
 AUTO_TILE_TYPES = {'grass', 'rock'}
 AUTO_TILE_MAP = {'0011': 1, '1011': 2, '1001': 3, '0001': 4, '0111': 5, '1111': 6, '1101': 7, '0101': 8, 
                 '0110': 9, '1110': 10, '1100': 11, '0100': 12, '0010': 13, '1010': 14, '1000': 15, '0000': 16}
+ENTITIES = {'slime'}
 
 class Editor:
     def __init__(self):
@@ -31,8 +32,13 @@ class Editor:
         self.assets = {
             'grass': self.load_tileset(pygame.image.load('data/images/tiles/grass.png').convert()),
             'rock': self.load_tileset(pygame.image.load('data/images/tiles/rock.png').convert()),
-            'spike': self.load_tileset(pygame.image.load('data/images/tiles/spike.png').convert())
+            'spike': self.load_tileset(pygame.image.load('data/images/tiles/spike.png').convert()),
+            'slime': [pygame.image.load('data/images/entities/slime/thumb.png').convert()]
         }
+        
+        for key in self.assets:
+            for surf in self.assets[key]:
+                surf.set_colorkey((0, 0, 0))
 
         self.scroll = pygame.Vector2(0, 0)
         self.controls = {'right': False, 'left': False, 'up': False, 'down': False, 'l_shift': False}
@@ -67,13 +73,20 @@ class Editor:
     def save(self, path):
         with open(path, 'w') as f:
             tiles = []
+            entities = []
             for loc in self.tile_map:
                 tile_type = 0
                 for key in CONVERT_TYPES:
                     if self.tile_map[loc]['type'] == CONVERT_TYPES[key]:
                         tile_type = key
-                tiles.append({'pos': [int(c) for c in loc.split(';')], 'type': tile_type, 'variant': self.tile_map[loc]['variant']})
-            json.dump({'level': {'tiles': tiles}}, f)
+                entity = False
+                for entity_type in ENTITIES:
+                    if self.tile_map[loc]['type'] == entity_type:
+                        entities.append({'type': self.tile_map[loc]['type'], 'pos': [int(c) * TILE_SIZE for c in loc.split(';')]})
+                        break
+                if not entity:
+                    tiles.append({'pos': [int(c) for c in loc.split(';')], 'type': tile_type, 'variant': self.tile_map[loc]['variant']})
+            json.dump({'level': {'tiles': tiles, 'entities': entities}}, f)
             f.close()
 
     def load_tileset(self, sheet):
@@ -139,7 +152,7 @@ class Editor:
         for i, particle in sorted(enumerate(self.particles), reverse=True):
             particle[0][0] += particle[1][0] * self.dt
             particle[0][1] += particle[1][1] * self.dt
-            particle[1][1] += 0.3 * self.dt
+            particle[1][1] += 0.2 * self.dt
             particle[2] += 0.2 * self.dt
             if particle[2] > 10:
                 self.particles.pop(i)
@@ -184,7 +197,7 @@ class Editor:
     def run(self):
         while self.running:
             self.dt = time.time() - self.last_time
-            self.dt *= 6
+            self.dt *= 60
             self.last_time = time.time()
             self.screen.fill((0, 0, 0))
             for event in pygame.event.get():
