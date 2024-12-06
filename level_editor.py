@@ -205,6 +205,8 @@ class Editor:
                         self.auto_tile()
                     if event.key == pygame.K_o:
                         self.save(self.path)
+                    if event.key == pygame.K_g:
+                        self.grid = not self.grid
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_RIGHT:
                         self.controls['right'] = False

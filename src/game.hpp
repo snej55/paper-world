@@ -29,7 +29,9 @@ private:
     World _World{};
     // ignore error squiggle
     Player _Player{{40.0, 40.0}, {6.0, 8.0}};
-    Entity _Entity{{50.0, 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false};
+    Entity* _Entity = new Entity{{50.0, 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false};
+    Entity* _Entities[1] {_Entity};
+    EntityManager _EntityManager{{50.0, 50.0}, 1, _Entities};
 
     int _Width {SCR_WIDTH};
     int _Height {SCR_HEIGHT};
@@ -176,7 +178,8 @@ public:
                             controller->setControl(Control::RIGHT, true);
                             break;
                         case SDLK_p:
-                            break;
+                            _Entity = new Entity{{static_cast<double>(std::rand() % 100 + 50), 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false};
+                            _EntityManager.addEntity(_Entity);
                         default:
                             break;
                     }
@@ -250,15 +253,13 @@ public:
             _Player.update(time_step, _World, &screen_shake);
             _Player.tickAd(time_step);
 
-            _Entity.update(time_step, _World, &screen_shake);
-            _Entity.touchPlayer(&_Player, &screen_shake);
-            _Entity.followPlayer(&_Player, &_World);
+            _EntityManager.update(time_step, _World, &screen_shake, &_Player);
             // do rendering here
 
             screen_shake = std::max(0.0, screen_shake - time_step);
             vec2<int> render_scroll{static_cast<int>(scroll.x + Util::random() * screen_shake - screen_shake / 2.0), static_cast<int>(scroll.y + Util::random() * screen_shake - screen_shake / 2.0)};
             _World.render(render_scroll.x, render_scroll.y, _Window, _Renderer, &_TexMan, _Width, _Height);
-            _Entity.render(render_scroll.x, render_scroll.y, _Renderer);
+            _EntityManager.render(render_scroll.x, render_scroll.y, _Renderer);
             if (_Player.getAd() > 120)
                 _Player.render(render_scroll.x, render_scroll.y, _Renderer);
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);

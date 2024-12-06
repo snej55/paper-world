@@ -195,7 +195,6 @@ public:
     }
 };
 
-template <int N>
 class EntityManager
 {
 private:
@@ -205,11 +204,11 @@ private:
     vec2<double> _pos;
 
 public:
-    EntityManager(vec2<double> pos, Entity* entities[N])
-     : _total{N}, _pos{pos}
+    EntityManager(vec2<double> pos, const int total, Entity** entities)
+     : _total{total}, _pos{pos}
     {
-        _Entities = new Entity*[N];
-        for (std::size_t i{0}; i < N; ++i)
+        _Entities = new Entity*[total];
+        for (std::size_t i{0}; i < total; ++i)
         {
             _Entities[i] = entities[i];
         }
@@ -230,7 +229,7 @@ public:
         ++_total;
     }
 
-    virtual void updateEntities(const double& time_step, World* world, double* screen_shake, Player* player)
+    virtual void update(const double& time_step, World& world, double* screen_shake, Player* player)
     {
         const int num{_total};
         for (std::size_t i{0}; i < num; ++i)
@@ -239,20 +238,33 @@ public:
             {
                 Entity* entity {_Entities[i]};
                 entity->update(time_step, world, screen_shake);
-                if (!(entity->_peaceful))
+                if (!(entity->getPeaceful()))
                 {
-                    entity->followPlayer(player, world);
+                    entity->followPlayer(player, &world);
                     entity->touchPlayer(player, screen_shake);
                 }
                 if (entity->getShouldDie())
                 {
-                    Util::swap(&_Entities[i], &_Entities[_total - 1])
+                    Util::swap(&_Entities[i], &_Entities[_total - 1]);
                     delete _Entities[_total - 1];
                     --_total;
                 }
             }
         }
     }
-}
+
+    virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
+    {
+        const int num{_total};
+        for (std::size_t i{0}; i < num; ++i)
+        {
+            if (i < _total)
+            {
+                Entity* entity {_Entities[i]};
+                entity->render(scrollX, scrollY, renderer);
+            }
+        }
+    }
+};
 
 #endif
