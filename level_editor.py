@@ -69,6 +69,8 @@ class Editor:
         for tile in data['level']['tiles']:
             tile_loc = f"{tile['pos'][0]};{tile['pos'][1]}"
             self.tile_map[tile_loc] = {'type': CONVERT_TYPES[tile['type']], 'variant': tile['variant']}
+        for entity in data['level']['entities']:
+            self.tile_map[f"{math.floor(entity['pos'][0] / TILE_SIZE)};{math.floor(entity['pos'][1] / TILE_SIZE)}"] = {'type': entity['type'], 'variant': 0}
     
     def save(self, path):
         with open(path, 'w') as f:
@@ -83,6 +85,7 @@ class Editor:
                 for entity_type in ENTITIES:
                     if self.tile_map[loc]['type'] == entity_type:
                         entities.append({'type': self.tile_map[loc]['type'], 'pos': [int(c) * TILE_SIZE for c in loc.split(';')]})
+                        entity = True
                         break
                 if not entity:
                     tiles.append({'pos': [int(c) for c in loc.split(';')], 'type': tile_type, 'variant': self.tile_map[loc]['variant']})
