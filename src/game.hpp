@@ -122,7 +122,7 @@ public:
         }
         _TexMan.load(_Window, _Renderer);
         _World.loadFromFile("data/maps/0.json");
-        _EMManager.loadFromPath("data/maps/0.json");
+        _EMManager.loadFromPath("data/maps/0.json", &_TexMan);
         if (success)
             std::cout << "Loaded!\n";
         return success;

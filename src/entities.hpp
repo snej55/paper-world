@@ -11,6 +11,7 @@
 #include "./vec2.hpp"
 #include "./tiles.hpp"
 #include "./player.hpp"
+#include "./anim.hpp"
 
 class Entity
 {
@@ -33,18 +34,19 @@ protected:
     double _recover{100.0};
     double _recover_time{10.0};
 
-    bool _flipped{false};
+    bool _flipped{false}; // flipping for moving direction
     bool _wandering{false}; // if it is moving while it is wandering
     double _wander_timer{0.0};
+    bool _anim_flipped{false}; // flipped for animation
 
 public:
     Entity(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name)
-     : _pos{pos}, _vel{vel}, _dimensions{dimensions}, _gravity{gravity}, _peaceful{peaceful}, _name{name}
+     : _pos{pos}, _vel{vel}, _gravity{gravity}, _peaceful{peaceful}, _name{name}
     { 
         _rect.x = pos.x;
         _rect.y = pos.y;
-        _rect.w = dimensions.x;
-        _rect.h = dimensions.y;
+        _rect.w = _dimensions.x;
+        _rect.h = _dimensions.y;
     }
 
     vec2<double>& getPos() {return _pos;}
@@ -196,6 +198,7 @@ public:
                     _flipped = true;
                 }
                 _vel.x += _flipped ? -0.1 : 0.1;
+                _anim_flipped = _flipped;
             }
             if (player_pos.y + 4.0 < getCenter().y)
             {
@@ -235,6 +238,74 @@ public:
         } else {
             _vel.x *= 0.8;
         }
+        _anim_flipped = _flipped;
+    }
+};
+
+class Slime : public Entity
+{
+protected:
+    Anim* _idleAnim;
+    Anim* _runAnim;
+    Anim* _jumpAnim;
+
+    Anim* _anim {nullptr};
+
+    vec2<int> _dimensions{11, 7};
+    vec2<int> _anim_offset{1, 1};
+
+public:
+    Slime(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman)
+     : Entity{pos, vel, gravity, peaceful, name}
+    {
+        loadAnim(texman);
+    }
+
+    ~Slime()
+    {
+        delete _idleAnim;
+        delete _runAnim;
+        delete _jumpAnim;
+    }
+
+    void loadAnim(TexMan* texman)
+    {
+        _idleAnim = new Anim{13, 9, 6, 0.16, true, &(texman->slimeIdle)};
+        _runAnim = new Anim{13, 9, 5, 0.2, true, &(texman->slimeRun)};
+        _jumpAnim = new Anim{13, 9, 8, 0.21, true, &(texman->slimeJump)};
+    }
+
+    void handleAnim(const double& time_step)
+    {
+        _anim = _idleAnim;
+        if (_falling >= 3.0)
+        {
+            _anim = _jumpAnim;
+            _runAnim->reset();
+            _idleAnim->reset();
+        } else if (std::abs(_vel.x) > 0.05)
+        {
+            _anim = _runAnim;
+            _jumpAnim->reset();
+            _idleAnim->reset();
+        } else {
+            _anim = _idleAnim;
+            _jumpAnim->reset();
+            _runAnim->reset();
+        }
+        _anim->setFlipped(_anim_flipped ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+        _anim->tick(time_step);
+    }
+
+    virtual void update(const double& time_step, World& world, double* screen_shake)
+    {
+        handleAnim(time_step);
+        Entity::update(time_step, world, screen_shake);
+    }
+
+    virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
+    {
+        _anim->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
     }
 };
 
@@ -366,7 +437,7 @@ public:
         _Managers.clear();
     }
 
-    void loadFromPath(std::string path)
+    void loadFromPath(std::string path, TexMan* texman)
     {
         std::ifstream f{path};
         json data = json::parse(f);
@@ -387,7 +458,7 @@ public:
                             found_entity = true;
                             if (entity_name == "slime")
                             {
-                                entity_vec.push_back(new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name});
+                                entity_vec.push_back(new Slime{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name, texman});
                             } else {
                                 entity_vec.push_back(new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, "default"});
                             }
@@ -400,7 +471,7 @@ public:
             {
                 if (entity_name == "slime")
                 {
-                    entities.push_back(std::vector<Entity*>{new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name}});
+                    entities.push_back(std::vector<Entity*>{new Slime{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name, texman}});
                 } else {
                     entities.push_back(std::vector<Entity*>{new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, "default"}});
                 }
