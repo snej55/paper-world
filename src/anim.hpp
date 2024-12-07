@@ -34,7 +34,7 @@ public:
 
     SDL_RendererFlip getFlipped() {return _flipped;}
     void setFlipped(SDL_RendererFlip flip) {_flipped = flip;}
-    void getFinished() {return _finished;}
+    bool getFinished() {return _finished;}
     void setFinished(bool val) {_finished = val;}
     void reset();
 

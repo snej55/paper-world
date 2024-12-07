@@ -14,10 +14,10 @@
 
 class Entity
 {
-private:
+protected:
     vec2<double> _pos;
     vec2<double> _vel;
-    vec2<int> _dimensions;
+    vec2<int> _dimensions {8, 8};
     double _gravity;
     bool _peaceful;
     std::string _name;
@@ -38,7 +38,7 @@ private:
     double _wander_timer{0.0};
 
 public:
-    Entity(vec2<double> pos, vec2<double> vel, vec2<int> dimensions, double gravity, bool peaceful, std::string name)
+    Entity(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name)
      : _pos{pos}, _vel{vel}, _dimensions{dimensions}, _gravity{gravity}, _peaceful{peaceful}, _name{name}
     { 
         _rect.x = pos.x;
@@ -55,7 +55,7 @@ public:
     bool getPeaceful() {return _peaceful;}
     std::string_view getName() {return _name;}
 
-    virtual void die(double* screen_shake) override
+    virtual void die(double* screen_shake)
     {
         if (!_should_die)
             *screen_shake = std::max(*screen_shake, 8.0);
@@ -63,7 +63,7 @@ public:
         _vel.x = 0;
     }
 
-    virtual void update(const double& time_step, World& world, double* screen_shake) override
+    virtual void update(const double& time_step, World& world, double* screen_shake)
     {
         _falling += time_step;
         _recover += time_step;
@@ -78,13 +78,13 @@ public:
         handlePhysics(time_step, _vel, world, screen_shake);
     }
 
-    virtual void updateVel(const double& time_step) override
+    virtual void updateVel(const double& time_step)
     {
         _vel.x = std::min(std::max(_vel.x, -_top_speed), _top_speed);
         _vel.y += _gravity * time_step;
     }
 
-    virtual void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake) override
+    virtual void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake)
     {
         _pos.x += frame_movement.x * time_step;
         _rect.x = _pos.x;
@@ -142,7 +142,7 @@ public:
         }
     }
 
-    virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer) override
+    virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
     {
         SDL_Rect renderRect{_pos.x - scrollX, _pos.y - scrollY, _dimensions.x, _dimensions.y};
         if (_recover < _recover_time)
@@ -155,7 +155,7 @@ public:
         SDL_RenderFillRect(renderer, &renderRect);
     }
 
-    virtual void touchPlayer(Player* player, double* screen_shake) override
+    virtual void touchPlayer(Player* player, double* screen_shake)
     {
         _rect.x = _pos.x;
         _rect.y = _pos.y;
@@ -166,7 +166,7 @@ public:
         }
     }
 
-    virtual void followPlayer(Player* player, World* world) override
+    virtual void followPlayer(Player* player, World* world)
     {
         SDL_Rect* player_rect{player->getRect()};
         vec2<double> player_pos{player->getCenter()};
@@ -209,7 +209,7 @@ public:
         }
     }
 
-    virtual void wander(World* world) override
+    virtual void wander(World* world)
     {
         if (_wandering)
         {
@@ -387,9 +387,9 @@ public:
                             found_entity = true;
                             if (entity_name == "slime")
                             {
-                                entity_vec.push_back(new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, vec2<int>{8, 8}, 0.2, false, entity_name});
+                                entity_vec.push_back(new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name});
                             } else {
-                                entity_vec.push_back(new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, vec2<int>{8, 8}, 0.2, false, "default"});
+                                entity_vec.push_back(new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, "default"});
                             }
                             break;
                         }
@@ -400,9 +400,9 @@ public:
             {
                 if (entity_name == "slime")
                 {
-                    entities.push_back(std::vector<Entity*>{new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, vec2<int>{8, 8}, 0.2, false, entity_name}});
+                    entities.push_back(std::vector<Entity*>{new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name}});
                 } else {
-                    entities.push_back(std::vector<Entity*>{new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, vec2<int>{8, 8}, 0.2, false, "default"}});
+                    entities.push_back(std::vector<Entity*>{new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, "default"}});
                 }
             }
         }
