@@ -1,5 +1,5 @@
 // TODO: 
-// 1. Add entities to level editor
+// 1. Implement global entity manager
 // 2. Create slime entity
 
 #ifndef GAME_H
@@ -31,11 +31,8 @@ private:
 
     TexMan _TexMan{};
     World _World{};
-    // ignore error squiggle
     Player _Player{{40.0, 40.0}, {6.0, 8.0}};
-    Entity* _Entity = new Entity{{50.0, 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false, "default"};
-    Entity* _Entities[1] {_Entity};
-    EntityManager _EntityManager{{50.0, 50.0}, 1, _Entities};
+    EMManager _EMManager{}; // this is the entity manager :)
 
     int _Width {SCR_WIDTH};
     int _Height {SCR_HEIGHT};
@@ -125,6 +122,7 @@ public:
         }
         _TexMan.load(_Window, _Renderer);
         _World.loadFromFile("data/maps/0.json");
+        _EMManager.loadFromPath("data/maps/0.json");
         if (success)
             std::cout << "Loaded!\n";
         return success;
@@ -182,8 +180,9 @@ public:
                             controller->setControl(Control::RIGHT, true);
                             break;
                         case SDLK_p:
-                            _Entity = new Entity{{static_cast<double>(std::rand() % 100 + 50), 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false, "default"};
-                            _EntityManager.addEntity(_Entity);
+                            //Entity* _Entity = new Entity{{static_cast<double>(std::rand() % 100 + 50), 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false, "default"};
+                            //_EMManager.addEntity(_Entity);
+                            break;
                         default:
                             break;
                     }
@@ -257,13 +256,13 @@ public:
             _Player.update(time_step, _World, &screen_shake);
             _Player.tickAd(time_step);
 
-            _EntityManager.update(time_step, _World, &screen_shake, &_Player);
+            _EMManager.update(time_step, _World, &screen_shake, &_Player);
             // do rendering here
 
             screen_shake = std::max(0.0, screen_shake - time_step);
             vec2<int> render_scroll{static_cast<int>(scroll.x + Util::random() * screen_shake - screen_shake / 2.0), static_cast<int>(scroll.y + Util::random() * screen_shake - screen_shake / 2.0)};
             _World.render(render_scroll.x, render_scroll.y, _Window, _Renderer, &_TexMan, _Width, _Height);
-            _EntityManager.render(render_scroll.x, render_scroll.y, _Renderer);
+            _EMManager.render(render_scroll.x, render_scroll.y, _Renderer);
             if (_Player.getAd() > 120)
                 _Player.render(render_scroll.x, render_scroll.y, _Renderer);
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);

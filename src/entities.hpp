@@ -5,6 +5,7 @@
 #include <JSON/json.hpp>
 
 #include <string>
+#include <fstream>
 
 #include "./util.hpp"
 #include "./vec2.hpp"
@@ -33,6 +34,8 @@ private:
     double _recover_time{10.0};
 
     bool _flipped{false};
+    bool _wandering{false}; // if it is moving while it is wandering
+    double _wander_timer{0.0};
 
 public:
     Entity(vec2<double> pos, vec2<double> vel, vec2<int> dimensions, double gravity, bool peaceful, std::string name)
@@ -52,7 +55,7 @@ public:
     bool getPeaceful() {return _peaceful;}
     std::string_view getName() {return _name;}
 
-    virtual void die(double* screen_shake)
+    virtual void die(double* screen_shake) override
     {
         if (!_should_die)
             *screen_shake = std::max(*screen_shake, 8.0);
@@ -60,22 +63,28 @@ public:
         _vel.x = 0;
     }
 
-    virtual void update(const double& time_step, World& world, double* screen_shake)
+    virtual void update(const double& time_step, World& world, double* screen_shake) override
     {
         _falling += time_step;
         _recover += time_step;
+        _wander_timer -= time_step;
+        if (_wander_timer <= 0.0)
+        {
+            _wandering = !_wandering;
+            _wander_timer = (std::rand() % 180 )+ 60;
+        }
 
         updateVel(time_step);
         handlePhysics(time_step, _vel, world, screen_shake);
     }
 
-    virtual void updateVel(const double& time_step)
+    virtual void updateVel(const double& time_step) override
     {
         _vel.x = std::min(std::max(_vel.x, -_top_speed), _top_speed);
         _vel.y += _gravity * time_step;
     }
 
-    virtual void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake)
+    virtual void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake) override
     {
         _pos.x += frame_movement.x * time_step;
         _rect.x = _pos.x;
@@ -133,7 +142,7 @@ public:
         }
     }
 
-    virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
+    virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer) override
     {
         SDL_Rect renderRect{_pos.x - scrollX, _pos.y - scrollY, _dimensions.x, _dimensions.y};
         if (_recover < _recover_time)
@@ -146,7 +155,7 @@ public:
         SDL_RenderFillRect(renderer, &renderRect);
     }
 
-    virtual void touchPlayer(Player* player, double* screen_shake)
+    virtual void touchPlayer(Player* player, double* screen_shake) override
     {
         _rect.x = _pos.x;
         _rect.y = _pos.y;
@@ -157,7 +166,7 @@ public:
         }
     }
 
-    virtual void followPlayer(Player* player, World* world)
+    virtual void followPlayer(Player* player, World* world) override
     {
         SDL_Rect* player_rect{player->getRect()};
         vec2<double> player_pos{player->getCenter()};
@@ -183,11 +192,10 @@ public:
                 if (player_pos.x > getCenter().x) // player is to the right of entity
                 {
                     _flipped = false;
-                    _vel.x += 0.1;
                 } else {
                     _flipped = true;
-                    _vel.x -= 0.1;
                 }
+                _vel.x += _flipped ? -0.1 : 0.1;
             }
             if (player_pos.y + 4.0 < getCenter().y)
             {
@@ -196,6 +204,36 @@ public:
                     _vel.y = -3.2;
                 }
             }
+        } else {
+            wander(world);
+        }
+    }
+
+    virtual void wander(World* world) override
+    {
+        if (_wandering)
+        {
+            vec2<double> checkTilePos {getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y + 8};
+            Tile* tile {world->getTileAt(checkTilePos.x, checkTilePos.y)};
+            if (tile == nullptr)
+            {
+                _vel.x += _flipped ? 0.2 : -0.2;
+                _flipped = !_flipped;
+            } else if (Util::elementIn<TileType, std::size(DANGER_TILES)>(tile->type, DANGER_TILES))
+            {
+                _vel.x += _flipped ? 0.2 : -0.2;
+                _flipped = !_flipped;
+            } else {
+                vec2<double> checkTilePos {getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y};
+                Tile* tile {world->getTileAt(checkTilePos.x, checkTilePos.y)};
+                if (tile != nullptr)
+                {
+                    _flipped = !_flipped;
+                }
+                _vel.x += _flipped ? -0.08 : 0.08;
+            }
+        } else {
+            _vel.x *= 0.8;
         }
     }
 };
@@ -207,6 +245,11 @@ private:
     Entity** _Entities;
 
     vec2<double> _pos;
+    std::string _name;
+
+    ParticleSpawner _Particles{10000, 0, {50.0, 50.0}, {1.0, 1.0}, 0.125, 0.01, true};
+    SmokeSpawner _Smoke{10000, 0, {100.0, 100.0}, 0.15, true};
+    FireSpawner _Fire{10000, 0, {200.0, 200.0}, 0.2, true};
 
 public:
     EntityManager(vec2<double> pos, const int total, Entity** entities)
@@ -216,17 +259,38 @@ public:
         for (std::size_t i{0}; i < total; ++i)
         {
             _Entities[i] = entities[i];
-            std::cout << _Entities[i]->getName();
+            _name = _Entities[i]->getName();
+        }
+    }
+
+    EntityManager(vec2<double> pos, const int total, std::vector<Entity*> entities)
+     : _total{total}, _pos{pos}
+    {
+        _Entities = new Entity*[total];
+        for (std::size_t i{0}; i < total; ++i)
+        {
+            _Entities[i] = entities[i];
+            _name = _Entities[i]->getName();
         }
     }
 
     ~EntityManager()
+    {
+        free();
+    }
+
+    void free()
     {
         for (std::size_t i{0}; i < _total; ++i)
         {
             delete _Entities[i];
         }
         delete _Entities;
+    }
+
+    std::string_view getName()
+    {
+        return _name;
     }
 
     virtual void addEntity(Entity* entity)
@@ -249,14 +313,16 @@ public:
                     entity->followPlayer(player, &world);
                     entity->touchPlayer(player, screen_shake);
                 }
+                // some black magic
                 if (entity->getShouldDie())
                 {
-                    Util::swap(&_Entities[i], &_Entities[_total - 1]);
-                    delete _Entities[_total - 1];
-                    --_total;
+                    Util::swap(&_Entities[i], &_Entities[_total - 1]); // swap dead entity with last entity in the array
+                    delete _Entities[_total - 1]; // deallocate dead entity
+                    --_total; // deincrement total to avoid undefined behaviour when we reference nullptr
                 }
             }
         }
+        //std::cout << _total << '\n';
     }
 
     virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
@@ -277,11 +343,114 @@ public:
 class EMManager
 {
 private:
-    std::vector<EntityManager> _Managers;
+    std::vector<EntityManager*> _Managers;
     // entities will be std::vector<std::vector<Entity*>> entities; in void loadEntities();
 
 public:
+    EMManager()
+    {
+    }
 
+    ~EMManager()
+    {
+        free();
+    }
+
+    void free()
+    {
+        for (std::size_t i{0}; i < _Managers.size(); ++i)
+        {
+            _Managers[i]->free();
+            delete _Managers[i];
+        }
+        _Managers.clear();
+    }
+
+    void loadFromPath(std::string path)
+    {
+        std::ifstream f{path};
+        json data = json::parse(f);
+
+        std::vector<std::vector<Entity*>> entities;
+        for (const auto& e : data["level"]["entities"])
+        {
+            std::string entity_name {e["type"]};
+            bool found_entity{false};
+            for (auto& entity_vec : entities)
+            {
+                if (!found_entity)
+                {
+                    for (Entity* entity : entity_vec)
+                    {
+                        if (entity->getName() == entity_name)
+                        {
+                            found_entity = true;
+                            if (entity_name == "slime")
+                            {
+                                entity_vec.push_back(new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, vec2<int>{8, 8}, 0.2, false, entity_name});
+                            } else {
+                                entity_vec.push_back(new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, vec2<int>{8, 8}, 0.2, false, "default"});
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!found_entity)
+            {
+                if (entity_name == "slime")
+                {
+                    entities.push_back(std::vector<Entity*>{new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, vec2<int>{8, 8}, 0.2, false, entity_name}});
+                } else {
+                    entities.push_back(std::vector<Entity*>{new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, vec2<int>{8, 8}, 0.2, false, "default"}});
+                }
+            }
+        }
+        
+        for (EntityManager* manager : _Managers)
+        {
+            manager->free();
+            delete manager;
+        }
+        _Managers.clear();
+
+        for (auto& entity_vec : entities)
+        {
+            _Managers.push_back(new EntityManager{vec2<double>{0, 0}, entity_vec.size(), entity_vec});
+        }
+
+        f.close();
+    }
+
+    void addEntity(Entity* entity)
+    {
+        for (std::size_t i{0}; i < _Managers.size(); ++i)
+        {
+            if (_Managers[i]->getName() == entity->getName())
+            {
+                _Managers[i]->addEntity(entity);
+                return; // break;
+            }
+        }
+        // we didn't find anything
+        _Managers.push_back(new EntityManager{vec2<double>{0, 0}, 1, std::vector<Entity*>{entity}});
+    }
+
+    void update(const double& time_step, World& world, double* screen_shake, Player* player)
+    {
+        for (std::size_t i{0}; i < _Managers.size(); ++i)
+        {
+            _Managers[i]->update(time_step, world, screen_shake, player);
+        }
+    }
+
+    void render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
+    {
+        for (std::size_t i{0}; i < _Managers.size(); ++i)
+        {
+            _Managers[i]->render(scrollX, scrollY, renderer);
+        }
+    }
 };
 
 #endif
