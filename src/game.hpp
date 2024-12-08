@@ -1,6 +1,7 @@
 // TODO: 
-// 1. Implement global entity manager
-// 2. Create slime entity
+// 1. Add particles to slime death
+// 2. Add bats
+// 3. Add player animations
 
 #ifndef GAME_H
 #define GAME_H

@@ -16,6 +16,7 @@
 class Entity
 {
 protected:
+    static inline int sId{0};
     vec2<double> _pos;
     vec2<double> _vel;
     vec2<int> _dimensions {8, 8};
@@ -39,207 +40,37 @@ protected:
     double _wander_timer{0.0};
     bool _anim_flipped{false}; // flipped for animation
 
+    int _id{0};
+
 public:
-    Entity(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name)
-     : _pos{pos}, _vel{vel}, _gravity{gravity}, _peaceful{peaceful}, _name{name}
-    { 
-        _rect.x = pos.x;
-        _rect.y = pos.y;
-        _rect.w = _dimensions.x;
-        _rect.h = _dimensions.y;
-    }
+    Entity(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name);
 
-    vec2<double>& getPos() {return _pos;}
-    vec2<double> getCenter() {return {_pos.x + _dimensions.x / 2.0, _pos.y + _dimensions.y / 2.0};}
-    SDL_Rect* getRect() {return &_rect;}
-    bool getShouldDie() {return _should_die;}
-    bool getFlipped() {return _flipped;}
-    bool getPeaceful() {return _peaceful;}
-    std::string_view getName() {return _name;}
+    int getId();
 
-    virtual void die(double* screen_shake)
-    {
-        if (!_should_die)
-            *screen_shake = std::max(*screen_shake, 8.0);
-        _should_die = true;
-        _vel.x = 0;
-    }
+    vec2<double>& getPos();
+    vec2<double> getCenter();
+    void updateRect();
+    SDL_Rect* getRect();
+    bool getShouldDie();
+    bool getFlipped();
+    bool getPeaceful();
+    std::string_view getName();
 
-    virtual void update(const double& time_step, World& world, double* screen_shake)
-    {
-        _falling += time_step;
-        _recover += time_step;
-        _wander_timer -= time_step;
-        if (_wander_timer <= 0.0)
-        {
-            _wandering = !_wandering;
-            _wander_timer = (std::rand() % 180 )+ 60;
-        }
+    virtual void die(double* screen_shake);
 
-        updateVel(time_step);
-        handlePhysics(time_step, _vel, world, screen_shake);
-    }
+    virtual void update(const double& time_step, World& world, double* screen_shake);
 
-    virtual void updateVel(const double& time_step)
-    {
-        _vel.x = std::min(std::max(_vel.x, -_top_speed), _top_speed);
-        _vel.y += _gravity * time_step;
-    }
+    virtual void updateVel(const double& time_step);
 
-    virtual void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake)
-    {
-        _pos.x += frame_movement.x * time_step;
-        _rect.x = _pos.x;
-        _rect.y = _pos.y;
+    virtual void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake);
 
-        std::array<SDL_Rect, 9> rects;
-        world.getTilesAroundPos(_pos, rects);
-        for (int i{0}; i < 9; ++i)
-        {
-            SDL_Rect* tile_rect {&(rects[i])};
-            if (Util::checkCollision(&_rect, tile_rect))
-            {
-                if (frame_movement.x > 0)
-                {
-                    _rect.x = tile_rect->x - _rect.w;
-                } else {
-                    _rect.x = tile_rect->x + tile_rect->w;
-                }
-                _pos.x = _rect.x;
-                _vel.x = 0;
-            }
-        }
+    virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
 
-        _pos.y += frame_movement.y * time_step;
-        _rect.x = _pos.x;
-        _rect.y = _pos.y;
+    virtual void touchPlayer(Player* player, double* screen_shake);
 
-        world.getTilesAroundPos(_pos, rects);
-        for (int i{0}; i < 9; ++i)
-        {
-            SDL_Rect* tile_rect {&(rects[i])};
-            if (Util::checkCollision(&_rect, tile_rect))
-            {
-                if (frame_movement.y > 0)
-                {
-                    _rect.y = tile_rect->y - _rect.h;
-                    _falling = 0.0;
-                } else {
-                    _rect.y = tile_rect->y + tile_rect->h;
-                }
-                _vel.y = 0.0;
-                _pos.y = _rect.y;
-            }
-        }
+    virtual void followPlayer(Player* player, World* world);
 
-        world.getDangerAroundPos(_pos, rects);
-        for (int i{0}; i < 9; ++i)
-        {
-            SDL_Rect* tile_rect{&(rects[i])};
-            if (Util::checkCollision(&_rect, tile_rect))
-            {
-                die(screen_shake);
-                break;
-            }
-        }
-    }
-
-    virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
-    {
-        SDL_Rect renderRect{_pos.x - scrollX, _pos.y - scrollY, _dimensions.x, _dimensions.y};
-        if (_recover < _recover_time)
-        {
-            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-        } else {
-            SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
-        }
-
-        SDL_RenderFillRect(renderer, &renderRect);
-    }
-
-    virtual void touchPlayer(Player* player, double* screen_shake)
-    {
-        _rect.x = _pos.x;
-        _rect.y = _pos.y;
-        SDL_Rect* player_rect{player->getRect()};
-        if (Util::checkCollision(player_rect, &_rect))
-        {
-            player->damage(_damage, screen_shake);
-        }
-    }
-
-    virtual void followPlayer(Player* player, World* world)
-    {
-        SDL_Rect* player_rect{player->getRect()};
-        vec2<double> player_pos{player->getCenter()};
-        if (Util::distance(player_pos, getCenter()) < 100.0)
-        {
-            vec2<double> checkTilePos {getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y + 8};
-            Tile* tile {world->getTileAt(checkTilePos.x, checkTilePos.y)};
-            if (tile == nullptr)
-            {
-                if (!(std::abs(static_cast<int>(player_pos.x - getCenter().x)) < 16 && player_pos.y > getCenter().y + 4.0 && _falling < 3.0))
-                {
-                    _vel.x += _flipped ? 0.2 : -0.2;
-                    _flipped = !_flipped;
-                }
-            } else if (Util::elementIn<TileType, std::size(DANGER_TILES)>(tile->type, DANGER_TILES))
-            {
-                if (!(std::abs(static_cast<int>(player_pos.x - getCenter().x)) < 16 && player_pos.y > getCenter().y + 4.0 && _falling < 3.0))
-                {
-                    _vel.x += _flipped ? 0.2 : -0.2;
-                    _flipped = !_flipped;
-                }
-            } else {
-                if (player_pos.x > getCenter().x) // player is to the right of entity
-                {
-                    _flipped = false;
-                } else {
-                    _flipped = true;
-                }
-                _vel.x += _flipped ? -0.1 : 0.1;
-                _anim_flipped = _flipped;
-            }
-            if (player_pos.y + 4.0 < getCenter().y)
-            {
-                if (_falling < 3.0)
-                {
-                    _vel.y = -3.2;
-                }
-            }
-        } else {
-            wander(world);
-        }
-    }
-
-    virtual void wander(World* world)
-    {
-        if (_wandering)
-        {
-            vec2<double> checkTilePos {getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y + 8};
-            Tile* tile {world->getTileAt(checkTilePos.x, checkTilePos.y)};
-            if (tile == nullptr)
-            {
-                _vel.x += _flipped ? 0.2 : -0.2;
-                _flipped = !_flipped;
-            } else if (Util::elementIn<TileType, std::size(DANGER_TILES)>(tile->type, DANGER_TILES))
-            {
-                _vel.x += _flipped ? 0.2 : -0.2;
-                _flipped = !_flipped;
-            } else {
-                vec2<double> checkTilePos {getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y};
-                Tile* tile {world->getTileAt(checkTilePos.x, checkTilePos.y)};
-                if (tile != nullptr)
-                {
-                    _flipped = !_flipped;
-                }
-                _vel.x += _flipped ? -0.08 : 0.08;
-            }
-        } else {
-            _vel.x *= 0.8;
-        }
-        _anim_flipped = _flipped;
-    }
+    virtual void wander(World* world);
 };
 
 class Slime : public Entity
@@ -309,6 +140,157 @@ public:
     }
 };
 
+class Bat : public Entity
+{
+private:
+    Anim* _anim;
+    Texture* _glowTex;
+    vec2<int> _dimensions{3, 4};
+    vec2<int> _anim_offset{2, 0};
+
+    double _angle{0.0};
+    double _speed{Util::random() * 1.0 + 0.25};
+
+public:
+    Bat(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman)
+     : Entity{pos, vel, 0.05, peaceful, name}
+    {
+        loadAnim(texman);
+    }
+
+    ~Bat()
+    {
+        delete _anim;
+    }
+
+    void loadAnim(TexMan* texman)
+    {
+        _anim = new Anim{7, 4, 2, 0.3, true, &(texman->bat)};
+        _glowTex = &(texman->lightTex);
+    }
+
+    void handleAnim(const double& time_step)
+    {
+        _anim->setAngle(_angle);
+        _anim->tick(time_step);
+    }
+
+    virtual void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake)
+    {
+        _pos.x += frame_movement.x * time_step * _speed;
+        _rect.x = _pos.x;
+        _rect.y = _pos.y;
+
+        std::array<SDL_Rect, 9> rects;
+        world.getTilesAroundPos(_pos, rects);
+        for (int i{0}; i < 9; ++i)
+        {
+            SDL_Rect* tile_rect {&(rects[i])};
+            if (Util::checkCollision(&_rect, tile_rect))
+            {
+                if (frame_movement.x > 0)
+                {
+                    _rect.x = tile_rect->x - _rect.w;
+                } else {
+                    _rect.x = tile_rect->x + tile_rect->w;
+                }
+                _pos.x = _rect.x;
+                _vel.x *= -1;
+                _vel.y *= 1.2;
+            }
+        }
+
+        _pos.y += frame_movement.y * time_step * _speed;
+        _rect.x = _pos.x;
+        _rect.y = _pos.y;
+
+        world.getTilesAroundPos(_pos, rects);
+        for (int i{0}; i < 9; ++i)
+        {
+            SDL_Rect* tile_rect {&(rects[i])};
+            if (Util::checkCollision(&_rect, tile_rect))
+            {
+                if (frame_movement.y > 0)
+                {
+                    _rect.y = tile_rect->y - _rect.h;
+                    _falling = 0.0;
+                } else {
+                    _rect.y = tile_rect->y + tile_rect->h;
+                }
+                _vel.y *= -1;
+                _pos.y = _rect.y;
+            }
+        }
+
+        world.getDangerAroundPos(_pos, rects);
+        for (int i{0}; i < 9; ++i)
+        {
+            SDL_Rect* tile_rect{&(rects[i])};
+            if (Util::checkCollision(&_rect, tile_rect))
+            {
+                die(screen_shake);
+                break;
+            }
+        }
+    }
+
+    virtual void touchPlayer(Player* player, double* screen_shake)
+    {
+        _rect.x = _pos.x;
+        _rect.y = _pos.y;
+        SDL_Rect* player_rect{player->getRect()};
+        if (Util::checkCollision(player_rect, &_rect))
+        {
+            double angle = Util::random() * 2.0 * M_PI;
+            _vel.x += std::cos(angle) * 5.0;
+            _vel.y += std::sin(angle) * 5.0;
+            player->damage(_damage, screen_shake);
+        }
+    }
+
+    virtual void followPlayer(Player* player, World* world)
+    {
+        SDL_Rect* player_rect{player->getRect()};
+        vec2<double> player_pos{player->getCenter()};
+        if (Util::distance(player_pos, getCenter()) < 200.0)
+        {
+            _vel.x += std::max(-0.1, std::min(0.1, (player_pos.x - getCenter().x) * 0.005));
+            _vel.y += std::max(-0.1, std::min(0.1, (player_pos.y - getCenter().y) * 0.005));
+            vec2<double> check_pos {getCenter().x + _vel.x * 2.0, getCenter().y + _vel.y * 2.0};
+            Tile* tile {world->getTileAt(check_pos.x, check_pos.y)};
+            if (tile != nullptr)
+            {    
+                if (Util::elementIn<TileType, std::size(DANGER_TILES)>(tile->type, DANGER_TILES))
+                {
+                    _vel.x *= -1;
+                    _vel.y *= -1;
+                }
+            }
+            _vel.x *= 0.95;
+            _vel.y *= 0.95;
+        } else {
+            wander(world);
+        }
+    }
+
+    virtual void update(const double& time_step, World& world, double* screen_shake)
+    {
+        handleAnim(time_step);
+        Entity::update(time_step, world, screen_shake);
+    }
+
+    virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
+    {
+        _glowTex->setBlendMode(SDL_BLENDMODE_ADD);
+        _glowTex->setAlpha(10);
+        _glowTex->setColor(246, 231, 156);
+        SDL_Rect renderQuad{static_cast<int>(getCenter().x - 6 - _anim_offset.x) - scrollX, static_cast<int>(getCenter().y - 6 - _anim_offset.y - 2) - scrollY, 10, 10};
+        SDL_RenderCopyEx(renderer, _glowTex->getTexture(), NULL, &renderQuad, 0, NULL, SDL_FLIP_NONE);
+        //_glowTex->render(static_cast<int>(getCenter().x - 2.5 - _anim_offset.x) - scrollX, static_cast<int>(getCenter().y - 2.5 - _anim_offset.y - 2) - scrollY, renderer, &clip);
+        _anim->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
+    }
+};
+
 class EntityManager
 {
 private:
@@ -364,6 +346,10 @@ public:
         return _name;
     }
 
+    Entity* getEntity(std::size_t idx) {return _Entities[idx];}
+
+    int getTotal() {return _total;}
+
     virtual void addEntity(Entity* entity)
     {
         _Entities[_total] = entity;
@@ -383,6 +369,8 @@ public:
                 {
                     entity->followPlayer(player, &world);
                     entity->touchPlayer(player, screen_shake);
+                } else {
+                    entity->wander(&world);
                 }
                 // some black magic
                 if (entity->getShouldDie())
@@ -459,6 +447,10 @@ public:
                             if (entity_name == "slime")
                             {
                                 entity_vec.push_back(new Slime{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name, texman});
+                            } else if (entity_name == "bat")
+                            {
+                                std::cout << "yo\n";
+                                entity_vec.push_back(new Bat{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name, texman});
                             } else {
                                 entity_vec.push_back(new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, "default"});
                             }
@@ -472,6 +464,10 @@ public:
                 if (entity_name == "slime")
                 {
                     entities.push_back(std::vector<Entity*>{new Slime{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name, texman}});
+                } else if (entity_name == "bat")
+                {
+                    std::cout << "yo\n";
+                    entities.push_back(std::vector<Entity*>{new Bat{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name, texman}});
                 } else {
                     entities.push_back(std::vector<Entity*>{new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, "default"}});
                 }

@@ -11,13 +11,16 @@ public:
     Texture tileRockTex{};
     Texture tileSpikeTex{};
 
+    // Particle Textures
     Texture particle{};
     Texture particleFire{};
+    Texture lightTex{};
 
-    // Textures
+    // Entity Textures
     Texture slimeIdle{};
     Texture slimeRun{};
     Texture slimeJump{};
+    Texture bat{};
 
     TexMan()
     {
@@ -30,9 +33,11 @@ public:
         tileSpikeTex.free();
         particle.free();
         particleFire.free();
+        lightTex.free();
         slimeIdle.free();
         slimeRun.free();
         slimeJump.free();
+        bat.free();
     }
 
     void confirm(bool val, bool& success)
@@ -54,6 +59,9 @@ public:
         confirm(slimeIdle.loadFromFile("data/images/entities/slime/idle.png", window, renderer), success);
         confirm(slimeRun.loadFromFile("data/images/entities/slime/run.png", window, renderer), success);
         confirm(slimeJump.loadFromFile("data/images/entities/slime/jump.png", window, renderer), success);
+        confirm(bat.loadFromFile("data/images/entities/bat/bat.png", window, renderer), success);
+        confirm(lightTex.loadFromFile("data/images/particles/light.png", window, renderer), success);
+
         return success;
     }
 };

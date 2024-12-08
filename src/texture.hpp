@@ -295,6 +295,11 @@ public:
         }
         return success;
     }
+
+    SDL_Texture* getTexture()
+    {
+        return mTexture;
+    }
 };
 
 #endif
