@@ -42,8 +42,8 @@ void Player::damage(double amount, double* screen_shake)
         _Particles.setPos(getCenter());
         _Smoke.setPos(getCenter());
         _Fire.setPos(getCenter());
-        _Particles.setSpawning(32, {8.0, 12.0}, _Palette[0]);
-        _Smoke.setSpawning(10, {1, 2}, {0xAA, 0xAA, 0xAA});
+        _Particles.setSpawning(16, {4.0, 4.0}, _Palette[0]);
+        _Smoke.setSpawning(10, {1, 2}, {0x88, 0x88, 0x88});
         _recover = 0.0;
         if (_health < 0.0)
         {
