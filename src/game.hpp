@@ -1,7 +1,8 @@
-// TODO: 
-// 1. Add particles to slime death
-// 2. Add bats
-// 3. Add player animations
+// TODO:
+// Add springs
+// Add slopes?
+// Add player animations
+// Attacks!
 
 #ifndef GAME_H
 #define GAME_H
@@ -263,7 +264,7 @@ public:
             screen_shake = std::max(0.0, screen_shake - time_step);
             vec2<int> render_scroll{static_cast<int>(scroll.x + Util::random() * screen_shake - screen_shake / 2.0), static_cast<int>(scroll.y + Util::random() * screen_shake - screen_shake / 2.0)};
             _World.render(render_scroll.x, render_scroll.y, _Window, _Renderer, &_TexMan, _Width, _Height);
-            _EMManager.render(render_scroll.x, render_scroll.y, _Renderer);
+            _EMManager.render(render_scroll.x, render_scroll.y, _Renderer, time_step, &_World, &_TexMan);
             if (_Player.getAd() > 120)
                 _Player.render(render_scroll.x, render_scroll.y, _Renderer);
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);

@@ -57,6 +57,12 @@ public:
         _palette_length = N;
     }
 
+    void setPalette(SDL_Color* palette, int palette_length)
+    {
+        _palette = palette;
+        _palette_length = palette_length;
+    }
+
     bool isDead(Particle* particle);
 
     void updateParticle(Particle* particle, const double& time_step, World* world);

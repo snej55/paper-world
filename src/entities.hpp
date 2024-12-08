@@ -41,6 +41,8 @@ protected:
     bool _anim_flipped{false}; // flipped for animation
 
     int _id{0};
+    // palette length must be 8 (don't ask)
+    const SDL_Color _Palette[8] {{0xa8, 0x60, 0x5d}, {0xd1, 0xa6, 0x7e}, {0xf6, 0xe7, 0x9c}, {0xb6, 0xcf, 0x8e}, {0x60, 0xae, 0x7b}, {0x3c, 0x6b, 0x64}, {0x1f, 0x24, 0x4b}, {0x65, 0x40, 0x53}};
 
 public:
     Entity(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name);
@@ -55,6 +57,11 @@ public:
     bool getFlipped();
     bool getPeaceful();
     std::string_view getName();
+
+    virtual void setPalette(ParticleSpawner* particles)
+    {
+        particles->setPalette<8>(_Palette);
+    }
 
     virtual void die(double* screen_shake);
 
@@ -85,6 +92,8 @@ protected:
     vec2<int> _dimensions{11, 7};
     vec2<int> _anim_offset{1, 1};
 
+    const SDL_Color _Palette[8] {{0x3c, 0x6b, 0x64}, {0xf6, 0xe7, 0x9c}, {0x60, 0xae, 0x7b}, {0x1f, 0x24, 0x4b}, {0x3c, 0x6b, 0x64}, {0xf6, 0xe7, 0x9c}, {0x60, 0xae, 0x7b}, {0x1f, 0x24, 0x4b}};
+
 public:
     Slime(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman);
 
@@ -109,6 +118,8 @@ private:
 
     double _angle{0.0};
     double _speed{Util::random() * 1.0 + 0.25};
+
+    const SDL_Color _Palette[8] {{0xa8, 0x60, 0x5d}, {0x65, 0x40, 0x53}, {0x1f, 0x24, 0x4b}, {0xa8, 0x60, 0x5d}, {0x65, 0x40, 0x53}, {0x1f, 0x24, 0x4b}, {0xa8, 0x60, 0x5d}, {0x65, 0x40, 0x53}};
 
 public:
     Bat(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman);
@@ -162,6 +173,8 @@ public:
 
     virtual void update(const double& time_step, World& world, double* screen_shake, Player* player);
 
+    virtual void updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman);
+
     virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
 };
 
@@ -185,7 +198,7 @@ public:
 
     void update(const double& time_step, World& world, double* screen_shake, Player* player);
 
-    void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
+    void render(const int scrollX, const int scrollY, SDL_Renderer* renderer, const double& time_step, World* world, TexMan* texman);
 };
 
 #endif

@@ -59,8 +59,8 @@ std::string_view Entity::getName()
 
 void Entity::die(double *screen_shake)
 {
-    //if (!_should_die)
-        //*screen_shake = std::max(*screen_shake, 8.0);
+    // if (!_should_die)
+    //     *screen_shake = std::max(*screen_shake, 8.0);
     _should_die = true;
     _vel.x = 0;
 }
@@ -393,8 +393,8 @@ void Bat::handlePhysics(const double& time_step, vec2<double> frame_movement, Wo
             break;
         }
     }
-    _vel.x = std::min(7.0, std::max(-7.0, _vel.x));
-    _vel.y = std::min(7.0, std::max(-7.0, _vel.y));
+    _vel.x = std::min(3.0, std::max(-3.0, _vel.x));
+    _vel.y = std::min(3.0, std::max(-3.0, _vel.y));
 }
 
 void Bat::touchPlayer(Player* player, double* screen_shake)
@@ -462,6 +462,7 @@ EntityManager::EntityManager(vec2<double> pos, const int total, Entity** entitie
     {
         _Entities[i] = entities[i];
         _name = _Entities[i]->getName();
+        _Entities[i]->setPalette(&_Particles);
     }
 }
 
@@ -473,6 +474,7 @@ EntityManager::EntityManager(vec2<double> pos, const int total, std::vector<Enti
     {
         _Entities[i] = entities[i];
         _name = _Entities[i]->getName();
+        _Entities[i]->setPalette(&_Particles);
     }
 }
 
@@ -524,6 +526,12 @@ void EntityManager::update(const double& time_step, World& world, double* screen
             // some black magic
             if (entity->getShouldDie())
             {
+                _Particles.setPos(entity->getCenter());
+                _Smoke.setPos(entity->getCenter());
+                _Fire.setPos(entity->getCenter());
+                _Particles.setSpawning(32, {8.0, 8.0}, SDL_Color{0x00, 0x00, 0x00});
+                _Smoke.setSpawning(20, {1, 2}, {0x88, 0x88, 0x88});
+                _Fire.setSpawning(20);
                 Util::swap(&_Entities[i], &_Entities[_total - 1]); // swap dead entity with last entity in the array
                 delete _Entities[_total - 1]; // deallocate dead entity
                 --_total; // deincrement total to avoid undefined behaviour when we reference nullptr
@@ -546,6 +554,12 @@ void EntityManager::render(const int scrollX, const int scrollY, SDL_Renderer* r
     }
 }
 
+void EntityManager::updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman)
+{
+    _Particles.update(time_step, scrollX, scrollY, renderer, world, texman);
+    _Smoke.update(time_step, scrollX, scrollY, renderer, world, &texman->particle);
+    _Fire.update(time_step, scrollX, scrollY, renderer, world, &texman->particleFire);
+}
 
 // "Manager of the Managers" Entity-Manager-Manager
 EMManager::EMManager()
@@ -591,7 +605,6 @@ void EMManager::loadFromPath(std::string path, TexMan* texman)
                             entity_vec.push_back(new Slime{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name, texman});
                         } else if (entity_name == "bat")
                         {
-                            std::cout << "yo\n";
                             entity_vec.push_back(new Bat{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name, texman});
                         } else {
                             entity_vec.push_back(new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, "default"});
@@ -608,7 +621,6 @@ void EMManager::loadFromPath(std::string path, TexMan* texman)
                 entities.push_back(std::vector<Entity*>{new Slime{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name, texman}});
             } else if (entity_name == "bat")
             {
-                std::cout << "yo\n";
                 entities.push_back(std::vector<Entity*>{new Bat{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name, texman}});
             } else {
                 entities.push_back(std::vector<Entity*>{new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, "default"}});
@@ -652,11 +664,12 @@ void EMManager::update(const double& time_step, World& world, double* screen_sha
         _Managers[i]->update(time_step, world, screen_shake, player);
     }
 }
-
-void EMManager::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
+// updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman)
+void EMManager::render(const int scrollX, const int scrollY, SDL_Renderer* renderer, const double& time_step, World* world, TexMan* texman)
 {
     for (std::size_t i{0}; i < _Managers.size(); ++i)
     {
         _Managers[i]->render(scrollX, scrollY, renderer);
+        _Managers[i]->updateParticles(time_step, scrollX, scrollY, renderer, world, texman);
     }
 }
