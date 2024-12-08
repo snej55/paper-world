@@ -12,6 +12,23 @@ Player::Player(vec2<double> pos, vec2<int> dimensions)
     _Particles.setPalette<5>(_Palette);
 }
 
+Player::~Player()
+{
+    delete _idleAnim;
+    delete _runAnim;
+    delete _jumpAnim;
+    delete _landAnim;
+}
+
+void Player::loadAnim(TexMan* texman)
+{
+    _idleAnim = new Anim{8, 8, 5, 0.16, true, &(texman->playerIdle)};
+    _runAnim = new Anim{8, 8, 5, 0.3, true, &(texman->playerRun)};
+    _jumpAnim = new Anim{8, 8, 2, 0.2, true, &(texman->playerJump)};
+    _landAnim = new Anim{8, 8, 5, 0.2, false, &(texman->playerLand)};
+    _anim = _idleAnim;
+}
+
 SDL_Rect* Player::getRect()
 {
     return &_rect;
@@ -77,6 +94,7 @@ void Player::update(const double& time_step, World& world, double* screen_shake)
     {
         updateVel(time_step);
         handlePhysics(time_step, _vel, world, screen_shake);
+        handleAnim(time_step);
     }
 }
 
@@ -92,10 +110,12 @@ void Player::updateVel(const double& time_step)
     _vel.x *= _friction;
     if (_Controller.getControl(Control::LEFT))
     {
+        _flipped = true;
         _vel.x -= 1.1;
     }
     if (_Controller.getControl(Control::RIGHT))
     {
+        _flipped = false;
         _vel.x += 1.1;
     }
     // y velocity
@@ -190,17 +210,55 @@ void Player::updateParticles(const double& time_step, const int scrollX, const i
     _Fire.update(time_step, scrollX, scrollY, renderer, world, &texman->particleFire);
 }
 
+void Player::handleAnim(const double& time_step)
+{
+    if (_falling > 3.0)
+    {
+        _anim = _jumpAnim;
+        _runAnim->reset();
+        _idleAnim->reset();
+        _landAnim->reset();
+        _grounded = 99.9;
+    } else if (_Controller.getControl(Control::RIGHT) || _Controller.getControl(Control::LEFT))
+    {
+        _anim = _runAnim;
+        _jumpAnim->reset();
+        _idleAnim->reset();
+        _landAnim->reset();
+        _grounded = 0.0;
+    } else if (_grounded > 3.0)
+    {
+        _anim = _landAnim;
+        _jumpAnim->reset();
+        _idleAnim->reset();
+        _runAnim->reset();
+        if (_landAnim->getFinished())
+        {
+            _grounded = 0.0;
+        }
+    } else {
+        _anim = _idleAnim;
+        _jumpAnim->reset();
+        _runAnim->reset();
+        _landAnim->reset();
+        _grounded = 0.0;
+    }
+    _anim->tick(time_step);
+    _anim->setFlipped(_flipped ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+}
+
 void Player::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
 {
-    SDL_Rect renderRect{_pos.x - scrollX, _pos.y - scrollY, _dimensions.x, _dimensions.y};
-    if (_recover < _recover_time)
-    {
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    } else {
-        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);
-    }
+    // SDL_Rect renderRect{_pos.x - scrollX, _pos.y - scrollY, _dimensions.x, _dimensions.y};
+    // if (_recover < _recover_time)
+    // {
+    //     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    // } else {
+    //     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);
+    // }
 
-    SDL_RenderFillRect(renderer, &renderRect);
+    // SDL_RenderFillRect(renderer, &renderRect);
+    _anim->render((int)_pos.x - 2, (int)_pos.y - 1, scrollX, scrollY, renderer);
 }
 
 void Controller::setControl(Control control, const bool val)

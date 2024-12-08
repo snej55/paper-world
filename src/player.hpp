@@ -7,6 +7,7 @@
 #include "./vec2.hpp"
 #include "./tiles.hpp"
 #include "./particles.hpp"
+#include "./anim.hpp"
 
 enum class Control
 {
@@ -66,8 +67,21 @@ private:
     double _recover{100.0}; // times since damaged
     double _recover_time{40.0};
 
+    // Animations
+    Anim* _idleAnim;
+    Anim* _runAnim;
+    Anim* _jumpAnim;
+    Anim* _landAnim;
+    Anim* _anim {nullptr}; // animation we render;
+
+    double _grounded{99.9};
+    bool _flipped{false};
+
 public:
     Player(vec2<double> pos, vec2<int> dimensions);
+    ~Player();
+
+    void loadAnim(TexMan* texman);
 
     SDL_Rect* getRect();
     Controller* getController();
@@ -106,6 +120,8 @@ public:
     void updateVel(const double& time_step);
     void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake);
     void updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* tex);
+
+    void handleAnim(const double& time_step);
 
     void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
 };

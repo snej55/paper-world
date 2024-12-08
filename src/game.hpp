@@ -1,7 +1,7 @@
 // TODO:
+// Add player animations
 // Add springs
 // Add slopes?
-// Add player animations
 // Attacks!
 
 #ifndef GAME_H
@@ -33,7 +33,7 @@ private:
 
     TexMan _TexMan{};
     World _World{};
-    Player _Player{{40.0, 40.0}, {6.0, 8.0}};
+    Player _Player{{40.0, 40.0}, {4, 8}};
     EMManager _EMManager{}; // this is the entity manager :)
 
     int _Width {SCR_WIDTH};
@@ -125,6 +125,7 @@ public:
         _TexMan.load(_Window, _Renderer);
         _World.loadFromFile("data/maps/0.json");
         _EMManager.loadFromPath("data/maps/0.json", &_TexMan);
+        _Player.loadAnim(&_TexMan);
         if (success)
             std::cout << "Loaded!\n";
         return success;

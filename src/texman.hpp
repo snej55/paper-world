@@ -22,6 +22,12 @@ public:
     Texture slimeJump{};
     Texture bat{};
 
+    // Player Textures
+    Texture playerIdle{};
+    Texture playerRun{};
+    Texture playerJump{};
+    Texture playerLand{};
+
     TexMan()
     {
     }
@@ -38,6 +44,10 @@ public:
         slimeRun.free();
         slimeJump.free();
         bat.free();
+        playerIdle.free();
+        playerRun.free();
+        playerJump.free();
+        playerLand.free();
     }
 
     void confirm(bool val, bool& success)
@@ -61,7 +71,10 @@ public:
         confirm(slimeJump.loadFromFile("data/images/entities/slime/jump.png", window, renderer), success);
         confirm(bat.loadFromFile("data/images/entities/bat/bat.png", window, renderer), success);
         confirm(lightTex.loadFromFile("data/images/particles/light.png", window, renderer), success);
-
+        confirm(playerIdle.loadFromFile("data/images/entities/player/idle.png", window, renderer), success);
+        confirm(playerRun.loadFromFile("data/images/entities/player/run.png", window, renderer), success);
+        confirm(playerJump.loadFromFile("data/images/entities/player/jump.png", window, renderer), success);
+        confirm(playerLand.loadFromFile("data/images/entities/player/land.png", window, renderer), success);
         return success;
     }
 };
