@@ -26,6 +26,7 @@ void Player::loadAnim(TexMan* texman)
     _runAnim = new Anim{8, 8, 5, 0.3, true, &(texman->playerRun)};
     _jumpAnim = new Anim{8, 8, 2, 0.2, true, &(texman->playerJump)};
     _landAnim = new Anim{8, 8, 5, 0.2, false, &(texman->playerLand)};
+    _flash = &(texman->playerFlash);
     _anim = _idleAnim;
 }
 
@@ -52,7 +53,7 @@ vec2<double> Player::getCenter()
 void Player::damage(double amount, double* screen_shake)
 {
     // we can add buffs later
-    if (_recover > _recover_time)
+    if (_recover > _recover_time + 30)
     {
         *screen_shake = std::max(*screen_shake, 8.0);
         _health -= amount;
@@ -189,6 +190,19 @@ void Player::handlePhysics(const double& time_step, vec2<double> frame_movement,
         }
     }
 
+    _rect.x = _pos.x;
+    _rect.y = _pos.y;
+    std::vector<Spring*>& springs {world.getSprings()};
+    for (Spring* spring : springs)
+    {
+        if (Util::checkCollision(&_rect, spring->getRect()))
+        {
+            _vel.y = -5;
+            spring->setVel(4.0);
+            break;
+        }
+    }
+
     // check for danger
     world.getDangerAroundPos(_pos, rects);
     for (int i{0}; i < 9; ++i)
@@ -258,7 +272,12 @@ void Player::render(const int scrollX, const int scrollY, SDL_Renderer* renderer
     // }
 
     // SDL_RenderFillRect(renderer, &renderRect);
-    _anim->render((int)_pos.x - 2, (int)_pos.y - 1, scrollX, scrollY, renderer);
+    if (_recover < _recover_time)
+    {
+        _flash->render((int)_pos.x - 2 - scrollX, (int)_pos.y - scrollY, renderer, 0, NULL, _flipped ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE, NULL);    
+    } else {
+        _anim->render((int)_pos.x - 2, (int)_pos.y, scrollX, scrollY, renderer);
+    }
 }
 
 void Controller::setControl(Control control, const bool val)

@@ -65,13 +65,14 @@ private:
     double _max_health{100.0};
     double _health{100.0};
     double _recover{100.0}; // times since damaged
-    double _recover_time{40.0};
+    double _recover_time{10.0};
 
     // Animations
     Anim* _idleAnim;
     Anim* _runAnim;
     Anim* _jumpAnim;
     Anim* _landAnim;
+    Texture* _flash;
     Anim* _anim {nullptr}; // animation we render;
 
     double _grounded{99.9};

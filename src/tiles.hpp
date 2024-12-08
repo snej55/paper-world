@@ -18,6 +18,53 @@
 
 using json = nlohmann::json;
 
+class Spring
+{
+private:
+    vec2<double> _pos; // absolute tile pos
+    double _vel{0.0};
+    double _spring_factor{0.0};
+    const double _dampening{0.9};
+    SDL_Rect _rect{0, 0, 8, 5};
+
+public:
+    Spring(vec2<double> pos)
+    {
+        _pos = pos;
+        _rect.x = pos.x;
+        _rect.y = pos.y - 1;
+    }
+
+    void updateRect()
+    {
+        _rect.x = _pos.x;
+        _rect.y = _pos.y - 1;
+    }
+
+    SDL_Rect* getRect()
+    {
+        updateRect();
+        return &_rect;
+    }
+
+    void setVel(const double val)
+    {
+        _vel = val;
+    }
+
+    void update(const double& time_step)
+    {
+        _vel += (-_spring_factor) * 0.1 * time_step;
+        _spring_factor += _vel * time_step;
+        _vel *= _dampening;
+    }
+
+    void render(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman)
+    {
+        texman->tileSpringTex.render(static_cast<int>(_pos.x) - scrollX, static_cast<int>(_pos.y + _spring_factor) - scrollY, renderer);
+    }
+};
+
 enum class TileType
 {
     GRASS,
@@ -46,6 +93,7 @@ class World
 {
 private:
     Chunk _Chunks[LEVEL_WIDTH * LEVEL_HEIGHT];
+    std::vector<Spring*> _Springs;
 
 public:
 
@@ -55,6 +103,15 @@ public:
 
     ~World()
     {
+        for (std::size_t i{0}; i < _Springs.size(); ++i)
+        {
+            delete _Springs[i];
+        }
+    }
+
+    std::vector<Spring*>& getSprings()
+    {
+        return _Springs;
     }
 
     Chunk* getChunkAt(const double x, const double y)
@@ -196,7 +253,7 @@ public:
         }
     }
 
-    void loadFromFile(const char* path, bool clear = false)
+    void loadFromFile(const char* path)
     {
         std::ifstream f{path};
         json data = json::parse(f);
@@ -205,6 +262,7 @@ public:
         {
             _Chunks[i] = Chunk{{0, 0}};
         }
+        _Springs.clear();
         for (const auto& tile : data["level"]["tiles"])
         {
             vec2<int> chunk_loc {static_cast<int>(std::floor((double)tile["pos"][0] / (double)CHUNK_SIZE)), static_cast<int>(std::floor((double)tile["pos"][1] / (double)CHUNK_SIZE))};
@@ -216,6 +274,10 @@ public:
                 chunk->tiles.push_back(Tile{{tile["pos"][0], tile["pos"][1]}, getTileType(tile["type"]), tile["variant"]});
                 chunk->pos = chunk_loc;
             }
+        }
+        for (const auto& spring : data["level"]["springs"])
+        {
+            _Springs.push_back(new Spring{vec2<double>{(double)spring["pos"][0], (double)spring["pos"][1]}});
         }
         f.close();
     }
@@ -238,6 +300,19 @@ public:
                     renderChunk(chunk, scrollX, scrollY, window, renderer, texman);
                 }
             }
+        }
+
+        for (Spring* spring : _Springs)
+        {
+            spring->render(scrollX, scrollY, renderer, texman);
+        }
+    }
+
+    void handleSprings(const double& time_step)
+    {
+        for (Spring* spring : _Springs)
+        {
+            spring->update(time_step);
         }
     }
 

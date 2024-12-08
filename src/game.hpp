@@ -1,5 +1,4 @@
 // TODO:
-// Add player animations
 // Add springs
 // Add slopes?
 // Attacks!
@@ -215,15 +214,15 @@ public:
                     switch (e.window.event)
                     {
                         case (SDL_WINDOWEVENT_RESIZED):
-                            _Width = e.window.data1 / 2;
-                            _Height = e.window.data2 / 2;
+                            _Width = e.window.data1 / 3;
+                            _Height = e.window.data2 / 3;
                             _Screen.free();
                             _Screen.createBlank(_Width, _Height, _Renderer, SDL_TEXTUREACCESS_TARGET);
                             SDL_RenderPresent(_Renderer);
                             break;
                         case (SDL_WINDOWEVENT_SIZE_CHANGED):
-                            _Width = e.window.data1 / 2;
-                            _Height = e.window.data2 / 2;
+                            _Width = e.window.data1 / 3;
+                            _Height = e.window.data2 / 3;
                             _Screen.free();
                             _Screen.createBlank(_Width, _Height, _Renderer, SDL_TEXTUREACCESS_TARGET);
                             SDL_RenderPresent(_Renderer);
@@ -264,6 +263,7 @@ public:
 
             screen_shake = std::max(0.0, screen_shake - time_step);
             vec2<int> render_scroll{static_cast<int>(scroll.x + Util::random() * screen_shake - screen_shake / 2.0), static_cast<int>(scroll.y + Util::random() * screen_shake - screen_shake / 2.0)};
+            _World.handleSprings(time_step);
             _World.render(render_scroll.x, render_scroll.y, _Window, _Renderer, &_TexMan, _Width, _Height);
             _EMManager.render(render_scroll.x, render_scroll.y, _Renderer, time_step, &_World, &_TexMan);
             if (_Player.getAd() > 120)
@@ -282,7 +282,7 @@ public:
            renderPlayerHealthBar();
             // render screen
             SDL_SetRenderTarget(_Renderer, NULL);
-            _Screen.renderClean(0, 0, _Renderer, 2);
+            _Screen.renderClean(0, 0, _Renderer, 3);
 
             SDL_RenderPresent(_Renderer);
 

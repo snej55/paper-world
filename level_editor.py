@@ -34,7 +34,8 @@ class Editor:
             'rock': self.load_tileset(pygame.image.load('data/images/tiles/rock.png').convert()),
             'spike': self.load_tileset(pygame.image.load('data/images/tiles/spike.png').convert()),
             'slime': [pygame.image.load('data/images/entities/slime/thumb.png').convert()],
-            'bat': [pygame.image.load('data/images/entities/bat/thumb.png').convert()]
+            'bat': [pygame.image.load('data/images/entities/bat/thumb.png').convert()],
+            'spring': [pygame.image.load('data/images/tiles/spring.png').convert()]
         }
         
         for key in self.assets:
@@ -72,11 +73,14 @@ class Editor:
             self.tile_map[tile_loc] = {'type': CONVERT_TYPES[tile['type']], 'variant': tile['variant']}
         for entity in data['level']['entities']:
             self.tile_map[f"{math.floor(entity['pos'][0] / TILE_SIZE)};{math.floor(entity['pos'][1] / TILE_SIZE)}"] = {'type': entity['type'], 'variant': 0}
+        for spring in data['level']['springs']:
+            self.tile_map[f"{math.floor(spring['pos'][0] / TILE_SIZE)};{math.floor(spring['pos'][1] / TILE_SIZE)}"] = {'type': "spring", 'variant': 0}
     
     def save(self, path):
         with open(path, 'w') as f:
             tiles = []
             entities = []
+            springs = []
             for loc in self.tile_map:
                 tile_type = 0
                 for key in CONVERT_TYPES:
@@ -89,8 +93,11 @@ class Editor:
                         entity = True
                         break
                 if not entity:
-                    tiles.append({'pos': [int(c) for c in loc.split(';')], 'type': tile_type, 'variant': self.tile_map[loc]['variant']})
-            json.dump({'level': {'tiles': tiles, 'entities': entities}}, f)
+                    if self.tile_map[loc]['type'] == "spring":
+                        springs.append({'pos': [int(c) * TILE_SIZE for c in loc.split(';')]})
+                    else:
+                        tiles.append({'pos': [int(c) for c in loc.split(';')], 'type': tile_type, 'variant': self.tile_map[loc]['variant']})
+            json.dump({'level': {'tiles': tiles, 'entities': entities, 'springs': springs}}, f)
             f.close()
 
     def load_tileset(self, sheet):
@@ -148,9 +155,12 @@ class Editor:
                 if tile_loc in self.tile_map:
                     for y in range(TILE_SIZE):
                         for x in range(TILE_SIZE):
-                            angle = random.random() * math.pi * 2
-                            #self.particles.append([[mouse_pos[0] * TILE_SIZE + random.random() * TILE_SIZE, mouse_pos[1] * TILE_SIZE + random.random() * TILE_SIZE], [random.random() * 2 - 1, random.random() * 4 - 3], 0, random.choice([(96, 174, 123), (60, 107, 100), (31, 36, 75), (101, 64, 83), (168, 96, 93), (209, 166, 126), (246, 231, 156), (182, 207, 142)])])
-                            self.particles.append([[mouse_pos[0] * TILE_SIZE + x, mouse_pos[1] * TILE_SIZE + y], [math.sin(angle), math.cos(angle)], 0, self.assets[self.tile_map[tile_loc]['type']][self.tile_map[tile_loc]['variant']].get_at((x, y))])
+                            try:
+                                angle = random.random() * math.pi * 2
+                                #self.particles.append([[mouse_pos[0] * TILE_SIZE + random.random() * TILE_SIZE, mouse_pos[1] * TILE_SIZE + random.random() * TILE_SIZE], [random.random() * 2 - 1, random.random() * 4 - 3], 0, random.choice([(96, 174, 123), (60, 107, 100), (31, 36, 75), (101, 64, 83), (168, 96, 93), (209, 166, 126), (246, 231, 156), (182, 207, 142)])])
+                                self.particles.append([[mouse_pos[0] * TILE_SIZE + x, mouse_pos[1] * TILE_SIZE + y], [math.sin(angle), math.cos(angle)], 0, self.assets[self.tile_map[tile_loc]['type']][self.tile_map[tile_loc]['variant']].get_at((x, y))])
+                            except IndexError:
+                                pass
                     del self.tile_map[tile_loc]
         
         for i, particle in sorted(enumerate(self.particles), reverse=True):
