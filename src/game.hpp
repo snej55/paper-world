@@ -1,7 +1,8 @@
 // TODO:
-// Add springs
-// Add slopes?
-// Attacks!
+// Attacks & Health Bars :( Boring
+// Sparks?! Yay!
+// Grass! :) Yay!
+// Water! :) Yay!
 
 #ifndef GAME_H
 #define GAME_H

@@ -31,7 +31,7 @@ protected:
     bool _should_die {false};
 
     double _health{10.0};
-    double _damage{10.0};
+    double _damage{5.0};
     double _recover{100.0};
     double _recover_time{10.0};
 
@@ -92,6 +92,9 @@ protected:
     vec2<int> _dimensions{11, 7};
     vec2<int> _anim_offset{1, 1};
 
+    double _health{20.0};
+    double _damage{10.0};
+
     const SDL_Color _Palette[8] {{0x3c, 0x6b, 0x64}, {0xf6, 0xe7, 0x9c}, {0x60, 0xae, 0x7b}, {0x1f, 0x24, 0x4b}, {0x3c, 0x6b, 0x64}, {0xf6, 0xe7, 0x9c}, {0x60, 0xae, 0x7b}, {0x1f, 0x24, 0x4b}};
 
 public:
@@ -115,6 +118,9 @@ private:
     Texture* _glowTex;
     vec2<int> _dimensions{3, 4};
     vec2<int> _anim_offset{2, 0};
+
+    double _health{10.0};
+    double _damage{3.0};
 
     double _angle{0.0};
     double _speed{Util::random() * 1.0 + 0.25};
