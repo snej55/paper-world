@@ -18,6 +18,23 @@
 
 using json = nlohmann::json;
 
+struct Grass
+{
+    Uint8_t variant;
+    vec2<double> pos;
+    double angle{0};
+    double target_angle{0};
+    double turn_vel{0};
+};
+
+class GrassManager
+{
+private:
+    const double _tension;
+    Grass* _Grass;
+    int _total;
+};
+
 class Spring
 {
 private:

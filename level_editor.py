@@ -12,6 +12,7 @@ CONVERT_TYPES = {
     0: 'grass',
     1: 'rock', 
     2: 'spike',
+    3: 'grass_key',
 }
 AUTO_TILE_TYPES = {'grass', 'rock'}
 AUTO_TILE_MAP = {'0011': 1, '1011': 2, '1001': 3, '0001': 4, '0111': 5, '1111': 6, '1101': 7, '0101': 8, 
@@ -35,7 +36,8 @@ class Editor:
             'spike': self.load_tileset(pygame.image.load('data/images/tiles/spike.png').convert()),
             'slime': [pygame.image.load('data/images/entities/slime/thumb.png').convert()],
             'bat': [pygame.image.load('data/images/entities/bat/thumb.png').convert()],
-            'spring': [pygame.image.load('data/images/tiles/spring.png').convert()]
+            'spring': [pygame.image.load('data/images/tiles/spring.png').convert()],
+            'grass_key': [pygame.image.load('data/images/tiles/grass_key.png').convert()]
         }
         
         for key in self.assets:
