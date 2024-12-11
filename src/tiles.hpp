@@ -18,21 +18,72 @@
 
 using json = nlohmann::json;
 
+constexpr int GRASS_VARIATIONS{18}; // number of different types of grass
+
 struct Grass
 {
     Uint8_t variant;
-    vec2<double> pos;
+    vec2<double> pos; // absolute position
     double angle{0};
     double target_angle{0};
     double turn_vel{0};
+};
+
+struct GrassTile
+{
+    Grass* grass;
+    vec2<int> pos; // relative tile pos
+    int total{0};
 };
 
 class GrassManager
 {
 private:
     const double _tension;
-    Grass* _Grass;
-    int _total;
+    GrassTile* _GrassTiles;
+    int _total{0};
+
+public:
+    // we don't load the grass immediately
+    GrassManager(const double tension)
+     : _tension{tension}
+    {
+    }
+
+    ~GrassManager()
+    {
+        free();
+    }
+
+    void free()
+    {
+        for (int i{0}; i < _total; ++i)
+        {
+            GrassTile* tile{_GrassTiles[i]};
+            for (int j{0}; j < tile->total; ++j)
+            {
+                delete tile->grass[j];
+            }
+            delete tile;
+        }
+        delete _GrassTiles;
+    }
+
+    void addGrassTile(vec2<int> pos, const int density = 8) // relative tile pos
+    {
+        GrassTile* grassTile {new GrassTile};
+        grassTile->pos = pos;
+        // NOTE: double not std::size_t
+        for (double i{0.0}; i < density; i += 1.0)
+        {
+            Grass* grass {new Grass};
+            grass->varient = static_cast<Uint8_t>(std::rand() % GRASS_VARIATIONS);
+            grass->pos = vec2<double>{static_cast<double>(pos.x * TILE_SIZE) + (double)TILE_SIZE / (double)density * i, static_cast<double>(pos.y * TILE_SIZE)};
+            grassTile->grass[grassTile->total] = grass;
+            grassTile->total += 1;
+        }
+        ++_total;
+    }
 };
 
 class Spring
@@ -110,6 +161,7 @@ class World
 {
 private:
     Chunk _Chunks[LEVEL_WIDTH * LEVEL_HEIGHT];
+    GrassManager _GrassManager{0.1};
     std::vector<Spring*> _Springs;
 
 public:
