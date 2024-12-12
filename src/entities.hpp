@@ -75,9 +75,9 @@ public:
 
     virtual void touchPlayer(Player* player, double* screen_shake);
 
-    virtual void followPlayer(Player* player, World* world);
+    virtual void followPlayer(Player* player, World* world, const double& time_step);
 
-    virtual void wander(World* world);
+    virtual void wander(World* world, const double& time_step);
 };
 
 class Slime : public Entity
@@ -140,7 +140,7 @@ public:
 
     virtual void touchPlayer(Player* player, double* screen_shake);
 
-    virtual void followPlayer(Player* player, World* world);
+    virtual void followPlayer(Player* player, World* world, const double& time_step);
 
     virtual void update(const double& time_step, World& world, double* screen_shake);
 

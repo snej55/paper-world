@@ -22,7 +22,7 @@ constexpr int GRASS_VARIATIONS{18}; // number of different types of grass
 
 struct Grass
 {
-    Uint8_t variant;
+    uint8_t variant;
     vec2<double> pos; // absolute position
     double angle{0};
     double target_angle{0};
@@ -31,7 +31,7 @@ struct Grass
 
 struct GrassTile
 {
-    Grass* grass;
+    Grass** grass;
     vec2<int> pos; // relative tile pos
     int total{0};
 };
@@ -40,7 +40,7 @@ class GrassManager
 {
 private:
     const double _tension;
-    GrassTile* _GrassTiles;
+    GrassTile** _GrassTiles;
     int _total{0};
 
 public:
@@ -48,6 +48,7 @@ public:
     GrassManager(const double tension)
      : _tension{tension}
     {
+        _GrassTiles = new GrassTile*[0];
     }
 
     ~GrassManager()
@@ -73,16 +74,40 @@ public:
     {
         GrassTile* grassTile {new GrassTile};
         grassTile->pos = pos;
+        // we need to allocate memory for the grass first, or we'll get a seg fault...
+        grassTile->grass = new Grass*[density];
         // NOTE: double not std::size_t
         for (double i{0.0}; i < density; i += 1.0)
         {
             Grass* grass {new Grass};
-            grass->varient = static_cast<Uint8_t>(std::rand() % GRASS_VARIATIONS);
+            grass->variant = static_cast<uint8_t>(std::rand() % GRASS_VARIATIONS);
             grass->pos = vec2<double>{static_cast<double>(pos.x * TILE_SIZE) + (double)TILE_SIZE / (double)density * i, static_cast<double>(pos.y * TILE_SIZE)};
-            grassTile->grass[grassTile->total] = grass;
+            grassTile->grass[grassTile->total] = grass; // here
             grassTile->total += 1;
         }
+        _GrassTiles[_total] = grassTile;
         ++_total;
+    }
+
+    void renderGrass(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, const int width, const int height)
+    {
+        for (std::size_t i{0}; i < _total; ++i)
+        {
+            GrassTile* grassTile {_GrassTiles[i]};
+            // check if it is on the screen
+            if (-TILE_SIZE * 2 < grassTile->pos.x * TILE_SIZE - scrollX && grassTile->pos.x * TILE_SIZE - scrollX < width + TILE_SIZE * 2 && -TILE_SIZE * 2 < grassTile->pos.y * TILE_SIZE - scrollY && grassTile->pos.y * TILE_SIZE - scrollY < height + TILE_SIZE * 2)
+            {
+                // iterate through grass in grassTile
+                for (std::size_t g{0}; g < grassTile->total; ++g)
+                {
+                    Grass* grass {grassTile->grass[g]};
+                    SDL_Rect clipRect{grass->variant * 9, 0, 9, 9};
+                    SDL_Point center{5, 5};
+                    grass->angle += 1;
+                    texman->grass.render((int)grass->pos.x - scrollX, (int)grass->pos.y - scrollY, renderer, grass->angle, &center, SDL_FLIP_NONE, &clipRect);
+                }
+            }
+        }
     }
 };
 
@@ -124,7 +149,7 @@ public:
     {
         _vel += (-_spring_factor) * 0.1 * time_step;
         _spring_factor += _vel * time_step;
-        _vel *= _dampening;
+        _vel += (_vel * _dampening - _vel) * time_step;
     }
 
     void render(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman)
@@ -340,7 +365,12 @@ public:
                 // calc chunk index
                 int chunk_idx {chunk_loc.y * LEVEL_WIDTH + chunk_loc.x};
                 Chunk* chunk {&(_Chunks[chunk_idx])};
-                chunk->tiles.push_back(Tile{{tile["pos"][0], tile["pos"][1]}, getTileType(tile["type"]), tile["variant"]});
+                if (tile["type"] != 3) // grass key
+                {
+                    chunk->tiles.push_back(Tile{{tile["pos"][0], tile["pos"][1]}, getTileType(tile["type"]), tile["variant"]});
+                } else {
+                    _GrassManager.addGrassTile({tile["pos"][0], tile["pos"][1]}, 4);
+                }
                 chunk->pos = chunk_loc;
             }
         }
@@ -375,6 +405,7 @@ public:
         {
             spring->render(scrollX, scrollY, renderer, texman);
         }
+        handleGrass(scrollX, scrollY, renderer, texman, width, height);
     }
 
     void handleSprings(const double& time_step)
@@ -422,6 +453,11 @@ public:
             SDL_Rect clip{getClipRect(tile)};
             getTileTex(tile, texman)->render(tile.pos.x * TILE_SIZE * SCALE_FACTOR - scrollX, tile.pos.y * TILE_SIZE * SCALE_FACTOR  - scrollY, renderer, &clip);
         }
+    }
+
+    void handleGrass(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, const int width, const int height)
+    {
+        _GrassManager.renderGrass(scrollX, scrollY, renderer, texman, width, height);
     }
 };
 

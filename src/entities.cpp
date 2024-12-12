@@ -174,7 +174,7 @@ void Entity::touchPlayer(Player *player, double *screen_shake)
     }
 }
 
-void Entity::followPlayer(Player *player, World *world)
+void Entity::followPlayer(Player *player, World *world, const double& time_step)
 {
     SDL_Rect *player_rect{player->getRect()};
     vec2<double> player_pos{player->getCenter()};
@@ -186,7 +186,7 @@ void Entity::followPlayer(Player *player, World *world)
         {
             if (!(std::abs(static_cast<int>(player_pos.x - getCenter().x)) < 16 && player_pos.y > getCenter().y + 4.0 && _falling < 3.0))
             {
-                _vel.x += _flipped ? 0.2 : -0.2;
+                _vel.x += (_flipped ? 0.2 : -0.2) * time_step;
                 _flipped = !_flipped;
             }
         }
@@ -194,7 +194,7 @@ void Entity::followPlayer(Player *player, World *world)
         {
             if (!(std::abs(static_cast<int>(player_pos.x - getCenter().x)) < 16 && player_pos.y > getCenter().y + 4.0 && _falling < 3.0))
             {
-                _vel.x += _flipped ? 0.2 : -0.2;
+                _vel.x += (_flipped ? 0.2 : -0.2) * time_step;
                 _flipped = !_flipped;
             }
         }
@@ -208,7 +208,7 @@ void Entity::followPlayer(Player *player, World *world)
             {
                 _flipped = true;
             }
-            _vel.x += _flipped ? -0.1 : 0.1;
+            _vel.x += (_flipped ? -0.1 : 0.1) * time_step;
             _anim_flipped = _flipped;
         }
         if (player_pos.y + 4.0 < getCenter().y)
@@ -221,11 +221,11 @@ void Entity::followPlayer(Player *player, World *world)
     }
     else
     {
-        wander(world);
+        wander(world, time_step);
     }
 }
 
-void Entity::wander(World *world)
+void Entity::wander(World *world, const double& time_step)
 {
     if (_wandering)
     {
@@ -233,12 +233,12 @@ void Entity::wander(World *world)
         Tile *tile{world->getTileAt(checkTilePos.x, checkTilePos.y)};
         if (tile == nullptr)
         {
-            _vel.x += _flipped ? 0.2 : -0.2;
+            _vel.x += (_flipped ? 0.2 : -0.2) * time_step;
             _flipped = !_flipped;
         }
         else if (Util::elementIn<TileType, std::size(DANGER_TILES)>(tile->type, DANGER_TILES))
         {
-            _vel.x += _flipped ? 0.2 : -0.2;
+            _vel.x += (_flipped ? 0.2 : -0.2) * time_step;
             _flipped = !_flipped;
         }
         else
@@ -411,14 +411,14 @@ void Bat::touchPlayer(Player* player, double* screen_shake)
     }
 }
 
-void Bat::followPlayer(Player* player, World* world)
+void Bat::followPlayer(Player* player, World* world, const double& time_step)
 {
     SDL_Rect* player_rect{player->getRect()};
     vec2<double> player_pos{player->getCenter()};
     if (Util::distance(player_pos, getCenter()) < 200.0)
     {
-        _vel.x += std::max(-0.1, std::min(0.1, (player_pos.x - getCenter().x) * 0.005));
-        _vel.y += std::max(-0.1, std::min(0.1, (player_pos.y - getCenter().y) * 0.005));
+        _vel.x += std::max(-0.1, std::min(0.1, (player_pos.x - getCenter().x) * 0.005)) * time_step;
+        _vel.y += std::max(-0.1, std::min(0.1, (player_pos.y - getCenter().y) * 0.005)) * time_step;
         vec2<double> check_pos {getCenter().x + _vel.x * 2.0, getCenter().y + _vel.y * 2.0};
         Tile* tile {world->getTileAt(check_pos.x, check_pos.y)};
         if (tile != nullptr)
@@ -429,10 +429,10 @@ void Bat::followPlayer(Player* player, World* world)
                 _vel.y *= -1;
             }
         }
-        _vel.x *= 0.95;
-        _vel.y *= 0.95;
+        _vel.x += (_vel.x * 0.95 - _vel.x) * time_step;
+        _vel.y += (_vel.y * 0.95 - _vel.y) * time_step;
     } else {
-        wander(world);
+        wander(world, time_step);
     }
 }
 
@@ -518,10 +518,10 @@ void EntityManager::update(const double& time_step, World& world, double* screen
             entity->update(time_step, world, screen_shake);
             if (!(entity->getPeaceful()))
             {
-                entity->followPlayer(player, &world);
+                entity->followPlayer(player, &world, time_step);
                 entity->touchPlayer(player, screen_shake);
             } else {
-                entity->wander(&world);
+                entity->wander(&world, time_step);
             }
             // some black magic
             if (entity->getShouldDie())

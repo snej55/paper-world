@@ -37,8 +37,8 @@ bool ParticleSpawner::isDead(Particle* particle)
 void ParticleSpawner::updateParticle(Particle* particle, const double& time_step, World* world)
 {
     particle->vel.y += _gravity * time_step;
-    particle->vel.x *= _friction.x;
-    particle->vel.y *= _friction.y;
+    particle->vel.x += (particle->vel.x * _friction.x - particle->vel.x) * time_step;
+    particle->vel.y += (particle->vel.y * _friction.y - particle->vel.y) * time_step;
     particle->pos.x += particle->vel.x * time_step;
     if (_solid)
     {

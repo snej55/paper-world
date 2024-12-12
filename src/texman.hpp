@@ -33,7 +33,7 @@ public:
     Texture playerFlash{};
 
     // Grass!
-    //Texture grass{};
+    Texture grass{};
 
     TexMan()
     {
@@ -58,7 +58,7 @@ public:
         playerRun.free();
         playerJump.free();
         playerLand.free();
-        //grass.free();
+        grass.free();
     }
 
     void confirm(bool val, bool& success)
@@ -90,7 +90,7 @@ public:
         confirm(playerJump.loadFromFile("data/images/entities/player/jump.png", window, renderer), success);
         confirm(playerLand.loadFromFile("data/images/entities/player/land.png", window, renderer), success);
         confirm(playerFlash.loadFromFile("data/images/entities/player/flash.png", window, renderer), success);
-        //confirm(grass.loadFromFile("data/images/grass/grass.png", window, renderer), success);
+        confirm(grass.loadFromFile("data/images/grass/grass.png", window, renderer), success);
         return success;
     }
 };
