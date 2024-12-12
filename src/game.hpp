@@ -99,7 +99,7 @@ public:
                     success = false;
                 }
             }
-            _Renderer = SDL_CreateRenderer(_Window, -1, SDL_RENDERER_ACCELERATED);// | SDL_RENDERER_PRESENTVSYNC);
+            _Renderer = SDL_CreateRenderer(_Window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
             if (_Renderer == NULL)
             {
                 std::cout << "INIT::ERROR Failed to create SDL_Renderer! SDL_Error: " << SDL_GetError() << '\n';
@@ -266,6 +266,7 @@ public:
             vec2<int> render_scroll{static_cast<int>(scroll.x + Util::random() * screen_shake - screen_shake / 2.0), static_cast<int>(scroll.y + Util::random() * screen_shake - screen_shake / 2.0)};
             // fairly obvious what this does
             _World.handleSprings(time_step);
+            _World.handleGrass(render_scroll.x, render_scroll.y, _Renderer, &_TexMan, _Width, _Height, _Player.getRect(), time_step);
             _World.render(render_scroll.x, render_scroll.y, _Window, _Renderer, &_TexMan, _Width, _Height);
             _EMManager.render(render_scroll.x, render_scroll.y, _Renderer, time_step, &_World, &_TexMan);
             // check if the player is not dead. ad stands for 'after death'

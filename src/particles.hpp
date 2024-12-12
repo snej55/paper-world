@@ -34,8 +34,8 @@ private:
 
     vec2<double> _vel{0.0, 0.0};
     SDL_Color _color {0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE};
-    SDL_Color* _palette = nullptr;
-    int _palette_length {0};
+    SDL_Color _palette[8] {{0xa8, 0x60, 0x5d}, {0xd1, 0xa6, 0x7e}, {0xf6, 0xe7, 0x9c}, {0xb6, 0xcf, 0x8e}, {0x60, 0xae, 0x7b}, {0x3c, 0x6b, 0x64}, {0x1f, 0x24, 0x4b}, {0x65, 0x40, 0x53}};
+    int _palette_length {8};
 
 public:
     ParticleSpawner(const int total_particles, int spawning, vec2<double> pos, vec2<double> friction, const double gravity, const double decay, const bool solid);
@@ -49,18 +49,12 @@ public:
     template <int N>
     void setPalette(const SDL_Color palette[N])
     {
-        _palette = new SDL_Color[N];
-        for (std::size_t i{0}; i < N; ++i)
-        {
-            _palette[i] = palette[i];
-        }
-        _palette_length = N;
+        // do nothing :(
     }
 
     void setPalette(SDL_Color* palette, int palette_length)
     {
-        _palette = palette;
-        _palette_length = palette_length;
+        // do nothing :(
     }
 
     bool isDead(Particle* particle);

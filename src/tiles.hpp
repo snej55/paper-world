@@ -15,6 +15,7 @@
 #include "./constants.hpp"
 
 #include "./texman.hpp"
+#include "./timer.hpp"
 
 using json = nlohmann::json;
 
@@ -43,12 +44,16 @@ private:
     GrassTile** _GrassTiles;
     int _total{0};
 
+    // for wind
+    Timer windTimer{};
+
 public:
     // we don't load the grass immediately
     GrassManager(const double tension)
      : _tension{tension}
     {
         _GrassTiles = new GrassTile*[0];
+        windTimer.start();
     }
 
     ~GrassManager()
@@ -82,6 +87,8 @@ public:
             Grass* grass {new Grass};
             grass->variant = static_cast<uint8_t>(std::rand() % GRASS_VARIATIONS);
             grass->pos = vec2<double>{static_cast<double>(pos.x * TILE_SIZE) + (double)TILE_SIZE / (double)density * i, static_cast<double>(pos.y * TILE_SIZE)};
+            grass->pos.x += Util::random() * M_PI;
+            grass->pos.x = std::max(static_cast<double>(grassTile->pos.x * TILE_SIZE), std::min(static_cast<double>(grassTile->pos.x * TILE_SIZE + TILE_SIZE - 1), grass->pos.x));
             grassTile->grass[grassTile->total] = grass; // here
             grassTile->total += 1;
         }
@@ -89,8 +96,35 @@ public:
         ++_total;
     }
 
-    void renderGrass(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, const int width, const int height)
+    void updateGrass(Grass* grass, const double& time_step, SDL_Rect* rect)
     {
+        double target_angle = 0.0;
+        SDL_Rect grassRect{grass->pos.x, grass->pos.y + 4, 4, 5};
+        if (Util::checkCollision(&grassRect, rect))
+        {
+            double distance {std::pow(static_cast<double>(grassRect.x + grassRect.w / 2) - static_cast<double>(rect->x + rect->w / 2), 2) + std::pow(static_cast<double>(grassRect.y + grassRect.h / 2) - static_cast<double>(rect->y + rect->h / 2), 2)};
+            double hd = static_cast<double>(grassRect.x + grassRect.w / 2) - static_cast<double>(rect->x + rect->w / 2);
+            if (distance < 1600.0)
+            {
+                double temp_target{0};
+                if (hd <= 0.0)
+                {
+                    temp_target = -70.0 - hd * 3.5;
+                }
+                if (hd > 0)
+                {
+                    temp_target = 70 - hd * 3.5;
+                }
+                target_angle = std::min(target_angle + temp_target, 90.0);
+                target_angle = std::max(target_angle, -90.0);
+            }
+        }
+        grass->target_angle += (target_angle - grass->target_angle) * 0.5 * time_step;
+    }
+
+    void renderGrass(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, const int width, const int height, SDL_Rect* player_rect, const double& time_step)
+    {
+        double time{static_cast<double>(windTimer.getTicks())};
         for (std::size_t i{0}; i < _total; ++i)
         {
             GrassTile* grassTile {_GrassTiles[i]};
@@ -101,10 +135,17 @@ public:
                 for (std::size_t g{0}; g < grassTile->total; ++g)
                 {
                     Grass* grass {grassTile->grass[g]};
+                    updateGrass(grass, time_step, player_rect);
+                    grass->target_angle += std::sin(time * 0.001 + (grass->pos.x + grass->pos.y) / 10.0) * (std::sin(time * 0.003 + (grass->pos.x + grass->pos.y) * 0.1) + 1.0) / 2;
+                    grass->target_angle += std::cos(time * (0.01 + 0.01 * (std::sin(grass->pos.x + grass->pos.y) + 1.0)) + (grass->pos.x + grass->pos.y) / 5.0) * 0.2 * (std::sin(time * 0.003 + (grass->pos.x + grass->pos.y) * 0.1) + 1.0) / 2;
+                    double force {grass->target_angle - grass->angle / _tension};
+                    grass->turn_vel += force * time_step;
+                    grass->angle += grass->turn_vel * time_step;
+                    grass->turn_vel += (grass->turn_vel * 0.9 - grass->turn_vel) * time_step;
+                    grass->angle = std::max(-90.0, std::min(90.0, grass->angle));
                     SDL_Rect clipRect{grass->variant * 9, 0, 9, 9};
                     SDL_Point center{5, 5};
-                    grass->angle += 1;
-                    texman->grass.render((int)grass->pos.x - scrollX, (int)grass->pos.y - scrollY, renderer, grass->angle, &center, SDL_FLIP_NONE, &clipRect);
+                    texman->grass.render((int)grass->pos.x - scrollX - 2.5, (int)grass->pos.y - scrollY + 3, renderer, grass->angle, &center, SDL_FLIP_NONE, &clipRect);
                 }
             }
         }
@@ -186,7 +227,7 @@ class World
 {
 private:
     Chunk _Chunks[LEVEL_WIDTH * LEVEL_HEIGHT];
-    GrassManager _GrassManager{0.1};
+    GrassManager _GrassManager{13.0};
     std::vector<Spring*> _Springs;
 
 public:
@@ -405,7 +446,6 @@ public:
         {
             spring->render(scrollX, scrollY, renderer, texman);
         }
-        handleGrass(scrollX, scrollY, renderer, texman, width, height);
     }
 
     void handleSprings(const double& time_step)
@@ -455,9 +495,9 @@ public:
         }
     }
 
-    void handleGrass(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, const int width, const int height)
+    void handleGrass(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, const int width, const int height, SDL_Rect* entity_rect, const double& time_step)
     {
-        _GrassManager.renderGrass(scrollX, scrollY, renderer, texman, width, height);
+        _GrassManager.renderGrass(scrollX, scrollY, renderer, texman, width, height, entity_rect, time_step);
     }
 };
 

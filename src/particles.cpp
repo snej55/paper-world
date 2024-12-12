@@ -97,6 +97,7 @@ void ParticleSpawner::update(const double& time_step, const int scrollX, const i
                 if (_palette != nullptr)
                 {
                     color = _palette[static_cast<std::size_t>(std::rand() % _palette_length)];
+                    //std::cout << "Color(" << (int)color.r << ", " << (int)color.g << ", " << (int)color.b << ", " << (int)color.a << ")\n";
                 }
                 _particles[i] = new Particle{_pos, vec2<double>{Util::random() * _vel.x - _vel.x / 2.0, Util::random() * _vel.y - _vel.y / 2.0}, 5.0, color};
             }
@@ -110,7 +111,8 @@ void ParticleSpawner::update(const double& time_step, const int scrollX, const i
                     SDL_Color color {_color};
                     if (_palette != nullptr)
                     {
-                         color = _palette[static_cast<std::size_t>(std::rand() % _palette_length)];
+                        color = _palette[static_cast<std::size_t>(std::rand() % _palette_length)];
+                        //std::cout << "Color(" << (int)color.r << ", " << (int)color.g << ", " << (int)color.b << ", " << (int)color.a << ")\n";
                     }
                     _particles[i] = new Particle{_pos, vec2<double>{Util::random() * _vel.x - _vel.x / 2.0, Util::random() * _vel.y - _vel.y / 2.0}, 5.0, color};
                 }
