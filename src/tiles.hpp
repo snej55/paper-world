@@ -49,10 +49,10 @@ private:
 
 public:
     // we don't load the grass immediately
-    GrassManager(const double tension)
+    GrassManager(const double tension, const int total)
      : _tension{tension}
     {
-        _GrassTiles = new GrassTile*[0];
+        _GrassTiles = new GrassTile*[total];
         windTimer.start();
     }
 
@@ -227,7 +227,7 @@ class World
 {
 private:
     Chunk _Chunks[LEVEL_WIDTH * LEVEL_HEIGHT];
-    GrassManager _GrassManager{13.0};
+    GrassManager* _GrassManager;
     std::vector<Spring*> _Springs;
 
 public:
@@ -398,6 +398,7 @@ public:
             _Chunks[i] = Chunk{{0, 0}};
         }
         _Springs.clear();
+        int grass_total{0};
         for (const auto& tile : data["level"]["tiles"])
         {
             vec2<int> chunk_loc {static_cast<int>(std::floor((double)tile["pos"][0] / (double)CHUNK_SIZE)), static_cast<int>(std::floor((double)tile["pos"][1] / (double)CHUNK_SIZE))};
@@ -410,9 +411,17 @@ public:
                 {
                     chunk->tiles.push_back(Tile{{tile["pos"][0], tile["pos"][1]}, getTileType(tile["type"]), tile["variant"]});
                 } else {
-                    _GrassManager.addGrassTile({tile["pos"][0], tile["pos"][1]}, 4);
+                    ++grass_total;
                 }
                 chunk->pos = chunk_loc;
+            }
+        }
+        _GrassManager = new GrassManager{8.0, grass_total};
+        for (const auto& tile : data["level"]["tiles"])
+        {
+            if (tile["type"] == 3) // grass key
+            {
+               _GrassManager->addGrassTile({tile["pos"][0], tile["pos"][1]}, 4);
             }
         }
         for (const auto& spring : data["level"]["springs"])
@@ -497,7 +506,7 @@ public:
 
     void handleGrass(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, const int width, const int height, SDL_Rect* entity_rect, const double& time_step)
     {
-        _GrassManager.renderGrass(scrollX, scrollY, renderer, texman, width, height, entity_rect, time_step);
+        _GrassManager->renderGrass(scrollX, scrollY, renderer, texman, width, height, entity_rect, time_step);
     }
 };
 

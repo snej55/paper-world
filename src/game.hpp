@@ -1,7 +1,6 @@
 // TODO:
 // Attacks & Health Bars :( Boring
 // Sparks?! Yay!
-// Grass! :) Yay!
 // Water! :) Yay!
 
 #ifndef GAME_H
@@ -39,6 +38,8 @@ private:
     int _Width {SCR_WIDTH};
     int _Height {SCR_HEIGHT};
 
+    bool _closed{false};
+
 public:
     Game()
     {
@@ -48,12 +49,15 @@ public:
 
     ~Game()
     {
-        close();
+        if (!_closed)
+        {
+            Close();
+        }
     }
 
     void start()
     {
-        if (!init())
+        if (!Init())
         {
             std::cerr << "GAME::ERROR Failed to initialize!" << std::endl;
         } else {
@@ -67,46 +71,43 @@ public:
         }
     }
 
-    void close()
+    void Close()
     {
         std::cout << "Closing\n";
         SDL_DestroyRenderer(_Renderer);
+        std::cout << "Destroyed renderer!\n";
         _Renderer = NULL;
         SDL_DestroyWindow(_Window);
+        std::cout << "Destroyed window!\n";
         _Window = NULL;
-        SDL_Quit();
+        std::cout << "Closed\n";
+        _closed = true;
     }
 
-    bool init()
+    bool Init()
     {
         std::cout << "Initializing...\n";
         bool success {true};
-        if (SDL_Init(SDL_INIT_VIDEO))
+        _Window = SDL_CreateWindow("Paper World", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+        if (_Window == NULL)
         {
-            std::cout << "INIT::ERROR Failed to initialize SDL! SDL_Error: " << SDL_GetError() << '\n';
+            std::cout << "INIT::ERROR Failed to create SDL_Window! SDL_Error: " << SDL_GetError() << '\n';
             success = false;
         } else {
-            _Window = SDL_CreateWindow("Paper World", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-            if (_Window == NULL)
+            int imgFlags {IMG_INIT_PNG};
+            if ((!(IMG_Init(imgFlags))) & imgFlags)
             {
-                std::cout << "INIT::ERROR Failed to create SDL_Window! SDL_Error: " << SDL_GetError() << '\n';
+                std::cout << "INIT::ERROR Failed to initialize SDL_Image! SDL_Image Error: " << IMG_GetError() << '\n';
                 success = false;
-            } else {
-                int imgFlags {IMG_INIT_PNG};
-                if ((!(IMG_Init(imgFlags))) & imgFlags)
-                {
-                    std::cout << "INIT::ERROR Failed to initialize SDL_Image! SDL_Image Error: " << IMG_GetError() << '\n';
-                    success = false;
-                }
             }
-            _Renderer = SDL_CreateRenderer(_Window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-            if (_Renderer == NULL)
-            {
-                std::cout << "INIT::ERROR Failed to create SDL_Renderer! SDL_Error: " << SDL_GetError() << '\n';
-                success = false;
-            } else {
-                SDL_SetRenderDrawColor(_Renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
-            }
+        }
+        _Renderer = SDL_CreateRenderer(_Window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        if (_Renderer == NULL)
+        {
+            std::cout << "INIT::ERROR Failed to create SDL_Renderer! SDL_Error: " << SDL_GetError() << '\n';
+            success = false;
+        } else {
+            SDL_SetRenderDrawColor(_Renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
         }
         if (success)
             std::cout << "Successfully Initialized!" << std::endl;
