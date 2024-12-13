@@ -52,7 +52,7 @@ private:
 
     double _falling {99.9};
 
-    SDL_Rect _rect {0.0, 0.0, 1.0, 1.0};
+    SDL_Rect _rect {0, 0, 1, 1};
     Controller _Controller{};
 
     double _ad {100};
