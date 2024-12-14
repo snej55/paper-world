@@ -19,6 +19,14 @@ Player::~Player()
     delete _runAnim;
     delete _jumpAnim;
     delete _landAnim;
+    if (_Sword != nullptr)
+    {
+        delete _Sword;
+    }
+    if (_Slash != nullptr)
+    {
+        delete _Slash;
+    }
 }
 
 void Player::loadAnim(TexMan* texman)
@@ -29,6 +37,7 @@ void Player::loadAnim(TexMan* texman)
     _landAnim = new Anim{8, 8, 5, 0.2, false, &(texman->playerLand)};
     _flash = &(texman->playerFlash);
     _anim = _idleAnim;
+    _Sword = new Sword(this, texman);
 }
 
 SDL_Rect* Player::getRect()
@@ -89,6 +98,8 @@ void Player::die(double* screen_shake)
 
 void Player::update(const double& time_step, World& world, double* screen_shake)
 {
+    // add all the timers here
+    _swordAttacked += time_step;
     _falling += time_step;
     _Controller.update(time_step);
 
@@ -105,7 +116,17 @@ void Player::update(const double& time_step, World& world, double* screen_shake)
             if (_Slash->getFinished())
             {
                 _swordAttacking = false;
+                delete _Slash;
                 _Slash = nullptr;
+            }
+        }
+        if (_Sword != nullptr)
+        {
+            _Sword->update(time_step);
+            if (_swordAttacked > 120.0)
+            {
+                _slashVFLIP = false;
+                _Sword->setUp(true);
             }
         }
     }
@@ -294,15 +315,21 @@ void Player::render(const int scrollX, const int scrollY, SDL_Renderer* renderer
     {
         _Slash->render(scrollX, scrollY, renderer, this);
     }
+    if (_Sword != nullptr)
+    {
+        _Sword->render(scrollX, scrollY, renderer);
+    }
 }
 
 void Player::attackSword(TexMan* texman)
 {
     if (!_swordAttacking)
     {
-        _Slash = new Slash{_slashVFLIP, _flipped, {-8.0, -8.0}, texman};
+        _Slash = new Slash{_slashVFLIP, _flipped, {(_flipped ? -11.0 : -5.0), -8.0}, texman};
         _swordAttacking = true;
         _slashVFLIP = !_slashVFLIP;
+        _swordAttacked = 0.0;
+        _Sword->flipUp();
     }
 }
 

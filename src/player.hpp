@@ -83,8 +83,10 @@ private:
  
     // for the sword
     bool _swordAttacking {false};
+    double _swordAttacked {0};
     bool _slashVFLIP {false};
     Slash* _Slash{nullptr};
+    Sword* _Sword;
 
 public:
     Player(vec2<double> pos, vec2<int> dimensions);

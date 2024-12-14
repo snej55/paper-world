@@ -28,4 +28,40 @@ public:
     void render(const int scrollX, const int scrollY, SDL_Renderer* renderer, void* target);
 };
 
+// -------------------------------------------------- Sword -------------------------------------------------- //
+
+class Sword
+{
+private:
+    void* _Player;
+    bool _flipped{false};
+
+    vec2<double> _pos{0, 0};
+
+    // turning stuff
+    double _angle{0.0};
+    double _turn{0.0};
+    const double _arm_length{4.0};
+    double _target_angle;
+    double _target_turn;
+    double _angle_vel;
+
+    bool _up{true};
+
+    // rendering
+    Texture* _tex;
+
+public:
+    Sword(void* Player, TexMan* texman);
+
+    void loadTex(TexMan* texman);
+
+    bool getUp() {return _up;}
+    void setUp(bool val) {_up = val;}
+    void flipUp() {_up = !_up;}
+    
+    void update(const double& time_step);
+    void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
+};
+
 #endif
