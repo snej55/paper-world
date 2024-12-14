@@ -10,7 +10,7 @@ Player::Player(vec2<double> pos, vec2<int> dimensions)
     _rect.w = _dimensions.x;
     _rect.h = _dimensions.y;
     _Particles.setPalette<5>(_Palette);
-    _Sword = new Sword{_pos, this};
+    // _Sword = new Sword{_pos, this};
 }
 
 Player::~Player()
@@ -96,7 +96,7 @@ void Player::update(const double& time_step, World& world, double* screen_shake)
     {
         updateVel(time_step);
         handlePhysics(time_step, _vel, world, screen_shake);
-        updateSword(time_step);
+        // updateSword(time_step);
         handleAnim(time_step);
     }
 }
@@ -106,20 +106,20 @@ void Player::updateVel(const double& time_step)
     // x velocity
     if (_falling > 3.0)
     {
-        _friction = 0.55;
-    } else {
         _friction = 0.6;
+    } else {
+        _friction = 0.7;
     }
     _vel.x *= _friction;
     if (_Controller.getControl(Control::LEFT))
     {
         _flipped = true;
-        _vel.x -= 1.1;
+        _vel.x -= 0.9;
     }
     if (_Controller.getControl(Control::RIGHT))
     {
         _flipped = false;
-        _vel.x += 1.1;
+        _vel.x += 0.9;
     }
     // y velocity
     if (_vel.y >= -1.0 && _vel.y <= 0.0)
@@ -282,15 +282,15 @@ void Player::render(const int scrollX, const int scrollY, SDL_Renderer* renderer
     }
 }
 
-void Player::updateSword(const double& time_step)
-{
-    _Sword->update(time_step);
-}
+// void Player::updateSword(const double& time_step)
+// {
+//     _Sword->update(time_step);
+// }
 
-void Player::renderSword(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman)
-{
-    _Sword->render(scrollX, scrollY, renderer, texman);
-}
+// void Player::renderSword(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman)
+// {
+//     _Sword->render(scrollX, scrollY, renderer, texman);
+// }
 
 void Controller::setControl(Control control, const bool val)
 {

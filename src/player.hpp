@@ -8,7 +8,6 @@
 #include "./tiles.hpp"
 #include "./particles.hpp"
 #include "./anim.hpp"
-#include "./sword.hpp"
 
 enum class Control
 {
@@ -80,7 +79,7 @@ private:
     bool _flipped{false};
 
     // Weapons
-    Sword* _Sword; // (void*)
+    //Sword* _Sword;
 
 public:
     Player(vec2<double> pos, vec2<int> dimensions);
@@ -90,7 +89,7 @@ public:
 
     SDL_Rect* getRect();
     Controller* getController();
-    Sword* getSword() {return _Sword;}
+    // Sword* getSword() {return _Sword;}
     vec2<double>& getPos();
     vec2<double> getCenter();
     bool getFlipped() {return _flipped;}
@@ -132,8 +131,8 @@ public:
 
     void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
 
-    void updateSword(const double& time_step);
-    void renderSword(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman);
+    // void updateSword(const double& time_step);
+    // void renderSword(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman);
 };
 
 #endif

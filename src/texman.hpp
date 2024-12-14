@@ -35,7 +35,9 @@ public:
     // Weapons
     Texture swordBase{};
     Texture slash{};
-
+    Texture blasterBase{};
+    Texture laserBlue{};
+    Texture laserRed{};
     // Grass!
     Texture grass{};
 
@@ -65,6 +67,9 @@ public:
         grass.free();
         swordBase.free();
         slash.free();
+        blasterBase.free();
+        laserBlue.free();
+        laserRed.free();
     }
 
     void confirm(bool val, bool& success)
@@ -99,6 +104,9 @@ public:
         confirm(grass.loadFromFile("data/images/grass/grass.png", window, renderer), success);
         confirm(swordBase.loadFromFile("data/images/entities/sword.png", window, renderer), success);
         confirm(slash.loadFromFile("data/images/vfx/slash.png", window, renderer), success);
+        confirm(blasterBase.loadFromFile("data/images/blasters/blaster.png", window, renderer), success);
+        confirm(laserBlue.loadFromFile("data/images/blasters/laser.png", window, renderer), success);
+        confirm(laserRed.loadFromFile("data/images/blasters/laser_red.png", window, renderer), success);
         return success;
     }
 };
