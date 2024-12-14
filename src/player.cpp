@@ -10,6 +10,7 @@ Player::Player(vec2<double> pos, vec2<int> dimensions)
     _rect.w = _dimensions.x;
     _rect.h = _dimensions.y;
     _Particles.setPalette<5>(_Palette);
+    _Sword = new Sword{_pos, this};
 }
 
 Player::~Player()
@@ -95,6 +96,7 @@ void Player::update(const double& time_step, World& world, double* screen_shake)
     {
         updateVel(time_step);
         handlePhysics(time_step, _vel, world, screen_shake);
+        updateSword(time_step);
         handleAnim(time_step);
     }
 }
@@ -278,6 +280,16 @@ void Player::render(const int scrollX, const int scrollY, SDL_Renderer* renderer
     } else {
         _anim->render((int)_pos.x - 2, (int)_pos.y, scrollX, scrollY, renderer);
     }
+}
+
+void Player::updateSword(const double& time_step)
+{
+    _Sword->update(time_step);
+}
+
+void Player::renderSword(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman)
+{
+    _Sword->render(scrollX, scrollY, renderer, texman);
 }
 
 void Controller::setControl(Control control, const bool val)

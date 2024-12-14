@@ -267,7 +267,14 @@ public:
             _EMManager.render(render_scroll.x, render_scroll.y, _Renderer, time_step, &_World, &_TexMan);
             // check if the player is not dead. ad stands for 'after death'
             if (_Player.getAd() > 120)
-                _Player.render(render_scroll.x, render_scroll.y, _Renderer);
+                if (_Player.getSword()->up())
+                {
+                    _Player.renderSword(render_scroll.x, render_scroll.y, _Renderer, &_TexMan);
+                    _Player.render(render_scroll.x, render_scroll.y, _Renderer);
+                } else {
+                    _Player.render(render_scroll.x, render_scroll.y, _Renderer);
+                    _Player.renderSword(render_scroll.x, render_scroll.y, _Renderer, &_TexMan);
+                }
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
             /*std::array<SDL_Rect, 9> rects;
             vec2<double> pos {(double)mouseX / 2 + scroll.x, (double)mouseY / 2 + scroll.y};

@@ -1,8 +1,9 @@
 #ifndef SWORD_H
 #define SWORD_H
 
+#include "./texman.hpp"
+#include "./vec2.hpp"
 #include "./anim.hpp"
-#include "./player.hpp"
 
 // class Slash
 // {
@@ -22,9 +23,9 @@ class Sword
 {
 private:
     vec2<double> _pos;
-    Player* _Player;
+    void* _Player;
     double _angle{0};
-    vec2<double> _offset;
+    vec2<double> _offset {-1, -6};
     bool _attacking{false};
     double _angle_offset{90.0};
     double _swing_dir{0.0};
@@ -32,17 +33,20 @@ private:
     const double _arm_length{1.5};
     double _attacked{10.0};
     double _target_turn{180.0};
-    SDL_RendererFlip _flipped{SDL_FLIP_NONE};
+    bool _flipped{false}; // we'll convert to SDL_RendererFlip when we render
     double _target_dir{M_PI};
     double _damp{0.5}; // spring dampening
 
 public:
-    Sword(vec2<double> pos, Player* player);
-    
-    void attack();
-    void update(const double& time_step);
+    Sword(vec2<double> pos, void* player);
 
-    void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
-}
+    bool up() {return (_target_dir == M_PI * 0.25);}
+    bool getAttacking() {return _attacking;}
+    
+    virtual void attack();
+    virtual void update(const double& time_step);
+
+    virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman);
+};
 
 #endif
