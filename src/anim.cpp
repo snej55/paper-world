@@ -40,5 +40,6 @@ void Anim::tick(const double& time_step)
 void Anim::render(int x, int y, const int scrollX, const int scrollY, SDL_Renderer* renderer)
 {
     SDL_Rect clip_rect {_step * _width, 0, _width, _height}; // all animation spritesheets are single strips
-    _texture->render(x - scrollX, y - scrollY, renderer, _angle, _center, _flipped, &clip_rect);
+    SDL_Point center {_width / 2, _height / 2};
+    _texture->render(x - scrollX, y - scrollY, renderer, _angle, &center, _flipped, &clip_rect);
 }

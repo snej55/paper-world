@@ -182,6 +182,9 @@ public:
                             //Entity* _Entity = new Entity{{static_cast<double>(std::rand() % 100 + 50), 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false, "default"};
                             //_EMManager.addEntity(_Entity);
                             break;
+                        case SDLK_x:
+                            _Player.attackSword(&_TexMan);
+                            break;
                         default:
                             break;
                     }

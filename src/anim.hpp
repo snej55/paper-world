@@ -9,7 +9,6 @@ class Anim
 private:
     SDL_RendererFlip _flipped {SDL_FLIP_NONE};
 
-    SDL_Point* _center{nullptr};
     double _angle{0};
 
     const int _width;

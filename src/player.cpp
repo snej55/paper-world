@@ -98,6 +98,16 @@ void Player::update(const double& time_step, World& world, double* screen_shake)
         handlePhysics(time_step, _vel, world, screen_shake);
         // updateSword(time_step);
         handleAnim(time_step);
+        updateRect();
+        if (_Slash != nullptr)
+        {
+            _Slash->update(time_step);
+            if (_Slash->getFinished())
+            {
+                _swordAttacking = false;
+                _Slash = nullptr;
+            }
+        }
     }
 }
 
@@ -114,12 +124,12 @@ void Player::updateVel(const double& time_step)
     if (_Controller.getControl(Control::LEFT))
     {
         _flipped = true;
-        _vel.x -= 0.9;
+        _vel.x -= 0.7;
     }
     if (_Controller.getControl(Control::RIGHT))
     {
         _flipped = false;
-        _vel.x += 0.9;
+        _vel.x += 0.7;
     }
     // y velocity
     if (_vel.y >= -1.0 && _vel.y <= 0.0)
@@ -279,6 +289,20 @@ void Player::render(const int scrollX, const int scrollY, SDL_Renderer* renderer
         _flash->render((int)_pos.x - 2 - scrollX, (int)_pos.y - scrollY, renderer, 0, NULL, _flipped ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE, NULL);    
     } else {
         _anim->render((int)_pos.x - 2, (int)_pos.y, scrollX, scrollY, renderer);
+    }
+    if (_Slash != nullptr)
+    {
+        _Slash->render(scrollX, scrollY, renderer, this);
+    }
+}
+
+void Player::attackSword(TexMan* texman)
+{
+    if (!_swordAttacking)
+    {
+        _Slash = new Slash{_slashVFLIP, _flipped, {-8.0, -8.0}, texman};
+        _swordAttacking = true;
+        _slashVFLIP = !_slashVFLIP;
     }
 }
 
