@@ -172,7 +172,7 @@ public:
     void updateRect()
     {
         _rect.x = _pos.x;
-        _rect.y = _pos.y - 1;
+        _rect.y = _pos.y - 1 + _spring_factor;
     }
 
     SDL_Rect* getRect()

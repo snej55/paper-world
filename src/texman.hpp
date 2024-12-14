@@ -32,6 +32,10 @@ public:
     Texture playerLand{};
     Texture playerFlash{};
 
+    // Weapons
+    Texture swordBase{};
+    Texture slash{};
+
     // Grass!
     Texture grass{};
 
@@ -59,6 +63,8 @@ public:
         playerJump.free();
         playerLand.free();
         grass.free();
+        swordBase.free();
+        slash.free();
     }
 
     void confirm(bool val, bool& success)
@@ -91,6 +97,8 @@ public:
         confirm(playerLand.loadFromFile("data/images/entities/player/land.png", window, renderer), success);
         confirm(playerFlash.loadFromFile("data/images/entities/player/flash.png", window, renderer), success);
         confirm(grass.loadFromFile("data/images/grass/grass.png", window, renderer), success);
+        confirm(swordBase.loadFromFile("data/images/entities/sword.png", window, renderer), success);
+        confirm(slash.loadFromFile("data/images/vfx/slash.png", window, renderer), success);
         return success;
     }
 };

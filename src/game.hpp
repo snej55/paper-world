@@ -1,8 +1,3 @@
-// TODO:
-// Attacks & Health Bars :( Boring
-// Sparks?! Yay!
-// Water! :) Yay!
-
 #ifndef GAME_H
 #define GAME_H
 
