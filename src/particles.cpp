@@ -79,7 +79,7 @@ void ParticleSpawner::renderParticle(Particle* particle, const int scrollX, cons
     particle->color.a = static_cast<uint8_t>(static_cast<int>(particle->size / 5.0 * 255.0));
     texman->particle.setColor(particle->color.r, particle->color.g, particle->color.b);
     texman->particle.setAlpha(particle->color.a);
-    texman->particle.setBlendMode(SDL_BLENDMODE_ADD);
+    texman->particle.setBlendMode(SDL_BLENDMODE_BLEND);
     texman->particle.render((int)particle->pos.x - scrollX, (int)particle->pos.y - scrollY, renderer);
 }
 
