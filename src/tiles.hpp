@@ -141,7 +141,7 @@ public:
                     double force {grass->target_angle - grass->angle / _tension};
                     grass->turn_vel += force * time_step;
                     grass->angle += grass->turn_vel * time_step;
-                    grass->turn_vel += (grass->turn_vel * 0.9 - grass->turn_vel) * time_step;
+                    grass->turn_vel += (grass->turn_vel * 0.8 - grass->turn_vel) * time_step;
                     grass->angle = std::max(-90.0, std::min(90.0, grass->angle));
                     SDL_Rect clipRect{grass->variant * 9, 0, 9, 9};
                     SDL_Point center{5, 5};
@@ -227,7 +227,7 @@ class World
 {
 private:
     Chunk _Chunks[LEVEL_WIDTH * LEVEL_HEIGHT];
-    GrassManager* _GrassManager;
+    GrassManager* _GrassManager {nullptr};
     std::vector<Spring*> _Springs;
 
 public:
@@ -241,6 +241,10 @@ public:
         for (std::size_t i{0}; i < _Springs.size(); ++i)
         {
             delete _Springs[i];
+        }
+        if (_GrassManager != nullptr)
+        {
+            delete _GrassManager;
         }
     }
 
@@ -415,6 +419,10 @@ public:
                 }
                 chunk->pos = chunk_loc;
             }
+        }
+        if (_GrassManager != nullptr)
+        {
+            delete _GrassManager;
         }
         _GrassManager = new GrassManager{8.0, grass_total};
         for (const auto& tile : data["level"]["tiles"])

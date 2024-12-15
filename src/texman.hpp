@@ -41,6 +41,10 @@ public:
     // Grass!
     Texture grass{};
 
+    // HUD
+    Texture enemyHealthBar{};
+    Texture playerHealthBar{};
+
     TexMan()
     {
     }
@@ -70,6 +74,8 @@ public:
         blasterBase.free();
         laserBlue.free();
         laserRed.free();
+        enemyHealthBar.free();
+        playerHealthBar.free();
     }
 
     void confirm(bool val, bool& success)
@@ -107,6 +113,8 @@ public:
         confirm(blasterBase.loadFromFile("data/images/blasters/blaster.png", window, renderer), success);
         confirm(laserBlue.loadFromFile("data/images/blasters/laser.png", window, renderer), success);
         confirm(laserRed.loadFromFile("data/images/blasters/laser_red.png", window, renderer), success);
+        confirm(enemyHealthBar.loadFromFile("data/images/entities/enemy_health_bar.png", window, renderer), success);
+        confirm(playerHealthBar.loadFromFile("data/images/entities/health_bar.png", window, renderer), success);
         return success;
     }
 };

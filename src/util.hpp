@@ -51,6 +51,25 @@ namespace Util {
         *val1 = *val2; // swap addresses
         *val2 = temp;
     }
+
+    inline SDL_Color lerpColor(SDL_Color& a, SDL_Color& b, const double x)
+    {
+        SDL_Color color{0x00, 0x00, 0x00, 0xFF};
+        color.r = static_cast<uint8_t>(static_cast<int>(a.r + (static_cast<double>(b.r) - static_cast<double>(a.r)) * x));
+        color.g = static_cast<uint8_t>(static_cast<int>(a.g + (static_cast<double>(b.g) - static_cast<double>(a.g)) * x));
+        color.b = static_cast<uint8_t>(static_cast<int>(a.b + (static_cast<double>(b.b) - static_cast<double>(a.b)) * x));
+        return color;
+    }
+
+    inline SDL_Color lerpColorAlpha(SDL_Color& a, SDL_Color& b, const double x)
+    {
+        SDL_Color color{0x00, 0x00, 0x00, 0xFF};
+        color.r = static_cast<uint8_t>(static_cast<int>(a.r + (static_cast<double>(b.r) - static_cast<double>(a.r)) * x));
+        color.g = static_cast<uint8_t>(static_cast<int>(a.g + (static_cast<double>(b.g) - static_cast<double>(a.g)) * x));
+        color.b = static_cast<uint8_t>(static_cast<int>(a.b + (static_cast<double>(b.b) - static_cast<double>(a.b)) * x));
+        color.a = static_cast<uint8_t>(static_cast<int>(a.a + (static_cast<double>(b.a) - static_cast<double>(a.a)) * x));
+        return color;
+    }
 }
 
 #endif

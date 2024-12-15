@@ -91,6 +91,7 @@ void Entity::update(const double &time_step, World &world, double *screen_shake)
 
     updateVel(time_step);
     handlePhysics(time_step, _vel, world, screen_shake);
+    updateHealthBar();
 }
 
 void Entity::updateVel(const double &time_step)
@@ -279,6 +280,22 @@ void Entity::wander(World *world, const double& time_step)
     _anim_flipped = _flipped;
 }
 
+void Entity::updateHealthBar()
+{
+    if (_health_bar != nullptr)
+    {
+        _health_bar->update(this);
+    }
+}
+
+void Entity::renderHealthBar(const int scrollX, const int scrollY, SDL_Renderer* renderer)
+{
+    if (_health_bar != nullptr && _health < _maxHealth)
+    {
+        _health_bar->render(scrollX, scrollY, renderer, this);
+    }
+}
+
 Slime::Slime(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman)
     : Entity{pos, vel, gravity, peaceful, name}
 {
@@ -299,6 +316,7 @@ void Slime::loadAnim(TexMan* texman)
     _runAnim = new Anim{13, 9, 5, 0.2, true, &(texman->slimeRun)};
     _jumpAnim = new Anim{13, 9, 8, 0.21, true, &(texman->slimeJump)};
     _flash = new Anim{13, 9, 1, true, 0.2, &(texman->slimeFlash)};
+    Entity::loadAnim(texman);
 }
 
 void Slime::handleAnim(const double& time_step)
@@ -337,6 +355,7 @@ void Slime::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
     } else {
         _flash->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
     }
+    Entity::renderHealthBar(scrollX, scrollY, renderer);
 }
 
 
@@ -357,6 +376,7 @@ void Bat::loadAnim(TexMan* texman)
     _anim = new Anim{7, 4, 2, 0.3, true, &(texman->bat)};
     _flash = new Anim{7, 4, 1, 0.2, true, &(texman->batFlash)};
     _glowTex = &(texman->lightTex);
+    Entity::loadAnim(texman);
 }
 
 void Bat::handleAnim(const double& time_step)
@@ -500,6 +520,7 @@ void Bat::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
     } else {
         _flash->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
     }
+    Entity::renderHealthBar(scrollX, scrollY, renderer);
 }
 
 

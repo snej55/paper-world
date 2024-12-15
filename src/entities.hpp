@@ -12,6 +12,7 @@
 #include "./tiles.hpp"
 #include "./player.hpp"
 #include "./anim.hpp"
+#include "./health_bars.hpp"
 
 class Entity
 {
@@ -24,6 +25,8 @@ protected:
     bool _peaceful;
     std::string _name;
 
+    EntityHealthBar* _health_bar {nullptr};
+
     double _falling{99.0};
     double _top_speed{1.0};
 
@@ -32,6 +35,7 @@ protected:
     bool _should_damage{false};
 
     double _health{10.0};
+    const double _maxHealth{10.0};
     double _damage{5.0};
     double _recover{100.0};
     double _recover_time{10.0};
@@ -47,8 +51,22 @@ protected:
 
 public:
     Entity(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name);
+    virtual ~Entity()
+    {
+        if (_health_bar != nullptr)
+        {
+            delete _health_bar;
+        }
+    }
+
+    virtual void loadAnim(TexMan* texman)
+    {
+        _health_bar = new EntityHealthBar{&(texman->enemyHealthBar), {12, 2}, _maxHealth};
+    }
 
     int getId();
+    double getHealth() {return _health;}
+    const double getMaxHealth() const {return _maxHealth;}
 
     vec2<double>& getPos();
     vec2<double> getCenter();
@@ -80,6 +98,9 @@ public:
     virtual void followPlayer(Player* player, World* world, const double& time_step);
 
     virtual void wander(World* world, const double& time_step);
+
+    void updateHealthBar();
+    void renderHealthBar(const int scrollX, const int scrollY, SDL_Renderer* renderer);
 };
 
 class Slime : public Entity
@@ -95,6 +116,7 @@ protected:
     vec2<int> _dimensions{11, 7};
     vec2<int> _anim_offset{1, 1};
 
+    const double _maxHealth{20.0};
     double _health{20.0};
     double _damage{10.0};
 
@@ -103,7 +125,7 @@ protected:
 public:
     Slime(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman);
 
-    ~Slime();
+    virtual ~Slime();
 
     void loadAnim(TexMan* texman);
 
@@ -123,6 +145,7 @@ private:
     vec2<int> _dimensions{3, 4};
     vec2<int> _anim_offset{2, 0};
 
+    const double _maxHealth{10.0};
     double _health{10.0};
     double _damage{3.0};
 
@@ -134,7 +157,7 @@ private:
 public:
     Bat(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman);
 
-    ~Bat();
+    virtual ~Bat();
 
     void loadAnim(TexMan* texman);
 
