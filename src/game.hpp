@@ -144,6 +144,7 @@ public:
         vec2<double> scroll;
 
         double screen_shake{0};
+        double slomo{1.0};
 
         float frames{1.0f};
         do {
@@ -239,9 +240,11 @@ public:
             // divide by 1000.0f to convert from millis to sec
             // times by 60 for 60fps
             // reset last_time
-            time_step = timer.getTicks() / 1000.0 * 60.0;
+            time_step = timer.getTicks() / 1000.0 * 60.0 * slomo;
             time_step = std::min(time_step, 3.0);
             timer.start();
+
+            slomo += (1.0 - slomo) / 20.0 * (time_step / slomo);
             // set screen as render target
             _Screen.setAsRenderTarget(_Renderer);
             // clear screen (0x1f, 0x24, 0x4b)
@@ -258,7 +261,7 @@ public:
             _Player.update(time_step, _World, &screen_shake);
             _Player.tickAd(time_step);
 
-            _EMManager.update(time_step, _World, &screen_shake, &_Player);
+            _EMManager.update(time_step, _World, &screen_shake, &_Player, &slomo);
             // do rendering here
 
             screen_shake = std::max(0.0, screen_shake - time_step);
@@ -272,17 +275,8 @@ public:
             if (_Player.getAd() > 120)
                 _Player.render(render_scroll.x, render_scroll.y, _Renderer);
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
-            /*std::array<SDL_Rect, 9> rects;
-            vec2<double> pos {(double)mouseX / 2 + scroll.x, (double)mouseY / 2 + scroll.y};
-            _World.getDangerAroundPos(pos, rects);
-            for (int i{0}; i < 9; ++i)
-            {
-                SDL_SetRenderDrawColor(_Renderer, 0xFF, 0x00, 0x00, 0xFF);
-                rects[i].x -= scroll.x;
-                rects[i].y -= scroll.y;
-                SDL_RenderFillRect(_Renderer, &(rects[i]));
-            }*/
-           renderPlayerHealthBar();
+
+            renderPlayerHealthBar();
             // render screen
             SDL_SetRenderTarget(_Renderer, NULL);
             _Screen.renderClean(0, 0, _Renderer, 3);

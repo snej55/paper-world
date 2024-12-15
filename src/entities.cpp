@@ -57,6 +57,19 @@ std::string_view Entity::getName()
     return _name;
 }
 
+void Entity::damage(const double damage, double* screen_shake)
+{
+    _recover = 0.0;
+    _should_damage = true;
+    _health -= damage;
+    if (_health <= 0.0)
+    {
+        *screen_shake = std::max(*screen_shake, 8.0);
+        die(screen_shake);
+    }
+
+}
+
 void Entity::die(double *screen_shake)
 {
     // if (!_should_die)
@@ -163,14 +176,21 @@ void Entity::render(const int scrollX, const int scrollY, SDL_Renderer *renderer
     SDL_RenderFillRect(renderer, &renderRect);
 }
 
-void Entity::touchPlayer(Player *player, double *screen_shake)
+void Entity::touchPlayer(Player *player, double *screen_shake, double* slomo)
 {
     _rect.x = _pos.x;
     _rect.y = _pos.y;
     SDL_Rect *player_rect{player->getRect()};
-    if (Util::checkCollision(player_rect, &_rect))
+    if (player->getAttacking())
     {
-        player->damage(_damage, screen_shake);
+        SDL_Rect playerAttackRect {player->getAttackRect()};
+        if (Util::checkCollision(&_rect, &playerAttackRect) && _recover > _recover_time)
+        {
+            damage(player->getSwordDamage(), screen_shake);
+        }
+    } else if (Util::checkCollision(player_rect, &_rect) && _recover > _recover_time)
+    {
+        player->damage(_damage, screen_shake, slomo);
     }
 }
 
@@ -270,6 +290,7 @@ Slime::~Slime()
     delete _idleAnim;
     delete _runAnim;
     delete _jumpAnim;
+    delete _flash;
 }
 
 void Slime::loadAnim(TexMan* texman)
@@ -277,6 +298,7 @@ void Slime::loadAnim(TexMan* texman)
     _idleAnim = new Anim{13, 9, 6, 0.16, true, &(texman->slimeIdle)};
     _runAnim = new Anim{13, 9, 5, 0.2, true, &(texman->slimeRun)};
     _jumpAnim = new Anim{13, 9, 8, 0.21, true, &(texman->slimeJump)};
+    _flash = new Anim{13, 9, 1, true, 0.2, &(texman->slimeFlash)};
 }
 
 void Slime::handleAnim(const double& time_step)
@@ -309,7 +331,12 @@ void Slime::update(const double& time_step, World& world, double* screen_shake)
 
 void Slime::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
 {
-    _anim->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
+    if (_recover > _recover_time)
+    {
+        _anim->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
+    } else {
+        _flash->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
+    }
 }
 
 
@@ -322,11 +349,13 @@ Bat::Bat(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std:
 Bat::~Bat()
 {
     delete _anim;
+    delete _flash;
 }
 
 void Bat::loadAnim(TexMan* texman)
 {
     _anim = new Anim{7, 4, 2, 0.3, true, &(texman->bat)};
+    _flash = new Anim{7, 4, 1, 0.2, true, &(texman->batFlash)};
     _glowTex = &(texman->lightTex);
 }
 
@@ -397,17 +426,32 @@ void Bat::handlePhysics(const double& time_step, vec2<double> frame_movement, Wo
     _vel.y = std::min(3.0, std::max(-3.0, _vel.y));
 }
 
-void Bat::touchPlayer(Player* player, double* screen_shake)
+void Bat::damage(const double damage, double* screen_shake)
+{
+    Entity::damage(damage, screen_shake);
+    double angle = Util::random() * 2.0 * M_PI;
+    _vel.x += std::cos(angle) * 5.0;
+    _vel.y += std::sin(angle) * 5.0;
+}
+
+void Bat::touchPlayer(Player* player, double* screen_shake, double* slomo)
 {
     _rect.x = _pos.x;
     _rect.y = _pos.y;
     SDL_Rect* player_rect{player->getRect()};
-    if (Util::checkCollision(player_rect, &_rect))
+    if (player->getAttacking())
+    {
+        SDL_Rect playerAttackRect {player->getAttackRect()};
+        if (Util::checkCollision(&_rect, &playerAttackRect) && _recover > _recover_time)
+        {
+            damage(player->getSwordDamage(), screen_shake);
+        }
+    } if (Util::checkCollision(player_rect, &_rect))
     {
         double angle = Util::random() * 2.0 * M_PI;
         _vel.x += std::cos(angle) * 5.0;
         _vel.y += std::sin(angle) * 5.0;
-        player->damage(_damage, screen_shake);
+        player->damage(_damage, screen_shake, slomo);
     }
 }
 
@@ -450,7 +494,12 @@ void Bat::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
     SDL_Rect renderQuad{static_cast<int>(getCenter().x - 6 - _anim_offset.x) - scrollX, static_cast<int>(getCenter().y - 6 - _anim_offset.y - 2) - scrollY, 10, 10};
     SDL_RenderCopyEx(renderer, _glowTex->getTexture(), NULL, &renderQuad, 0, NULL, SDL_FLIP_NONE);
     //_glowTex->render(static_cast<int>(getCenter().x - 2.5 - _anim_offset.x) - scrollX, static_cast<int>(getCenter().y - 2.5 - _anim_offset.y - 2) - scrollY, renderer, &clip);
-    _anim->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
+    if (_recover > _recover_time)
+    {
+        _anim->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
+    } else {
+        _flash->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
+    }
 }
 
 
@@ -507,7 +556,7 @@ void EntityManager::addEntity(Entity* entity)
     ++_total;
 }
 
-void EntityManager::update(const double& time_step, World& world, double* screen_shake, Player* player)
+void EntityManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo)
 {
     const int num{_total};
     for (std::size_t i{0}; i < num; ++i)
@@ -519,7 +568,7 @@ void EntityManager::update(const double& time_step, World& world, double* screen
             if (!(entity->getPeaceful()))
             {
                 entity->followPlayer(player, &world, time_step);
-                entity->touchPlayer(player, screen_shake);
+                entity->touchPlayer(player, screen_shake, slomo);
             } else {
                 entity->wander(&world, time_step);
             }
@@ -657,11 +706,11 @@ void EMManager::addEntity(Entity* entity)
     _Managers.push_back(new EntityManager{vec2<double>{0, 0}, 1, std::vector<Entity*>{entity}});
 }
 
-void EMManager::update(const double& time_step, World& world, double* screen_shake, Player* player)
+void EMManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo)
 {
     for (std::size_t i{0}; i < _Managers.size(); ++i)
     {
-        _Managers[i]->update(time_step, world, screen_shake, player);
+        _Managers[i]->update(time_step, world, screen_shake, player, slomo);
     }
 }
 // updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman)

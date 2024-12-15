@@ -100,6 +100,17 @@ public:
         _rect.x = _pos.x;
         _rect.y = _pos.y;
     }
+    SDL_Rect getAttackRect();
+    bool getAttacking();
+    double getSwordDamage() const 
+    {
+        if (_Sword != nullptr)
+        {
+            return _Sword->getDamage();
+        }
+        return 0.0;
+    }
+
     Controller* getController();
     // Sword* getSword() {return _Sword;}
     vec2<double>& getPos();
@@ -111,7 +122,7 @@ public:
     double getRecover() {return _recover;}
     void setRecover(double val) {_recover = val;}
 
-    void damage(double amount, double* screen_shake);
+    void damage(double amount, double* screen_shake, double* slomo);
 
     double getAd() {return _ad;}
     void tickAd(const double& time_step)
@@ -142,6 +153,9 @@ public:
     void handleAnim(const double& time_step);
 
     void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
+    void renderPlayer(const int scrollX, const int scrollY, SDL_Renderer* renderer);
+    void renderSword(const int scrollX, const int scrollY, SDL_Renderer* renderer);
+    void renderSlash(const int scrollX, const int scrollY, SDL_Renderer* renderer);
 
     // void updateSword(const double& time_step);
     // void renderSword(const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman);

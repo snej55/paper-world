@@ -29,6 +29,7 @@ protected:
 
     SDL_Rect _rect{0, 0, 0, 0};
     bool _should_die {false};
+    bool _should_damage{false};
 
     double _health{10.0};
     double _damage{5.0};
@@ -63,6 +64,7 @@ public:
         particles->setPalette<8>(_Palette);
     }
 
+    virtual void damage(const double damage, double* screen_shake);
     virtual void die(double* screen_shake);
 
     virtual void update(const double& time_step, World& world, double* screen_shake);
@@ -73,7 +75,7 @@ public:
 
     virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
 
-    virtual void touchPlayer(Player* player, double* screen_shake);
+    virtual void touchPlayer(Player* player, double* screen_shake, double* slomo);
 
     virtual void followPlayer(Player* player, World* world, const double& time_step);
 
@@ -86,6 +88,7 @@ protected:
     Anim* _idleAnim;
     Anim* _runAnim;
     Anim* _jumpAnim;
+    Anim* _flash;
 
     Anim* _anim {nullptr};
 
@@ -115,6 +118,7 @@ class Bat : public Entity
 {
 private:
     Anim* _anim;
+    Anim* _flash;
     Texture* _glowTex;
     vec2<int> _dimensions{3, 4};
     vec2<int> _anim_offset{2, 0};
@@ -136,9 +140,11 @@ public:
 
     void handleAnim(const double& time_step);
 
+    virtual void damage(const double damage, double* screen_shake);
+
     virtual void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake);
 
-    virtual void touchPlayer(Player* player, double* screen_shake);
+    virtual void touchPlayer(Player* player, double* screen_shake, double* slomo);
 
     virtual void followPlayer(Player* player, World* world, const double& time_step);
 
@@ -177,7 +183,7 @@ public:
 
     virtual void addEntity(Entity* entity);
 
-    virtual void update(const double& time_step, World& world, double* screen_shake, Player* player);
+    virtual void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo);
 
     virtual void updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman);
 
@@ -202,7 +208,7 @@ public:
 
     void addEntity(Entity* entity);
 
-    void update(const double& time_step, World& world, double* screen_shake, Player* player);
+    void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo);
 
     void render(const int scrollX, const int scrollY, SDL_Renderer* renderer, const double& time_step, World* world, TexMan* texman);
 };

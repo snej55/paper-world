@@ -41,7 +41,7 @@ private:
     // turning stuff
     double _angle{0.0};
     double _turn{0.0};
-    const double _arm_length{4.0};
+    const double _arm_length{2.5};
     double _target_angle;
     double _target_turn;
     double _angle_vel;
@@ -51,10 +51,14 @@ private:
     // rendering
     Texture* _tex;
 
+    const double _damage{2.0};
+
 public:
     Sword(void* Player, TexMan* texman);
 
     void loadTex(TexMan* texman);
+
+    const double getDamage() const {return _damage;}
 
     bool getUp() {return _up;}
     void setUp(bool val) {_up = val;}

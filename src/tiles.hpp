@@ -136,8 +136,8 @@ public:
                 {
                     Grass* grass {grassTile->grass[g]};
                     updateGrass(grass, time_step, player_rect);
-                    grass->target_angle += std::sin(time * 0.001 + (grass->pos.x + grass->pos.y) / 10.0) * (std::sin(time * 0.003 + (grass->pos.x + grass->pos.y) * 0.1) + 1.0) / 2;
-                    grass->target_angle += std::cos(time * (0.01 + 0.01 * (std::sin(grass->pos.x + grass->pos.y) + 1.0)) + (grass->pos.x + grass->pos.y) / 5.0) * 0.2 * (std::sin(time * 0.003 + (grass->pos.x + grass->pos.y) * 0.1) + 1.0) / 2;
+                    grass->target_angle += std::sin(time * 0.001 + (grass->pos.x + grass->pos.y) / 10.0) * (std::sin(time * 0.003 + (grass->pos.x + grass->pos.y) * 0.1) + 1.0) / 2 * time_step;
+                    grass->target_angle += std::cos(time * (0.01 + 0.01 * (std::sin(grass->pos.x + grass->pos.y) + 1.0)) + (grass->pos.x + grass->pos.y) / 5.0) * 0.2 * (std::sin(time * 0.003 + (grass->pos.x + grass->pos.y) * 0.1) + 1.0) / 2 * time_step;
                     double force {grass->target_angle - grass->angle / _tension};
                     grass->turn_vel += force * time_step;
                     grass->angle += grass->turn_vel * time_step;

@@ -1,8 +1,8 @@
 # TODO
- - Attacks & Health Bars (sword/blaster)
- - Water & Sparks + some juice
+ - Health Bars
  - Turtle enemy
- - Background
+ - Water & Sparks + some juice
  - SFX
+ - Background
  - Lava
  - Art & Music

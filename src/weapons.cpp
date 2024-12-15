@@ -78,5 +78,5 @@ void Sword::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
     int angle {static_cast<int>(_angle * 180 / M_PI + (-90.0 + 180.0 * (_angle - M_PI * 0.25) / (M_PI * 1.7)))};
     _flipped = static_cast<Player*>(_Player)->getFlipped();
     SDL_Point center {3, 8};
-    _tex->render(static_cast<int>(_pos.x) - scrollX - (_flipped ? 4 : 3), static_cast<int>(_pos.y) - scrollY - 8, renderer, angle * (_flipped ? -1 : 1), &center, (_flipped ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE));
+    _tex->render(static_cast<int>(_pos.x) - scrollX - (_flipped ? 5 : 1), static_cast<int>(_pos.y) - scrollY - (_flipped ? 9 : 8), renderer, angle * (_flipped ? -1 : 1), &center, (_flipped ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE));
 }

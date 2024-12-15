@@ -45,6 +45,16 @@ SDL_Rect* Player::getRect()
     return &_rect;
 }
 
+SDL_Rect Player::getAttackRect()
+{
+    return {(_flipped ? getCenter().x - 12 : getCenter().x), _pos.y - 6, 12, 16};
+}
+
+bool Player::getAttacking()
+{
+    return _swordAttacking;
+}
+
 Controller* Player::getController()
 {
     return &_Controller;
@@ -60,7 +70,7 @@ vec2<double> Player::getCenter()
     return {_pos.x + _dimensions.x / 2.0, _pos.y + _dimensions.y / 2.0};
 }
 
-void Player::damage(double amount, double* screen_shake)
+void Player::damage(double amount, double* screen_shake, double* slomo)
 {
     // we can add buffs later
     if (_recover > _recover_time + 30)
@@ -73,8 +83,10 @@ void Player::damage(double amount, double* screen_shake)
         _Particles.setSpawning(16, {4.0, 4.0}, _Palette[0]);
         _Smoke.setSpawning(10, {1, 2}, {0x88, 0x88, 0x88});
         _recover = 0.0;
+        *slomo = std::min(0.7, *slomo);
         if (_health < 0.0)
         {
+            *slomo = std::min(0.5, *slomo);
             die(screen_shake);
         }
     }
@@ -305,19 +317,45 @@ void Player::render(const int scrollX, const int scrollY, SDL_Renderer* renderer
     // }
 
     // SDL_RenderFillRect(renderer, &renderRect);
+    if (_Sword != nullptr)
+    {
+        if (_Sword->getUp())
+        {
+            renderSword(scrollX, scrollY, renderer);
+            renderPlayer(scrollX, scrollY, renderer);
+        } else {
+            renderPlayer(scrollX, scrollY, renderer);
+            renderSword(scrollX, scrollY, renderer);
+        }
+    } else {
+        renderPlayer(scrollX, scrollY, renderer);
+    }
+    renderSlash(scrollX, scrollY, renderer);
+}
+
+void Player::renderPlayer(const int scrollX, const int scrollY, SDL_Renderer* renderer)
+{
     if (_recover < _recover_time)
     {
         _flash->render((int)_pos.x - 2 - scrollX, (int)_pos.y - scrollY, renderer, 0, NULL, _flipped ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE, NULL);    
     } else {
         _anim->render((int)_pos.x - 2, (int)_pos.y, scrollX, scrollY, renderer);
     }
-    if (_Slash != nullptr)
-    {
-        _Slash->render(scrollX, scrollY, renderer, this);
-    }
+}
+
+void Player::renderSword(const int scrollX, const int scrollY, SDL_Renderer* renderer)
+{
     if (_Sword != nullptr)
     {
         _Sword->render(scrollX, scrollY, renderer);
+    }
+}
+
+void Player::renderSlash(const int scrollX, const int scrollY, SDL_Renderer* renderer)
+{
+    if (_Slash != nullptr)
+    {
+        _Slash->render(scrollX, scrollY, renderer, this);
     }
 }
 
@@ -325,7 +363,7 @@ void Player::attackSword(TexMan* texman)
 {
     if (!_swordAttacking)
     {
-        _Slash = new Slash{_slashVFLIP, _flipped, {(_flipped ? -11.0 : -5.0), -8.0}, texman};
+        _Slash = new Slash{_slashVFLIP, _flipped, {(_flipped ? -13.0 : -3.0), -10.0}, texman};
         _swordAttacking = true;
         _slashVFLIP = !_slashVFLIP;
         _swordAttacked = 0.0;
