@@ -240,7 +240,7 @@ public:
             // divide by 1000.0f to convert from millis to sec
             // times by 60 for 60fps
             // reset last_time
-            time_step = timer.getTicks() / 1000.0 * 6.0 * slomo;
+            time_step = timer.getTicks() / 1000.0 * 60.0 * slomo;
             time_step = std::min(time_step, 3.0);
             timer.start();
 
