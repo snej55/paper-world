@@ -315,7 +315,7 @@ void Slime::loadAnim(TexMan* texman)
     _idleAnim = new Anim{13, 9, 6, 0.16, true, &(texman->slimeIdle)};
     _runAnim = new Anim{13, 9, 5, 0.2, true, &(texman->slimeRun)};
     _jumpAnim = new Anim{13, 9, 8, 0.21, true, &(texman->slimeJump)};
-    _flash = new Anim{13, 9, 1, true, 0.2, &(texman->slimeFlash)};
+    _flash = new Anim{13, 9, 1, 0.2, true, &(texman->slimeFlash)};
     Entity::loadAnim(texman);
 }
 
