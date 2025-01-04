@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 
+#define SDL_MAIN_HANDLED
+
 #include <SDL2/SDL.h>
 #include "src/game.hpp"
 
