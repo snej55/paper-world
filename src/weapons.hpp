@@ -42,9 +42,9 @@ private:
     double _angle{0.0};
     double _turn{0.0};
     const double _arm_length{2.5};
-    double _target_angle;
-    double _target_turn;
-    double _angle_vel;
+    double _target_angle{0.0};
+    double _target_turn{0.0};
+    double _angle_vel{0.0};
 
     bool _up{true};
 

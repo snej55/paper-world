@@ -165,7 +165,7 @@ void Entity::handlePhysics(const double &time_step, vec2<double> frame_movement,
 
 void Entity::render(const int scrollX, const int scrollY, SDL_Renderer *renderer)
 {
-    SDL_Rect renderRect{_pos.x - scrollX, _pos.y - scrollY, _dimensions.x, _dimensions.y};
+    SDL_Rect renderRect{static_cast<int>(_pos.x) - scrollX, static_cast<int>(_pos.y) - scrollY, _dimensions.x, _dimensions.y};
     if (_recover < _recover_time)
     {
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -265,8 +265,8 @@ void Entity::wander(World *world, const double& time_step)
         }
         else
         {
-            vec2<double> checkTilePos{getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y};
-            Tile *tile{world->getTileAt(checkTilePos.x, checkTilePos.y)};
+            vec2<double> checkTilePos2{getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y};
+            Tile *tile2{world->getTileAt(checkTilePos.x, checkTilePos.y)};
             if (tile != nullptr)
             {
                 _flipped = !_flipped;
@@ -316,7 +316,7 @@ void Slime::loadAnim(TexMan* texman)
     _idleAnim = new Anim{13, 9, 6, 0.16, true, &(texman->slimeIdle)};
     _runAnim = new Anim{13, 9, 5, 0.2, true, &(texman->slimeRun)};
     _jumpAnim = new Anim{13, 9, 8, 0.21, true, &(texman->slimeJump)};
-    _flash = new Anim{13, 9, 1, true, 0.2, &(texman->slimeFlash)};
+    _flash = new Anim{13, 9, 1, 0.2, true, &(texman->slimeFlash)};
     Entity::loadAnim(texman);
 }
 
@@ -531,6 +531,7 @@ EntityManager::EntityManager(vec2<double> pos, const int total, Entity** entitie
     _Entities = new Entity*[total];
     for (std::size_t i{0}; i < total; ++i)
     {
+        _Entities[i] = nullptr;
         _Entities[i] = entities[i];
         _name = _Entities[i]->getName();
         _Entities[i]->setPalette(&_Particles);
@@ -543,6 +544,7 @@ EntityManager::EntityManager(vec2<double> pos, const int total, std::vector<Enti
     _Entities = new Entity*[total];
     for (std::size_t i{0}; i < total; ++i)
     {
+        _Entities[i] = nullptr;
         _Entities[i] = entities[i];
         _name = _Entities[i]->getName();
         _Entities[i]->setPalette(&_Particles);
@@ -558,9 +560,15 @@ void EntityManager::free()
 {
     for (std::size_t i{0}; i < _total; ++i)
     {
-        delete _Entities[i];
+        if (_Entities[i] != nullptr)
+        {
+            delete _Entities[i];
+            _Entities[i] = nullptr;
+        }
     }
+    _total = 0;
     delete _Entities;
+    _Entities = nullptr;
 }
 
 std::string_view EntityManager::getName()
@@ -605,6 +613,7 @@ void EntityManager::update(const double& time_step, World& world, double* screen
                 _Fire.setSpawning(20);
                 Util::swap(&_Entities[i], &_Entities[_total - 1]); // swap dead entity with last entity in the array
                 delete _Entities[_total - 1]; // deallocate dead entity
+                _Entities[_total - 1] = nullptr;
                 --_total; // deincrement total to avoid undefined behaviour when we reference nullptr
             }
         }
@@ -708,7 +717,7 @@ void EMManager::loadFromPath(std::string path, TexMan* texman)
 
     for (auto& entity_vec : entities)
     {
-        _Managers.push_back(new EntityManager{vec2<double>{0, 0}, entity_vec.size(), entity_vec});
+        _Managers.push_back(new EntityManager{vec2<double>{0, 0}, static_cast<int>(entity_vec.size()), entity_vec});
     }
 
     f.close();
