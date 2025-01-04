@@ -172,7 +172,7 @@ public:
         SDL_RenderCopy(renderer, mTexture, clip, &renderQuad);
     }
 
-    void render(int x, int y, SDL_Renderer* renderer, double angle, SDL_Point* center, SDL_RendererFlip flip, SDL_Rect* clip = NULL, int scale_factor = NULL)
+    void render(int x, int y, SDL_Renderer* renderer, double angle, SDL_Point* center, SDL_RendererFlip flip, SDL_Rect* clip = NULL, int scale_factor = 0)
     {
         SDL_Rect renderQuad {x, y, mWidth, mHeight};
 

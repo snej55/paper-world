@@ -567,7 +567,7 @@ void EntityManager::free()
         }
     }
     _total = 0;
-    delete _Entities;
+    delete[] _Entities;
     _Entities = nullptr;
 }
 

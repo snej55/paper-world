@@ -176,6 +176,42 @@ public:
     virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
 };
 
+// class Turtle : public Entity
+// {
+// private:
+//     Anim* _idleAnim;
+//     Anim* _runAnim;
+//     Anim* _jumpAnim;
+//     Anim* _landAnim;
+//     Anim* _flash;
+//     vec2<int> _dimensions{8, 8};
+
+//     const double _maxHealth{30.0};
+//     double _health{30.0};
+//     double _damage{4.0};
+
+// public:
+//     Turtle(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman);
+
+//     virtual ~Turtle();
+
+//     void loadAnim(TexMan* texman);
+
+//     void handleAnim(const double& time_step);
+
+//     virtual void damage(const double damage, double* screen_shake);
+
+//     virtual void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake);
+
+//     virtual void touchPlayer(Player* player, double* screen_shake, double* slomo);
+
+//     virtual void followPlayer(Player* player, World* world, const double& time_step);
+
+//     virtual void update(const double& time_step, World& world, double* screen_shake);
+
+//     virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
+// }
+
 class EntityManager
 {
 private:

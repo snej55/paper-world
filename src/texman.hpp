@@ -24,6 +24,11 @@ public:
     Texture slimeFlash{};
     Texture bat{};
     Texture batFlash{};
+    Texture turtleIdle{};
+    Texture turtleRun{};
+    Texture turtleJump{};
+    Texture turtleLand{};
+    Texture turtleFlash{};
 
     // Player Textures
     Texture playerIdle{};
@@ -76,6 +81,11 @@ public:
         laserRed.free();
         enemyHealthBar.free();
         playerHealthBar.free();
+        turtleIdle.free();
+        turtleRun.free();
+        turtleJump.free();
+        turtleLand.free();
+        turtleFlash.free();
     }
 
     void confirm(bool val, bool& success)
@@ -115,6 +125,11 @@ public:
         confirm(laserRed.loadFromFile("data/images/blasters/laser_red.png", window, renderer), success);
         confirm(enemyHealthBar.loadFromFile("data/images/entities/enemy_health_bar.png", window, renderer), success);
         confirm(playerHealthBar.loadFromFile("data/images/entities/health_bar.png", window, renderer), success);
+        confirm(turtleIdle.loadFromFile("data/images/entities/turtle/idle.png", window, renderer), success);
+        confirm(turtleRun.loadFromFile("data/images/entities/turtle/run.png", window, renderer), success);
+        confirm(turtleJump.loadFromFile("data/images/entities/turtle/jump.png", window, renderer), success);
+        confirm(turtleLand.loadFromFile("data/images/entities/turtle/jump.png", window, renderer), success);
+        confirm(turtleFlash.loadFromFile("data/images/entities/turtle/flash.png", window, renderer), success);
         return success;
     }
 };

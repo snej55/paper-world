@@ -46,56 +46,48 @@ build cmake_object_order_depends_target_main: phony || .
 
 build CMakeFiles/main.dir/main.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/main.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles\main.dir\main.cpp.obj.d
-  FLAGS = -mwindows
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
   OBJECT_DIR = CMakeFiles\main.dir
   OBJECT_FILE_DIR = CMakeFiles\main.dir
 
 build CMakeFiles/main.dir/src/anim.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/anim.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles\main.dir\src\anim.cpp.obj.d
-  FLAGS = -mwindows
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
   OBJECT_DIR = CMakeFiles\main.dir
   OBJECT_FILE_DIR = CMakeFiles\main.dir\src
 
 build CMakeFiles/main.dir/src/entities.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/entities.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles\main.dir\src\entities.cpp.obj.d
-  FLAGS = -mwindows
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
   OBJECT_DIR = CMakeFiles\main.dir
   OBJECT_FILE_DIR = CMakeFiles\main.dir\src
 
 build CMakeFiles/main.dir/src/health_bars.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/health_bars.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles\main.dir\src\health_bars.cpp.obj.d
-  FLAGS = -mwindows
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
   OBJECT_DIR = CMakeFiles\main.dir
   OBJECT_FILE_DIR = CMakeFiles\main.dir\src
 
 build CMakeFiles/main.dir/src/particles.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/particles.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles\main.dir\src\particles.cpp.obj.d
-  FLAGS = -mwindows
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
   OBJECT_DIR = CMakeFiles\main.dir
   OBJECT_FILE_DIR = CMakeFiles\main.dir\src
 
 build CMakeFiles/main.dir/src/player.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/player.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles\main.dir\src\player.cpp.obj.d
-  FLAGS = -mwindows
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
   OBJECT_DIR = CMakeFiles\main.dir
   OBJECT_FILE_DIR = CMakeFiles\main.dir\src
 
 build CMakeFiles/main.dir/src/timer.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/timer.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles\main.dir\src\timer.cpp.obj.d
-  FLAGS = -mwindows
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
   OBJECT_DIR = CMakeFiles\main.dir
   OBJECT_FILE_DIR = CMakeFiles\main.dir\src
 
 build CMakeFiles/main.dir/src/weapons.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/weapons.cpp || cmake_object_order_depends_target_main
   DEP_FILE = CMakeFiles\main.dir\src\weapons.cpp.obj.d
-  FLAGS = -mwindows
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
   OBJECT_DIR = CMakeFiles\main.dir
   OBJECT_FILE_DIR = CMakeFiles\main.dir\src
@@ -109,7 +101,6 @@ build CMakeFiles/main.dir/src/weapons.cpp.obj: CXX_COMPILER__main_unscanned_ C$:
 # Link the executable main.exe
 
 build main.exe: CXX_EXECUTABLE_LINKER__main_ CMakeFiles/main.dir/main.cpp.obj CMakeFiles/main.dir/src/anim.cpp.obj CMakeFiles/main.dir/src/entities.cpp.obj CMakeFiles/main.dir/src/health_bars.cpp.obj CMakeFiles/main.dir/src/particles.cpp.obj CMakeFiles/main.dir/src/player.cpp.obj CMakeFiles/main.dir/src/timer.cpp.obj CMakeFiles/main.dir/src/weapons.cpp.obj
-  FLAGS = -mwindows
   LINK_LIBRARIES = -lmingw32  -lSDL2main  -lSDL2  -lSDL2_image  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   LINK_PATH = -LC:/Users/AnkenWannePC/vs_projects/paper-world/lib
   OBJECT_DIR = CMakeFiles\main.dir

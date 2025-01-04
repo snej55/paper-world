@@ -47,7 +47,7 @@ SDL_Rect* Player::getRect()
 
 SDL_Rect Player::getAttackRect()
 {
-    return {(_flipped ? getCenter().x - 12 : getCenter().x), _pos.y - 6, 12, 16};
+    return {static_cast<int>(_flipped ? getCenter().x - 12 : getCenter().x), static_cast<int>(_pos.y) - 6, 12, 16};
 }
 
 bool Player::getAttacking()

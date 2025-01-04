@@ -99,7 +99,7 @@ public:
     void updateGrass(Grass* grass, const double& time_step, SDL_Rect* rect)
     {
         double target_angle = 0.0;
-        SDL_Rect grassRect{grass->pos.x, grass->pos.y + 4, 4, 5};
+        SDL_Rect grassRect{static_cast<int>(grass->pos.x), static_cast<int>(grass->pos.y) + 4, 4, 5};
         if (Util::checkCollision(&grassRect, rect))
         {
             double distance {std::pow(static_cast<double>(grassRect.x + grassRect.w / 2) - static_cast<double>(rect->x + rect->w / 2), 2) + std::pow(static_cast<double>(grassRect.y + grassRect.h / 2) - static_cast<double>(rect->y + rect->h / 2), 2)};
@@ -145,7 +145,7 @@ public:
                     grass->angle = std::max(-90.0, std::min(90.0, grass->angle));
                     SDL_Rect clipRect{grass->variant * 9, 0, 9, 9};
                     SDL_Point center{5, 5};
-                    texman->grass.render((int)grass->pos.x - scrollX - 2.5, (int)grass->pos.y - scrollY + 3, renderer, grass->angle, &center, SDL_FLIP_NONE, &clipRect);
+                    texman->grass.render(static_cast<int>(grass->pos.x) - scrollX - 2.5, static_cast<int>(grass->pos.y) - scrollY + 3, renderer, grass->angle, &center, SDL_FLIP_NONE, &clipRect);
                 }
             }
         }
@@ -442,8 +442,8 @@ public:
     void render(const int scrollX, const int scrollY, SDL_Window* window, SDL_Renderer* renderer, TexMan* texman, const int width, const int height)
     {
         // location in relative chunk coords
-        int chunkX {std::floor((double)scrollX / (double)TILE_SIZE / (double)CHUNK_SIZE)};
-        int chunkY {std::floor((double)scrollY / (double)TILE_SIZE / (double)CHUNK_SIZE)};
+        int chunkX {static_cast<int>(std::floor((double)scrollX / (double)TILE_SIZE / (double)CHUNK_SIZE))};
+        int chunkY {static_cast<int>(std::floor((double)scrollY / (double)TILE_SIZE / (double)CHUNK_SIZE))};
         for (int y{0}; y < std::floor(height / TILE_SIZE) + 1; ++y)
         {
             for (int x{0}; x < std::floor(width / TILE_SIZE) + 1; ++x)

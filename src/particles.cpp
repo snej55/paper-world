@@ -296,7 +296,7 @@ void FireSpawner::update(const double& time_step, const int scrollX, const int s
                 --_spawning;
                 double dist{Util::random() * 16.0 - 8.0};
                 double angle{Util::random() * M_PI * 2};
-                _fire[i] = new Fire{{_pos.x + std::cos(angle) * dist, _pos.y + std::sin(angle) * dist}, {0, -1.0 * Util::random() - 1.0}, std::rand() % 7};
+                _fire[i] = new Fire{{_pos.x + std::cos(angle) * dist, _pos.y + std::sin(angle) * dist}, {0, -1.0 * Util::random() - 1.0}, static_cast<double>(std::rand() % 7)};
             }
         } else {
             if (isDead(fire))
@@ -307,7 +307,7 @@ void FireSpawner::update(const double& time_step, const int scrollX, const int s
                     delete fire;
                     double dist{Util::random() * 16.0 - 8.0};
                     double angle{Util::random() * M_PI * 2};
-                    _fire[i] = new Fire{{_pos.x + std::cos(angle) * dist, _pos.y + std::sin(angle) * dist}, {0, -1.0 * Util::random() - 1.0}, std::rand() % 7};
+                    _fire[i] = new Fire{{_pos.x + std::cos(angle) * dist, _pos.y + std::sin(angle) * dist}, {0, -1.0 * Util::random() - 1.0}, static_cast<double>(std::rand() % 7)};
                 }
             } else {
                 updateFire(fire, time_step, world);
