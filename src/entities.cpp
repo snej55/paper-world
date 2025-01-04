@@ -59,6 +59,7 @@ std::string_view Entity::getName()
 
 void Entity::damage(const double damage, double* screen_shake)
 {
+    *screen_shake = std::max(*screen_shake, 6.0);
     _recover = 0.0;
     _should_damage = true;
     _health -= damage;
