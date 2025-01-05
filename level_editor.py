@@ -17,7 +17,7 @@ CONVERT_TYPES = {
 AUTO_TILE_TYPES = {'grass', 'rock'}
 AUTO_TILE_MAP = {'0011': 1, '1011': 2, '1001': 3, '0001': 4, '0111': 5, '1111': 6, '1101': 7, '0101': 8, 
                 '0110': 9, '1110': 10, '1100': 11, '0100': 12, '0010': 13, '1010': 14, '1000': 15, '0000': 16}
-ENTITIES = {'slime', 'bat'}
+ENTITIES = {'slime', 'bat', 'turtle'}
 
 class Editor:
     def __init__(self):
@@ -36,6 +36,7 @@ class Editor:
             'spike': self.load_tileset(pygame.image.load('data/images/tiles/spike.png').convert()),
             'slime': [pygame.image.load('data/images/entities/slime/thumb.png').convert()],
             'bat': [pygame.image.load('data/images/entities/bat/thumb.png').convert()],
+            'turtle': [pygame.image.load('data/images/entities/turtle/thumb.png').convert()],
             'spring': [pygame.image.load('data/images/tiles/spring.png').convert()],
             'grass_key': [pygame.image.load('data/images/tiles/grass_key.png').convert()]
         }

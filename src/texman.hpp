@@ -128,7 +128,7 @@ public:
         confirm(turtleIdle.loadFromFile("data/images/entities/turtle/idle.png", window, renderer), success);
         confirm(turtleRun.loadFromFile("data/images/entities/turtle/run.png", window, renderer), success);
         confirm(turtleJump.loadFromFile("data/images/entities/turtle/jump.png", window, renderer), success);
-        confirm(turtleLand.loadFromFile("data/images/entities/turtle/jump.png", window, renderer), success);
+        confirm(turtleLand.loadFromFile("data/images/entities/turtle/land.png", window, renderer), success);
         confirm(turtleFlash.loadFromFile("data/images/entities/turtle/flash.png", window, renderer), success);
         return success;
     }

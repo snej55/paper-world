@@ -249,36 +249,41 @@ void Entity::followPlayer(Player *player, World *world, const double& time_step)
 
 void Entity::wander(World *world, const double& time_step)
 {
-    if (_wandering)
-    {
-        vec2<double> checkTilePos{getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y + 8};
-        Tile *tile{world->getTileAt(checkTilePos.x, checkTilePos.y)};
-        if (tile == nullptr)
         {
-            _vel.x += (_flipped ? 0.2 : -0.2) * time_step;
-            _flipped = !_flipped;
-        }
-        else if (Util::elementIn<TileType, std::size(DANGER_TILES)>(tile->type, DANGER_TILES))
+        if (_wandering)
         {
-            _vel.x += (_flipped ? 0.2 : -0.2) * time_step;
-            _flipped = !_flipped;
+            vec2<double> checkTilePos{getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y + 10};
+            Tile *tile{world->getTileAt(checkTilePos.x, checkTilePos.y)};
+            if (tile == nullptr)
+            {
+                _vel.x += (_flipped ? 0.2 : -0.2) * time_step;
+                _flipped = !_flipped;
+            }
+            else if (Util::elementIn<TileType, std::size(DANGER_TILES)>(tile->type, DANGER_TILES))
+            {
+                _vel.x += (_flipped ? 0.2 : -0.2) * time_step;
+                _flipped = !_flipped;
+            }
+            else
+            {
+                checkTilePos = {getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y};
+                tile = {world->getTileAt(checkTilePos.x, checkTilePos.y)};
+                if (tile != nullptr)
+                {
+                    if (Util::elementIn<TileType, std::size(SOLID_TILES)>(tile->type, SOLID_TILES))
+                    {
+                        _flipped = !_flipped;
+                    }
+                }
+                _vel.x += _flipped ? -0.08 : 0.08;
+            }
         }
         else
         {
-            vec2<double> checkTilePos2{getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y};
-            Tile *tile2{world->getTileAt(checkTilePos.x, checkTilePos.y)};
-            if (tile != nullptr)
-            {
-                _flipped = !_flipped;
-            }
-            _vel.x += _flipped ? -0.08 : 0.08;
+            _vel.x *= 0.8;
         }
+        _anim_flipped = _flipped;
     }
-    else
-    {
-        _vel.x *= 0.8;
-    }
-    _anim_flipped = _flipped;
 }
 
 void Entity::updateHealthBar()
@@ -546,10 +551,10 @@ Turtle::~Turtle()
 void Turtle::loadAnim(TexMan* texman)
 {
     _idleAnim = new Anim{8, 8, 6, 0.2, true, &(texman->turtleIdle)};
-    _runAnim = new Anim{8, 8, 5, 0.3, true, &(texman->turtleRun)};
+    _runAnim = new Anim{8, 8, 5, 0.2, true, &(texman->turtleRun)};
     _jumpAnim = new Anim{8, 8, 6, 0.2, false, &(texman->turtleJump)};
     _landAnim = new Anim{8, 8, 6, 0.3, false, &(texman->turtleLand)};
-    _flash = new Anim{7, 4, 1, 0.2, true, &(texman->batFlash)};
+    _flash = new Anim{7, 4, 1, 0.2, true, &(texman->turtleFlash)};
     Entity::loadAnim(texman); // for the health_bar
     _health_bar->setDimensions({8, 2});
 }
@@ -588,7 +593,7 @@ void Turtle::handleAnim(const double& time_step)
         _grounded = 0.0;
     }
     _anim->tick(time_step);
-    _anim->setFlipped(_flipped ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+    _anim->setFlipped(_anim_flipped ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 }
 
 void Turtle::damage(const double damage, double* screen_shake)
@@ -598,17 +603,74 @@ void Turtle::damage(const double damage, double* screen_shake)
 
 void Turtle::touchPlayer(Player* player, double* screen_shake, double* slomo)
 {
-    Entity::touchPlayer(player, screen_shake, slomo);
+    _rect.x = _pos.x;
+    _rect.y = _pos.y;
+    SDL_Rect *player_rect{player->getRect()};
+    if (Util::checkCollision(&_rect, player_rect))
+    {
+        if (player->getFalling() > 3.0 && player->getVelY() > 0.1)
+        {
+            _grounded = 99.9;
+            player->setVelY(-3.6);
+            _landAnim->setFrame(2); // at the bottom
+            _wandering = false;
+            _wander_timer = 100.0;
+        }
+    }
+    if (player->getAttacking())
+    {
+        SDL_Rect playerAttackRect {player->getAttackRect()};
+        if (Util::checkCollision(&_rect, &playerAttackRect) && _recover > _recover_time)
+        {
+            damage(player->getSwordDamage() * 0.5, screen_shake);
+        }
+    }
 }
 
-void Turtle::followPlayer(Player* player, World* world, const double& time_step)
+void Turtle::wander(World* world, const double& time_step)
 {
-    Entity::followPlayer(player, world, time_step);
+    {
+        if (_wandering)
+        {
+            vec2<double> checkTilePos{getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y + 10};
+            Tile *tile{world->getTileAt(checkTilePos.x, checkTilePos.y)};
+            if (tile == nullptr)
+            {
+                _vel.x += (_flipped ? 0.2 : -0.2) * time_step;
+                _flipped = !_flipped;
+            }
+            else if (Util::elementIn<TileType, std::size(DANGER_TILES)>(tile->type, DANGER_TILES))
+            {
+                _vel.x += (_flipped ? 0.2 : -0.2) * time_step;
+                _flipped = !_flipped;
+            }
+            else
+            {
+                checkTilePos = {getCenter().x + (_flipped ? -10.0 : 10.0), getCenter().y};
+                tile = {world->getTileAt(checkTilePos.x, checkTilePos.y)};
+                if (tile != nullptr)
+                {
+                    if (Util::elementIn<TileType, std::size(SOLID_TILES)>(tile->type, SOLID_TILES))
+                    {
+                        _flipped = !_flipped;
+                        
+                    }
+                }
+                _vel.x += _flipped ? -0.04 : 0.04;
+            }
+        }
+        else
+        {
+            _vel.x *= 0.8;
+        }
+        _anim_flipped = _flipped;
+    }
 }
 
 void Turtle::update(const double& time_step, World& world, double* screen_shake)
 {
     handleAnim(time_step);
+    _vel.x *= 0.9;
     Entity::update(time_step, world, screen_shake);
 }
 
@@ -699,6 +761,10 @@ void EntityManager::update(const double& time_step, World& world, double* screen
                 entity->touchPlayer(player, screen_shake, slomo);
             } else {
                 entity->wander(&world, time_step);
+                if (entity->getName() == "turtle")
+                {
+                    entity->touchPlayer(player, screen_shake, slomo);
+                }
             }
             // some black magic
             if (entity->getShouldDie())
@@ -784,6 +850,9 @@ void EMManager::loadFromPath(std::string path, TexMan* texman)
                         } else if (entity_name == "bat")
                         {
                             entity_vec.push_back(new Bat{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name, texman});
+                        } else if (entity_name == "turtle")
+                        {
+                            entity_vec.push_back(new Turtle{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, true, entity_name, texman});
                         } else {
                             entity_vec.push_back(new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, "default"});
                         }
@@ -800,6 +869,9 @@ void EMManager::loadFromPath(std::string path, TexMan* texman)
             } else if (entity_name == "bat")
             {
                 entities.push_back(std::vector<Entity*>{new Bat{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, entity_name, texman}});
+            } else if (entity_name == "turtle")
+            {
+                entities.push_back(std::vector<Entity*>{new Turtle{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, true, entity_name, texman}});
             } else {
                 entities.push_back(std::vector<Entity*>{new Entity{vec2<double>{(double)e["pos"][0], (double)e["pos"][1]}, vec2<double> {0, 0}, 0.2, false, "default"}});
             }

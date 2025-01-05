@@ -44,7 +44,7 @@ protected:
 
     bool _flipped{false}; // flipping for moving direction
     bool _wandering{false}; // if it is moving while it is wandering
-    double _wander_timer{0.0};
+    double _wander_timer{static_cast<double>(std::rand() % 180)};
     bool _anim_flipped{false}; // flipped for animation
 
     int _id{0};
@@ -197,7 +197,7 @@ private:
     double _health{30.0};
     double _damage{4.0};
 
-    double _grounded{99.9};
+    double _grounded{0.0};
 
 public:
     Turtle(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman);
@@ -208,11 +208,16 @@ public:
 
     void handleAnim(const double& time_step);
 
+    void setGrounded(const double grounded)
+    {
+        _grounded = grounded;
+    }
+
     virtual void damage(const double damage, double* screen_shake);
 
     virtual void touchPlayer(Player* player, double* screen_shake, double* slomo);
 
-    virtual void followPlayer(Player* player, World* world, const double& time_step);
+    virtual void wander(World* world, const double& time_step);
 
     virtual void update(const double& time_step, World& world, double* screen_shake);
 

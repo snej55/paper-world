@@ -111,6 +111,12 @@ public:
         return 0.0;
     }
 
+    double getFalling() {return _falling;}
+    void setVelY(const double val) {_vel.y = val;}
+    void setVelX(const double val) {_vel.x = val;}
+    double getVelY() {return _vel.y;}
+    double getVelX() {return _vel.x;}
+
     Controller* getController();
     // Sword* getSword() {return _Sword;}
     vec2<double>& getPos();

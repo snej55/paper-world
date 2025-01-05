@@ -96,7 +96,7 @@ public:
         ++_total;
     }
 
-    void updateGrass(Grass* grass, const double& time_step, SDL_Rect* rect)
+    void updateGrass(Grass* grass, const double& time_step, SDL_Rect* rect, bool check_collision = true)
     {
         double target_angle = 0.0;
         SDL_Rect grassRect{static_cast<int>(grass->pos.x), static_cast<int>(grass->pos.y) + 4, 4, 5};
@@ -135,7 +135,8 @@ public:
                 for (std::size_t g{0}; g < grassTile->total; ++g)
                 {
                     Grass* grass {grassTile->grass[g]};
-                    updateGrass(grass, time_step, player_rect);
+                    SDL_Rect tileRect {grassTile->pos.x * TILE_SIZE - 8, grassTile->pos.y * TILE_SIZE - 8, TILE_SIZE + 16, TILE_SIZE + 16};
+                    updateGrass(grass, time_step, player_rect, Util::checkCollision(&tileRect, player_rect));
                     grass->target_angle += std::sin(time * 0.001 + (grass->pos.x + grass->pos.y) / 10.0) * (std::sin(time * 0.003 + (grass->pos.x + grass->pos.y) * 0.1) + 1.0) / 2 * time_step;
                     grass->target_angle += std::cos(time * (0.01 + 0.01 * (std::sin(grass->pos.x + grass->pos.y) + 1.0)) + (grass->pos.x + grass->pos.y) / 5.0) * 0.2 * (std::sin(time * 0.003 + (grass->pos.x + grass->pos.y) * 0.1) + 1.0) / 2 * time_step;
                     double force {grass->target_angle - grass->angle / _tension};
