@@ -25,6 +25,8 @@ protected:
     bool _peaceful;
     std::string _name;
 
+    vec2<int> _anim_offset{0, 0};
+
     EntityHealthBar* _health_bar {nullptr};
 
     double _falling{99.0};
@@ -62,11 +64,13 @@ public:
     virtual void loadAnim(TexMan* texman)
     {
         _health_bar = new EntityHealthBar{&(texman->enemyHealthBar), {12, 2}, _maxHealth};
+        _health_bar->setDimensions({_dimensions.x, 2});
     }
 
     int getId();
     double getHealth() {return _health;}
     const double getMaxHealth() const {return _maxHealth;}
+    const vec2<int> getAnimOffset() const {return _anim_offset;}
 
     vec2<double>& getPos();
     vec2<double> getCenter();
@@ -176,41 +180,44 @@ public:
     virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
 };
 
-// class Turtle : public Entity
-// {
-// private:
-//     Anim* _idleAnim;
-//     Anim* _runAnim;
-//     Anim* _jumpAnim;
-//     Anim* _landAnim;
-//     Anim* _flash;
-//     vec2<int> _dimensions{8, 8};
+class Turtle : public Entity
+{
+private:
+    Anim* _idleAnim;
+    Anim* _runAnim;
+    Anim* _jumpAnim;
+    Anim* _landAnim;
+    Anim* _flash;
+    Anim* _anim;
 
-//     const double _maxHealth{30.0};
-//     double _health{30.0};
-//     double _damage{4.0};
+    vec2<int> _dimensions{8, 8};
+    vec2<int> _anim_offset{0, 0};
 
-// public:
-//     Turtle(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman);
+    const double _maxHealth{30.0};
+    double _health{30.0};
+    double _damage{4.0};
 
-//     virtual ~Turtle();
+    double _grounded{99.9};
 
-//     void loadAnim(TexMan* texman);
+public:
+    Turtle(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman);
 
-//     void handleAnim(const double& time_step);
+    virtual ~Turtle();
 
-//     virtual void damage(const double damage, double* screen_shake);
+    void loadAnim(TexMan* texman);
 
-//     virtual void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake);
+    void handleAnim(const double& time_step);
 
-//     virtual void touchPlayer(Player* player, double* screen_shake, double* slomo);
+    virtual void damage(const double damage, double* screen_shake);
 
-//     virtual void followPlayer(Player* player, World* world, const double& time_step);
+    virtual void touchPlayer(Player* player, double* screen_shake, double* slomo);
 
-//     virtual void update(const double& time_step, World& world, double* screen_shake);
+    virtual void followPlayer(Player* player, World* world, const double& time_step);
 
-//     virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
-// }
+    virtual void update(const double& time_step, World& world, double* screen_shake);
+
+    virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
+};
 
 class EntityManager
 {

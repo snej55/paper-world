@@ -318,6 +318,7 @@ void Slime::loadAnim(TexMan* texman)
     _jumpAnim = new Anim{13, 9, 8, 0.21, true, &(texman->slimeJump)};
     _flash = new Anim{13, 9, 1, 0.2, true, &(texman->slimeFlash)};
     Entity::loadAnim(texman);
+    _health_bar->setDimensions({11, 2});
 }
 
 void Slime::handleAnim(const double& time_step)
@@ -378,6 +379,8 @@ void Bat::loadAnim(TexMan* texman)
     _flash = new Anim{7, 4, 1, 0.2, true, &(texman->batFlash)};
     _glowTex = &(texman->lightTex);
     Entity::loadAnim(texman);
+    _health_bar->setDimensions({7, 2});
+    _health_bar->setOffset({1, 0});
 }
 
 void Bat::handleAnim(const double& time_step)
@@ -524,6 +527,101 @@ void Bat::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
     Entity::renderHealthBar(scrollX, scrollY, renderer);
 }
 
+
+Turtle::Turtle(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman)
+    : Entity{pos, vel, 0.4, peaceful, name}
+{
+    loadAnim(texman);
+}
+
+Turtle::~Turtle()
+{
+    delete _idleAnim;
+    delete _runAnim;
+    delete _jumpAnim;
+    delete _landAnim;
+    delete _flash;
+}
+
+void Turtle::loadAnim(TexMan* texman)
+{
+    _idleAnim = new Anim{8, 8, 6, 0.2, true, &(texman->turtleIdle)};
+    _runAnim = new Anim{8, 8, 5, 0.3, true, &(texman->turtleRun)};
+    _jumpAnim = new Anim{8, 8, 6, 0.2, false, &(texman->turtleJump)};
+    _landAnim = new Anim{8, 8, 6, 0.3, false, &(texman->turtleLand)};
+    _flash = new Anim{7, 4, 1, 0.2, true, &(texman->batFlash)};
+    Entity::loadAnim(texman); // for the health_bar
+    _health_bar->setDimensions({8, 2});
+}
+
+void Turtle::handleAnim(const double& time_step)
+{
+    _anim = _idleAnim;
+    if (_falling >= 3.0)
+    {
+        _anim = _jumpAnim;
+        _runAnim->reset();
+        _idleAnim->reset();
+        _landAnim->reset();
+        _grounded = 99.9;
+    } else if (std::abs(_vel.x) > 0.05)
+    {
+        _anim = _runAnim;
+        _jumpAnim->reset();
+        _idleAnim->reset();
+        _landAnim->reset();
+    } else if (_grounded > 3.0)
+    {
+        _anim = _landAnim;
+        _jumpAnim->reset();
+        _idleAnim->reset();
+        _runAnim->reset();
+        if (_landAnim->getFinished())
+        {
+            _grounded = 0.0;
+        }
+    } else {
+        _anim = _idleAnim;
+        _jumpAnim->reset();
+        _runAnim->reset();
+        _landAnim->reset();
+        _grounded = 0.0;
+    }
+    _anim->tick(time_step);
+    _anim->setFlipped(_flipped ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
+}
+
+void Turtle::damage(const double damage, double* screen_shake)
+{
+    Entity::damage(damage, screen_shake);
+}
+
+void Turtle::touchPlayer(Player* player, double* screen_shake, double* slomo)
+{
+    Entity::touchPlayer(player, screen_shake, slomo);
+}
+
+void Turtle::followPlayer(Player* player, World* world, const double& time_step)
+{
+    Entity::followPlayer(player, world, time_step);
+}
+
+void Turtle::update(const double& time_step, World& world, double* screen_shake)
+{
+    handleAnim(time_step);
+    Entity::update(time_step, world, screen_shake);
+}
+
+void Turtle::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
+{
+    if (_recover > _recover_time)
+    {
+        _anim->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
+    } else {
+        _flash->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
+    }
+    Entity::renderHealthBar(scrollX, scrollY, renderer);
+}
 
 EntityManager::EntityManager(vec2<double> pos, const int total, Entity** entities)
     : _total{total}, _pos{pos}

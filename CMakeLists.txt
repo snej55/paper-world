@@ -3,7 +3,6 @@ project(PaperWorld VERSION 1.0
                   DESCRIPTION "Pixel art platformer"
                   LANGUAGES CXX)
 
-
 set(CMAKE_CPP_COMPILER g++)
 
 # for release

@@ -16,11 +16,15 @@ private:
     SDL_Color _greenLight{0x60, 0xae, 0x7b, 0xFF};
     SDL_Color _redDark{0xa8, 0x60, 0x5d, 0xFF};
     SDL_Color _redLight{0xd1, 0xa7, 0x7e, 0xFF};
+    vec2<int> _offset{0, 0};
 
 public:
     EntityHealthBar(Texture* tex, vec2<int> dimensions, const double maxHealth);
 
     void update(void* entity);
+
+    void setDimensions(vec2<int> dimensions);
+    void setOffset(vec2<int> offset);
 
     void render(const int scrollX, const int scrollY, SDL_Renderer* renderer, void* entity);
 };
