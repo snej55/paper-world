@@ -62,13 +62,13 @@ void Entity::damage(const double damage, double* screen_shake)
     *screen_shake = std::max(*screen_shake, 6.0);
     _recover = 0.0;
     _should_damage = true;
-    _health -= damage;
-    if (_health <= 0.0)
+    setHealth(getHealth() - damage);
+    if (getHealth() <= 0.0)
     {
         *screen_shake = std::max(*screen_shake, 8.0);
         die(screen_shake);
     }
-
+    std::cout << getHealth() << '\n';
 }
 
 void Entity::die(double *screen_shake)
@@ -166,7 +166,7 @@ void Entity::handlePhysics(const double &time_step, vec2<double> frame_movement,
 void Entity::render(const int scrollX, const int scrollY, SDL_Renderer *renderer)
 {
     SDL_Rect renderRect{static_cast<int>(_pos.x) - scrollX, static_cast<int>(_pos.y) - scrollY, _dimensions.x, _dimensions.y};
-    if (_recover < _recover_time)
+    if (_recover < _recover_time - 1.0)
     {
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     }
@@ -186,11 +186,11 @@ void Entity::touchPlayer(Player *player, double *screen_shake, double* slomo)
     if (player->getAttacking())
     {
         SDL_Rect playerAttackRect {player->getAttackRect()};
-        if (Util::checkCollision(&_rect, &playerAttackRect) && _recover > _recover_time)
+        if (Util::checkCollision(&_rect, &playerAttackRect) && _recover > _recover_time && player->getRecover() > 10.0)
         {
             damage(player->getSwordDamage(), screen_shake);
         }
-    } else if (Util::checkCollision(player_rect, &_rect) && _recover > _recover_time)
+    } else if (Util::checkCollision(player_rect, &_rect) && _recover > _recover_time && player->getRecover() > 10.0)
     {
         player->damage(_damage, screen_shake, slomo);
     }
@@ -296,7 +296,7 @@ void Entity::updateHealthBar()
 
 void Entity::renderHealthBar(const int scrollX, const int scrollY, SDL_Renderer* renderer)
 {
-    if (_health_bar != nullptr && _health < _maxHealth)
+    if (_health_bar != nullptr && getHealth() < getMaxHealth())
     {
         _health_bar->render(scrollX, scrollY, renderer, this);
     }
@@ -306,6 +306,8 @@ Slime::Slime(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, 
     : Entity{pos, vel, gravity, peaceful, name}
 {
     loadAnim(texman);
+    _maxHealth = 40.0;
+    _health = 40.0;
 }
 
 Slime::~Slime()
@@ -370,6 +372,8 @@ Bat::Bat(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std:
     : Entity{pos, vel, 0.05, peaceful, name}
 {
     loadAnim(texman);
+    _maxHealth = 20.0;
+    _health = 20.0;
 }
 
 Bat::~Bat()
@@ -471,11 +475,11 @@ void Bat::touchPlayer(Player* player, double* screen_shake, double* slomo)
     if (player->getAttacking())
     {
         SDL_Rect playerAttackRect {player->getAttackRect()};
-        if (Util::checkCollision(&_rect, &playerAttackRect) && _recover > _recover_time)
+        if (Util::checkCollision(&_rect, &playerAttackRect) && _recover > _recover_time && player->getRecover() > 10.0)
         {
             damage(player->getSwordDamage(), screen_shake);
         }
-    } if (Util::checkCollision(player_rect, &_rect))
+    } if (Util::checkCollision(player_rect, &_rect) && player->getRecover() > 10.0)
     {
         double angle = Util::random() * 2.0 * M_PI;
         _vel.x += std::cos(angle) * 5.0;
@@ -537,6 +541,8 @@ Turtle::Turtle(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful
     : Entity{pos, vel, 0.4, peaceful, name}
 {
     loadAnim(texman);
+    _maxHealth = 60.0;
+    _health = 60.0;
 }
 
 Turtle::~Turtle()
@@ -598,6 +604,7 @@ void Turtle::handleAnim(const double& time_step)
 
 void Turtle::damage(const double damage, double* screen_shake)
 {
+    _vel.x *= 0.1;
     Entity::damage(damage, screen_shake);
 }
 
@@ -676,7 +683,7 @@ void Turtle::update(const double& time_step, World& world, double* screen_shake)
 
 void Turtle::render(const int scrollX, const int scrollY, SDL_Renderer* renderer)
 {
-    if (_recover > _recover_time)
+    if (_recover > _recover_time - 1.0)
     {
         _anim->render((int)_pos.x - _anim_offset.x, (int)_pos.y - _anim_offset.y, scrollX, scrollY, renderer);
     } else {
@@ -701,7 +708,7 @@ EntityManager::EntityManager(vec2<double> pos, const int total, Entity** entitie
 EntityManager::EntityManager(vec2<double> pos, const int total, std::vector<Entity*> entities)
     : _total{total}, _pos{pos}
 {
-    _Entities = new Entity*[total];
+    _Entities = new Entity*[512];
     for (std::size_t i{0}; i < total; ++i)
     {
         _Entities[i] = nullptr;
@@ -769,16 +776,83 @@ void EntityManager::update(const double& time_step, World& world, double* screen
             // some black magic
             if (entity->getShouldDie())
             {
-                _Particles.setPos(entity->getCenter());
-                _Smoke.setPos(entity->getCenter());
-                _Fire.setPos(entity->getCenter());
-                _Particles.setSpawning(32, {8.0, 8.0}, SDL_Color{0x00, 0x00, 0x00});
-                _Smoke.setSpawning(20, {1, 2}, {0x88, 0x88, 0x88});
-                _Fire.setSpawning(20);
+                if (entity->getName() == "turtle")
+                {
+                    _Particles.setPos(entity->getCenter());
+                    _Smoke.setPos(entity->getCenter());
+                    _Fire.setPos(entity->getCenter());
+                    _Particles.setSpawning(32, {8.0, 8.0}, SDL_Color{0x00, 0x00, 0x00});
+                    _Smoke.setSpawning(20, {1, 2}, {0x88, 0x88, 0x88});
+                    _Fire.setSpawning(20);
+                    int num{(std::rand() % 10) + 15};
+                    for (int i{0}; i < num; ++i)
+                    {
+                        _SparkManager.addSpark(new Spark{entity->getCenter(), Util::random() * M_PI * 2.0, Util::random() * 3.0 + 2.0});
+                    }
+                } else if (entity->getName() == "slime")
+                {
+                    _Particles.setPos(entity->getCenter());
+                    _Smoke.setPos(entity->getCenter());
+                    _Fire.setPos(entity->getCenter());
+                    _Particles.setSpawning(32, {8.0, 8.0}, SDL_Color{0x00, 0x00, 0x00});
+                    _Smoke.setSpawning(20, {1, 2}, {0x88, 0x88, 0x88});
+                    _Fire.setSpawning(20);
+                    int num{(std::rand() % 10) + 15};
+                    for (int i{0}; i < num; ++i)
+                    {
+                        _SparkManager.addSpark(new Spark{entity->getCenter(), Util::random() * M_PI * 2.0, Util::random() * 3.0 + 2.0});
+                    }
+                } else if (entity->getName() == "bat")
+                {
+                    _Particles.setPos(entity->getCenter());
+                    _Smoke.setPos(entity->getCenter());
+                    _Fire.setPos(entity->getCenter());
+                    _Particles.setSpawning(16, {8.0, 4.0}, SDL_Color{0x00, 0x00, 0x00});
+                    _Smoke.setSpawning(5, {1, 2}, {0x88, 0x88, 0x88});
+                    _Fire.setSpawning(10);
+                    int num{(std::rand() % 10) + 15};
+                    for (int i{0}; i < num; ++i)
+                    {
+                        _SparkManager.addSpark(new Spark{entity->getCenter(), Util::random() * M_PI * 2.0, Util::random() * 2.0 + 1.0});
+                    }
+                }
                 Util::swap(&_Entities[i], &_Entities[_total - 1]); // swap dead entity with last entity in the array
                 delete _Entities[_total - 1]; // deallocate dead entity
                 _Entities[_total - 1] = nullptr;
                 --_total; // deincrement total to avoid undefined behaviour when we reference nullptr
+            } else if (entity->getShouldDamage())
+            {
+                entity->setShouldDamage(false);
+                if (entity->getName() == "turtle")
+                {
+                    int num{(std::rand() % 5) + 10};
+                    for (int i{0}; i < num; ++i)
+                    {
+                        _SparkManager.addSpark(new Spark{entity->getCenter(), Util::random() * M_PI * 2.0, Util::random() * 2.0 + 0.5});
+                    }
+                    _Particles.setPos(entity->getCenter());
+                    _Particles.setSpawning(16, {8.0, 8.0}, SDL_Color{0x00, 0x00, 0x00});
+                }
+                if (entity->getName() == "slime")
+                {
+                    int num{(std::rand() % 5) + 10};
+                    for (int i{0}; i < num; ++i)
+                    {
+                        _SparkManager.addSpark(new Spark{entity->getCenter(), Util::random() * M_PI * 2.0, Util::random() * 3.0 + 1.0});
+                    }
+                    _Particles.setPos(entity->getCenter());
+                    _Particles.setSpawning(16, {3.0, 10.0}, SDL_Color{0x00, 0x00, 0x00});
+                }
+                if (entity->getName() == "bat")
+                {
+                    int num{(std::rand() % 5) + 6};
+                    for (int i{0}; i < num; ++i)
+                    {
+                        _SparkManager.addSpark(new Spark{entity->getCenter(), Util::random() * M_PI * 2.0, Util::random() * 2.0 + 0.5});
+                    }
+                    _Particles.setPos(entity->getCenter());
+                    _Particles.setSpawning(8, {4.0, 4.0}, SDL_Color{0x00, 0x00, 0x00});
+                }
             }
         }
     }
@@ -803,6 +877,8 @@ void EntityManager::updateParticles(const double& time_step, const int scrollX, 
     _Particles.update(time_step, scrollX, scrollY, renderer, world, texman);
     _Smoke.update(time_step, scrollX, scrollY, renderer, world, &texman->particle);
     _Fire.update(time_step, scrollX, scrollY, renderer, world, &texman->particleFire);
+    _SparkManager.setTexture(&(texman->particle));
+    _SparkManager.update(time_step, scrollX, scrollY, renderer);
 }
 
 // "Manager of the Managers" Entity-Manager-Manager

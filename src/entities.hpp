@@ -13,6 +13,7 @@
 #include "./player.hpp"
 #include "./anim.hpp"
 #include "./health_bars.hpp"
+#include "./sparks.hpp"
 
 class Entity
 {
@@ -36,8 +37,8 @@ protected:
     bool _should_die {false};
     bool _should_damage{false};
 
+    double _maxHealth{10.0};
     double _health{10.0};
-    const double _maxHealth{10.0};
     double _damage{5.0};
     double _recover{100.0};
     double _recover_time{10.0};
@@ -63,13 +64,14 @@ public:
 
     virtual void loadAnim(TexMan* texman)
     {
-        _health_bar = new EntityHealthBar{&(texman->enemyHealthBar), {12, 2}, _maxHealth};
+        _health_bar = new EntityHealthBar{&(texman->enemyHealthBar), {12, 2}, getMaxHealth()};
         _health_bar->setDimensions({_dimensions.x, 2});
     }
 
     int getId();
-    double getHealth() {return _health;}
-    const double getMaxHealth() const {return _maxHealth;}
+    virtual double getHealth() {return _health;}
+    virtual double getMaxHealth() {return _maxHealth;}
+    virtual void setHealth(double val) {_health = val;} 
     const vec2<int> getAnimOffset() const {return _anim_offset;}
 
     vec2<double>& getPos();
@@ -77,6 +79,8 @@ public:
     void updateRect();
     SDL_Rect* getRect();
     bool getShouldDie();
+    bool getShouldDamage() {return _should_damage;}
+    void setShouldDamage(bool val) {_should_damage = val;}
     bool getFlipped();
     bool getPeaceful();
     std::string_view getName();
@@ -120,8 +124,8 @@ protected:
     vec2<int> _dimensions{11, 7};
     vec2<int> _anim_offset{1, 1};
 
-    const double _maxHealth{20.0};
-    double _health{20.0};
+    double _maxHealth{40.0};
+    double _health{40.0};
     double _damage{10.0};
 
     const SDL_Color _Palette[8] {{0x3c, 0x6b, 0x64}, {0xf6, 0xe7, 0x9c}, {0x60, 0xae, 0x7b}, {0x1f, 0x24, 0x4b}, {0x3c, 0x6b, 0x64}, {0xf6, 0xe7, 0x9c}, {0x60, 0xae, 0x7b}, {0x1f, 0x24, 0x4b}};
@@ -130,6 +134,10 @@ public:
     Slime(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman);
 
     virtual ~Slime();
+
+    virtual double getHealth() {return _health;}
+    virtual double getMaxHealth() {return _maxHealth;}
+    virtual void setHealth(double val) {_health = val;}
 
     void loadAnim(TexMan* texman);
 
@@ -149,8 +157,8 @@ private:
     vec2<int> _dimensions{3, 4};
     vec2<int> _anim_offset{2, 0};
 
-    const double _maxHealth{10.0};
-    double _health{10.0};
+    double _maxHealth{20.0};
+    double _health{20.0};
     double _damage{3.0};
 
     double _angle{0.0};
@@ -162,6 +170,10 @@ public:
     Bat(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman);
 
     virtual ~Bat();
+
+    virtual double getHealth() {return _health;}
+    virtual double getMaxHealth() {return _maxHealth;}
+    virtual void setHealth(double val) {_health = val;}
 
     void loadAnim(TexMan* texman);
 
@@ -193,8 +205,8 @@ private:
     vec2<int> _dimensions{8, 8};
     vec2<int> _anim_offset{0, 0};
 
-    const double _maxHealth{30.0};
-    double _health{30.0};
+    double _maxHealth{60.0};
+    double _health{60.0};
     double _damage{4.0};
 
     double _grounded{0.0};
@@ -203,6 +215,10 @@ public:
     Turtle(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman);
 
     virtual ~Turtle();
+
+    virtual double getHealth() {return _health;}
+    virtual double getMaxHealth() {return _maxHealth;}
+    virtual void setHealth(double val) {_health = val;}
 
     void loadAnim(TexMan* texman);
 
@@ -236,6 +252,8 @@ private:
     ParticleSpawner _Particles{10000, 0, {50.0, 50.0}, {1.0, 1.0}, 0.125, 0.01, true};
     SmokeSpawner _Smoke{10000, 0, {100.0, 100.0}, 0.15, true};
     FireSpawner _Fire{10000, 0, {200.0, 200.0}, 0.2, true};
+
+    SparkManager _SparkManager{0.0, 0.2, 1.0, nullptr};
 
 public:
     EntityManager(vec2<double> pos, const int total, Entity** entities);

@@ -10,7 +10,7 @@ class EntityHealthBar
 private:
     Texture* _tex;
     vec2<int> _dimensions;
-    const double _maxHealth;
+    double _maxHealth;
     double _health{0.0};
     SDL_Color _greenDark{0x32, 0x6b, 0x64, 0xFF};
     SDL_Color _greenLight{0x60, 0xae, 0x7b, 0xFF};

@@ -30,6 +30,8 @@ public:
     ~SparkManager();
     void free();
 
+    void setTexture(Texture* texture) {_particleTexture = texture;}
+
     void addSpark(Spark* spark);
 
     void point_towards(Spark* spark, const double angle, const double rate, const double& time_step);

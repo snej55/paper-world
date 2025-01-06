@@ -36,8 +36,6 @@ private:
 
     bool _closed{false};
 
-    SparkManager* _SparkManager;
-
 public:
     Game()
     {
@@ -71,7 +69,6 @@ public:
 
     void Close()
     {
-        delete _SparkManager;
         std::cout << "Closing\n";
         SDL_DestroyRenderer(_Renderer);
         std::cout << "Destroyed renderer!\n";
@@ -126,7 +123,6 @@ public:
         _World.loadFromFile("data/maps/0.json");
         _EMManager.loadFromPath("data/maps/0.json", &_TexMan);
         _Player.loadAnim(&_TexMan);
-        _SparkManager = new SparkManager{0.0, 0.1, 1.0, &(_TexMan.particle)};
         if (success)
             std::cout << "Loaded!\n";
         return success;
@@ -239,7 +235,6 @@ public:
                 }
             }
 
-            _SparkManager->addSpark(new Spark{{100.0, 100.0}, Util::random() * M_PI * 2, Util::random() * 2.0 + 3.0});
             SDL_GetWindowPosition(_Window, &windowX, &windowY);
             // calculate dt
             // timer.getTicks() and last_time are both Uint32 so must cast to float
@@ -281,8 +276,6 @@ public:
             if (_Player.getAd() > 120)
                 _Player.render(render_scroll.x, render_scroll.y, _Renderer);
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
-
-            _SparkManager->update(time_step, render_scroll.x, render_scroll.y, _Renderer);
 
             renderPlayerHealthBar();
             // render screen

@@ -26,6 +26,8 @@ void EntityHealthBar::render(const int scrollX, const int scrollY, SDL_Renderer*
     vec2<double> targetPos;
     targetPos.y = static_cast<Entity*>(entity)->getPos().y - _dimensions.y - 3;
     targetPos.x = static_cast<Entity*>(entity)->getPos().x;
+    _health = static_cast<Entity*>(entity)->getHealth();
+    _maxHealth = static_cast<Entity*>(entity)->getMaxHealth();
     SDL_Rect upperBar{(int)targetPos.x - scrollX - _offset.x, (int)targetPos.y - scrollY - _offset.y, static_cast<int>(_dimensions.x * _health / _maxHealth), 1};
     SDL_Rect lowerBar{(int)targetPos.x - scrollX - _offset.x, (int)targetPos.y + 1 - scrollY - _offset.y, static_cast<int>(_dimensions.x * _health / _maxHealth), 1};
     SDL_Color lightColor {Util::lerpColor(_redLight, _greenLight, _health / _maxHealth)};
