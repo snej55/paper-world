@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <array>
+#include <vector>
 #include <cstdlib>
 #include <cmath>
 
@@ -69,6 +70,29 @@ namespace Util {
         color.b = static_cast<uint8_t>(static_cast<int>(a.b + (static_cast<double>(b.b) - static_cast<double>(a.b)) * x));
         color.a = static_cast<uint8_t>(static_cast<int>(a.a + (static_cast<double>(b.a) - static_cast<double>(a.a)) * x));
         return color;
+    }
+
+    template <typename type>
+    std::vector<int> get_water_indices(std::vector<type> vertices)
+    {
+        int T{static_cast<int>(vertices.size())};
+        int H{static_cast<int>((T + 1) / 2)};
+        int TQ{static_cast<int>((T - 1) / 2)};
+        std::vector<int> indices;
+        indices.resize(TQ * 6);
+
+        for (int c{0}; c < TQ; ++c)
+        {
+            int qi {c * 6}; // quad index
+            indices[qi] = c;
+            indices[qi + 1] = c + 1;
+            indices[qi + 2] = H + c;
+            indices[qi + 3] = H + c;
+            indices[qi + 4] = H + c + 1;
+            indices[qi + 5] = c + 1;
+        }
+
+        return indices;
     }
 }
 

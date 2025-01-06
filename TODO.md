@@ -1,11 +1,11 @@
 # TODO
 Week 1:
- - Turtle enemy
- - Water & Sparks + some juice
+ - Water & Sparks + some juice (dust when jumping, leaves)
  - Lava
+ - Leaves
  - SFX
- - Art & Music
- - Fix Health Bars
+ - Art & Music (Decor)
+ - Fix player health bar
 Week 2:
  - Portals
  - Coins

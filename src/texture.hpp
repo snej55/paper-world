@@ -14,32 +14,32 @@
 #ifndef SCALE_FACTOR_DEF
 #define SCALE_FACTOR_DEF
 
-constexpr int SCALE_FACTOR{3};
+constexpr int SCALE_FACTOR{1};
 #endif
 
 class Texture
 {
 private:
-    SDL_Texture* mTexture;
+    SDL_Texture* _Texture;
 
-    SDL_Surface* mSurfacePixels;
+    SDL_Surface* _SurfacePixels;
 
-    void* mRawPixels;
-    int mRawPitch;
+    void* _RawPixels;
+    int _RawPitch;
 
-    int mWidth;
-    int mHeight;
+    int _Width;
+    int _Height;
 
 public:
     Texture()
     {
         // initialize
-        mTexture = NULL;
-        mSurfacePixels = NULL;
-        mRawPixels = NULL;
-        mRawPitch = 0;
-        mWidth = 0;
-        mHeight = 0;
+        _Texture = NULL;
+        _SurfacePixels = NULL;
+        _RawPixels = NULL;
+        _RawPitch = 0;
+        _Width = 0;
+        _Height = 0;
     }
 
     ~Texture()
@@ -60,7 +60,7 @@ public:
             }
         }
 
-        return mTexture != NULL;
+        return _Texture != NULL;
     }
 
     bool loadPixelsFromFile(std::string path, SDL_Window* window)
@@ -74,91 +74,91 @@ public:
         }
         else
         {
-            mSurfacePixels = SDL_ConvertSurfaceFormat( loadedSurface, SDL_GetWindowPixelFormat( window ), 0 );
-            if( mSurfacePixels == NULL )
+            _SurfacePixels = SDL_ConvertSurfaceFormat( loadedSurface, SDL_GetWindowPixelFormat( window ), 0 );
+            if( _SurfacePixels == NULL )
             {
                 printf( "Unable to convert loaded surface to display format! SDL Error: %s\n", SDL_GetError() );
             }
             else
             {
-                mWidth = mSurfacePixels->w;
-                mHeight = mSurfacePixels->h;
+                _Width = _SurfacePixels->w;
+                _Height = _SurfacePixels->h;
             }
 
             SDL_FreeSurface( loadedSurface );
         }
 
-        return mSurfacePixels != NULL;
+        return _SurfacePixels != NULL;
     }
 
     bool loadFromPixels(SDL_Renderer* renderer)
     {
-        if (mSurfacePixels == NULL)
+        if (_SurfacePixels == NULL)
         {
             std::cout << "TEXTURE::LOADFROMPIXELS No pixels loaded!\n";
         } else {
-            SDL_SetColorKey(mSurfacePixels, SDL_TRUE, SDL_MapRGB(mSurfacePixels->format, 0, 0, 0));
-            mTexture = SDL_CreateTextureFromSurface(renderer, mSurfacePixels);
-            assert(mTexture != NULL && SDL_GetError());
-            mWidth = mSurfacePixels->w;
-            mHeight = mSurfacePixels->h;
-            SDL_FreeSurface(mSurfacePixels);
-            mSurfacePixels = NULL;
+            SDL_SetColorKey(_SurfacePixels, SDL_TRUE, SDL_MapRGB(_SurfacePixels->format, 0, 0, 0));
+            _Texture = SDL_CreateTextureFromSurface(renderer, _SurfacePixels);
+            assert(_Texture != NULL && SDL_GetError());
+            _Width = _SurfacePixels->w;
+            _Height = _SurfacePixels->h;
+            SDL_FreeSurface(_SurfacePixels);
+            _SurfacePixels = NULL;
         }
-        return mTexture != NULL;
+        return _Texture != NULL;
     }
 
     bool createBlank(int width, int height, SDL_Renderer* renderer, SDL_TextureAccess access)
     {
         free();
 
-        mTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, access, width, height);
-        if (mTexture == NULL)
+        _Texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, access, width, height);
+        if (_Texture == NULL)
         {
             std::cout << "Unable to create texture!\n";
         } else {
-            mWidth = width;
-            mHeight = height;
+            _Width = width;
+            _Height = height;
         }
 
-        return mTexture != NULL;
+        return _Texture != NULL;
     }
 
     void free()
     {
-        if (mTexture != NULL)
+        if (_Texture != NULL)
         {
-            SDL_DestroyTexture(mTexture);
-            mTexture = NULL;
-            mWidth = 0;
-            mHeight = 0;
+            SDL_DestroyTexture(_Texture);
+            _Texture = NULL;
+            _Width = 0;
+            _Height = 0;
         }
 
-        if (mSurfacePixels != NULL)
+        if (_SurfacePixels != NULL)
         {
-            SDL_FreeSurface(mSurfacePixels);
-            mSurfacePixels = NULL;
+            SDL_FreeSurface(_SurfacePixels);
+            _SurfacePixels = NULL;
         }
     }
 
     void setColor(Uint8 red, Uint8 green, Uint8 blue)
     {
-        SDL_SetTextureColorMod(mTexture, red, green, blue);
+        SDL_SetTextureColorMod(_Texture, red, green, blue);
     }
 
     void setBlendMode(SDL_BlendMode blending)
     {
-        SDL_SetTextureBlendMode(mTexture, blending);
+        SDL_SetTextureBlendMode(_Texture, blending);
     }
 
     void setAlpha(Uint8 alpha)
     {
-        SDL_SetTextureAlphaMod(mTexture, alpha);
+        SDL_SetTextureAlphaMod(_Texture, alpha);
     }
 
     void render(int x, int y, SDL_Renderer* renderer, SDL_Rect* clip = NULL)
     {
-        SDL_Rect renderQuad {x, y, mWidth, mHeight};
+        SDL_Rect renderQuad {x, y, _Width, _Height};
 
         if (clip != NULL)
         {
@@ -169,12 +169,12 @@ public:
         renderQuad.w *= SCALE_FACTOR;
         renderQuad.h *= SCALE_FACTOR;
 
-        SDL_RenderCopy(renderer, mTexture, clip, &renderQuad);
+        SDL_RenderCopy(renderer, _Texture, clip, &renderQuad);
     }
 
     void render(int x, int y, SDL_Renderer* renderer, double angle, SDL_Point* center, SDL_RendererFlip flip, SDL_Rect* clip = NULL, int scale_factor = 0)
     {
-        SDL_Rect renderQuad {x, y, mWidth, mHeight};
+        SDL_Rect renderQuad {x, y, _Width, _Height};
 
         if (clip != NULL)
         {
@@ -191,45 +191,45 @@ public:
             renderQuad.h *= scale_factor;
         }
 
-        SDL_RenderCopyEx(renderer, mTexture, clip, &renderQuad, angle, center, flip);
+        SDL_RenderCopyEx(renderer, _Texture, clip, &renderQuad, angle, center, flip);
     }
 
     void renderClean(int x, int y, SDL_Renderer* renderer, int scale_factor)
     {
-        SDL_Rect renderQuad {x, y, mWidth, mHeight};
+        SDL_Rect renderQuad {x, y, _Width, _Height};
         renderQuad.w *= scale_factor;
         renderQuad.h *= scale_factor;
-        SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
+        SDL_RenderCopy(renderer, _Texture, NULL, &renderQuad);
     }
 
     void renderClean(int x, int y, SDL_Renderer* renderer)
     {
-        SDL_Rect renderQuad {x, y, mWidth, mHeight};
-        SDL_RenderCopy(renderer, mTexture, NULL, &renderQuad);
+        SDL_Rect renderQuad {x, y, _Width, _Height};
+        SDL_RenderCopy(renderer, _Texture, NULL, &renderQuad);
     }
 
     void setAsRenderTarget(SDL_Renderer* renderer)
     {
-        SDL_SetRenderTarget(renderer, mTexture);
+        SDL_SetRenderTarget(renderer, _Texture);
     }
 
     int getWidth()
     {
-        return mWidth;
+        return _Width;
     }
 
     int getHeight()
     {
-        return mHeight;
+        return _Height;
     }
 
     Uint32* getPixels32()
     {
         Uint32* pixels {NULL};
-        if (mSurfacePixels != NULL)
+        if (_SurfacePixels != NULL)
         {
 
-            pixels = static_cast<Uint32*>(mSurfacePixels->pixels);
+            pixels = static_cast<Uint32*>(_SurfacePixels->pixels);
         }
         return pixels;
     }
@@ -237,10 +237,10 @@ public:
     Uint32 getPitch32()
     {
         Uint32 pitch {0};
-        if (mSurfacePixels != NULL)
+        if (_SurfacePixels != NULL)
         {
             // divide by 4 because 32bits/4bytes per pixel
-            pitch = mSurfacePixels->pitch / 4;
+            pitch = _SurfacePixels->pitch / 4;
         }
         return pitch;
     }
@@ -249,30 +249,30 @@ public:
     {
         Uint32 pixel{0};
 
-        if (mSurfacePixels != NULL)
+        if (_SurfacePixels != NULL)
         {
-            pixel = SDL_MapRGBA(mSurfacePixels->format, r, g, b, a);
+            pixel = SDL_MapRGBA(_SurfacePixels->format, r, g, b, a);
         }
         return pixel;
     }
 
     void copyRawPixels32(void* pixels)
     {
-        if (mRawPixels != NULL)
+        if (_RawPixels != NULL)
         {
-            memcpy(mRawPixels, pixels, mRawPitch * mHeight);
+            memcpy(_RawPixels, pixels, _RawPitch * _Height);
         }
     }
 
     bool lockTexture()
     {
         bool success {true};
-        if (mRawPixels != NULL)
+        if (_RawPixels != NULL)
         {
             std::cout << "Texture is already locked!\n";
             success = false;
         } else {
-            if (SDL_LockTexture(mTexture, NULL, &mRawPixels, &mRawPitch) != 0)
+            if (SDL_LockTexture(_Texture, NULL, &_RawPixels, &_RawPitch) != 0)
             {
                 std::cout << "Unable to lock texture! SDL_Error: " << SDL_GetError() << '\n';
                 success = false;
@@ -284,21 +284,21 @@ public:
     bool unlockTexture()
     {
         bool success {true};
-        if (mRawPixels == NULL)
+        if (_RawPixels == NULL)
         {
             std::cout << "Texture is not locked!\n";
             success = false;
         } else {
-            SDL_UnlockTexture(mTexture);
-            mRawPixels = NULL;
-            mRawPitch = 0;
+            SDL_UnlockTexture(_Texture);
+            _RawPixels = NULL;
+            _RawPitch = 0;
         }
         return success;
     }
 
     SDL_Texture* getTexture()
     {
-        return mTexture;
+        return _Texture;
     }
 };
 
