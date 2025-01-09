@@ -3,9 +3,8 @@ Week 1:
  - Water + some juice (dust when jumping, leaves)
  - Lava
  - Leaves
- - SFX
  - Art & Music (Decor)
- - Fix player health bar
+ - Red glow when player loses health
 Week 2:
  - Portals
  - Coins
