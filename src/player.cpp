@@ -368,6 +368,7 @@ void Player::attackSword(TexMan* texman)
         _slashVFLIP = !_slashVFLIP;
         _swordAttacked = 0.0;
         _Sword->flipUp();
+        texman->SFX_sword_swoosh.play();
     }
 }
 

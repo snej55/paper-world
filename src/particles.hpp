@@ -1,7 +1,7 @@
 #ifndef PARTICLES_H
 #define PARTICLES_H
 
-#include <SDL2/SDL.h>
+#include "SDL2/SDL.h"
 
 #include "./vec2.hpp"
 #include "./util.hpp"

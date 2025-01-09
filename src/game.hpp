@@ -1,9 +1,9 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-//#include <SDL2/SDL_mixer.h>
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
+#include "SDL2/SDL_mixer.h"
 
 #include "./constants.hpp"
 #include "./texture.hpp"
@@ -34,7 +34,11 @@ private:
     int _Width {SCR_WIDTH};
     int _Height {SCR_HEIGHT};
 
+    Mix_Chunk* music{NULL};
+
     bool _closed{false};
+
+    double _playerHealth{100.0};
 
 public:
     Game()
@@ -69,6 +73,7 @@ public:
 
     void Close()
     {
+        Mix_FreeChunk(music);
         std::cout << "Closing\n";
         SDL_DestroyRenderer(_Renderer);
         std::cout << "Destroyed renderer!\n";
@@ -105,6 +110,10 @@ public:
         } else {
             SDL_SetRenderDrawColor(_Renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
         }
+        if( Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 ) == -1 )
+        {
+            success = false; 
+        }
         if (success)
             std::cout << "Successfully Initialized!" << std::endl;
         return success;
@@ -123,6 +132,14 @@ public:
         _World.loadFromFile("data/maps/0.json");
         _EMManager.loadFromPath("data/maps/0.json", &_TexMan);
         _Player.loadAnim(&_TexMan);
+
+        music = Mix_LoadWAV("data/audio/hit/hit_0.wav");
+        if (music == NULL)
+        {
+            success = false;
+            std::cout << "Error loading music\n";
+        }
+
         if (success)
             std::cout << "Loaded!\n";
         return success;
@@ -183,6 +200,8 @@ public:
                         case SDLK_p:
                             //Entity* _Entity = new Entity{{static_cast<double>(std::rand() % 100 + 50), 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false, "default"};
                             //_EMManager.addEntity(_Entity);
+                            Mix_PlayChannel(-1, music, 0);
+                            _Player.damage(30, &screen_shake, &slomo);
                             break;
                         case SDLK_x:
                             _Player.attackSword(&_TexMan);
@@ -262,7 +281,7 @@ public:
             _Player.update(time_step, _World, &screen_shake);
             _Player.tickAd(time_step);
 
-            _EMManager.update(time_step, _World, &screen_shake, &_Player, &slomo);
+            _EMManager.update(time_step, _World, &screen_shake, &_Player, &slomo, &_TexMan);
             // do rendering here
 
             screen_shake = std::max(0.0, screen_shake - time_step);
@@ -277,6 +296,11 @@ public:
                 _Player.render(render_scroll.x, render_scroll.y, _Renderer);
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
 
+            _playerHealth += (_Player.getHealth() - _playerHealth) * 0.12 * time_step;
+            if (_Player.getHealth() == _Player.getMaxHealth())
+            {
+                _playerHealth = _Player.getHealth();
+            }
             renderPlayerHealthBar();
             // render screen
             SDL_SetRenderTarget(_Renderer, NULL);
@@ -285,7 +309,7 @@ public:
             SDL_RenderPresent(_Renderer);
 
             float avgFPS {frames / (fpsTimer.getTicks() / 1000.0f)};
-            setWindowTitle(avgFPS);
+            setWindowTitle(avgFPS); 
             ++frames;
         } while (running);
     }
@@ -299,14 +323,18 @@ public:
 
     void renderPlayerHealthBar()
     {
-        SDL_SetRenderDrawColor(_Renderer, 0x1f, 0x24, 0x4b, 0xFF);
-        SDL_Rect fillRect {4, 4, 100, 10};
+        _TexMan.playerHealthBar.render(2, 3, _Renderer, nullptr);
+        SDL_Color greenDark{0x32, 0x6b, 0x64, 0xFF};
+        SDL_Color greenLight{0x60, 0xae, 0x7b, 0xFF};
+        SDL_Color redDark{0xa8, 0x60, 0x5d, 0xFF};
+        SDL_Color redLight{0xd1, 0xa7, 0x7e, 0xFF};
+        SDL_Color lightColor {Util::lerpColor(redLight, greenLight, _playerHealth / _Player.getMaxHealth())};
+        SDL_Color darkColor {Util::lerpColor(redDark, greenDark, _playerHealth / _Player.getMaxHealth())};
+        SDL_SetRenderDrawColor(_Renderer, lightColor.r, lightColor.g, lightColor.b, 0xFF);
+        SDL_Rect fillRect = SDL_Rect{5, 5, static_cast<int>(26.0 * _playerHealth / _Player.getMaxHealth()), 2};
         SDL_RenderFillRect(_Renderer, &fillRect);
-        SDL_SetRenderDrawColor(_Renderer, 0xb6, 0xcf, 0x8e, 0xFF);
-        fillRect = SDL_Rect{5, 5, static_cast<int>(98.0 * _Player.getHealth() / 100.0), 4};
-        SDL_RenderFillRect(_Renderer, &fillRect);
-        SDL_SetRenderDrawColor(_Renderer, 0x3c, 0x6b, 0x64, 0xFF);
-        fillRect = SDL_Rect{5, 9, static_cast<int>(98.0 * _Player.getHealth() / 100.0), 4};
+        SDL_SetRenderDrawColor(_Renderer, darkColor.r, darkColor.g, darkColor.b, 0xFF);
+        fillRect = SDL_Rect{5, 7, static_cast<int>(26.0 * _playerHealth / _Player.getMaxHealth()), 2};
         SDL_RenderFillRect(_Renderer, &fillRect);
     }
 };

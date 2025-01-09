@@ -1,8 +1,8 @@
 #ifndef ENTITIES_H
 #define ENTITIES_H
 
-#include <SDL2/SDL.h>
-#include <JSON/json.hpp>
+#include "SDL2/SDL.h"
+#include "JSON/json.hpp"
 
 #include <string>
 #include <fstream>
@@ -272,7 +272,7 @@ public:
 
     virtual void addEntity(Entity* entity);
 
-    virtual void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo);
+    virtual void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman);
 
     virtual void updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman);
 
@@ -297,7 +297,7 @@ public:
 
     void addEntity(Entity* entity);
 
-    void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo);
+    void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman);
 
     void render(const int scrollX, const int scrollY, SDL_Renderer* renderer, const double& time_step, World* world, TexMan* texman);
 };

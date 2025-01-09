@@ -753,7 +753,7 @@ void EntityManager::addEntity(Entity* entity)
     ++_total;
 }
 
-void EntityManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo)
+void EntityManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman)
 {
     const int num{_total};
     for (std::size_t i{0}; i < num; ++i)
@@ -776,6 +776,7 @@ void EntityManager::update(const double& time_step, World& world, double* screen
             // some black magic
             if (entity->getShouldDie())
             {
+                texman->SFX_death_0.play();
                 if (entity->getName() == "turtle")
                 {
                     _Particles.setPos(entity->getCenter());
@@ -822,6 +823,8 @@ void EntityManager::update(const double& time_step, World& world, double* screen
                 --_total; // deincrement total to avoid undefined behaviour when we reference nullptr
             } else if (entity->getShouldDamage())
             {
+                texman->playDamageSound();
+                std::cout << "damaging\n";
                 entity->setShouldDamage(false);
                 if (entity->getName() == "turtle")
                 {
@@ -983,11 +986,11 @@ void EMManager::addEntity(Entity* entity)
     _Managers.push_back(new EntityManager{vec2<double>{0, 0}, 1, std::vector<Entity*>{entity}});
 }
 
-void EMManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo)
+void EMManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman)
 {
     for (std::size_t i{0}; i < _Managers.size(); ++i)
     {
-        _Managers[i]->update(time_step, world, screen_shake, player, slomo);
+        _Managers[i]->update(time_step, world, screen_shake, player, slomo, texman);
     }
 }
 // updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman)

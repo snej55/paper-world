@@ -1,7 +1,9 @@
 #ifndef TEXMAN_H
 #define TEXMAN_H
 
+#include "SDL2/SDL_mixer.h"
 #include "./texture.hpp"
+#include "./audio.hpp"
 
 class TexMan
 {
@@ -50,6 +52,16 @@ public:
     Texture enemyHealthBar{};
     Texture playerHealthBar{};
 
+    // -------- Sounds --------- //
+    Sound SFX_death_0{};
+    Sound SFX_hit_0{};
+    Sound SFX_hit_1{};
+    Sound SFX_hit_2{};
+    Sound SFX_hit_3{};
+    Sound SFX_player_hit{};
+    Sound SFX_sword_slash{};
+    Sound SFX_sword_swoosh{};
+
     TexMan()
     {
     }
@@ -86,6 +98,14 @@ public:
         turtleJump.free();
         turtleLand.free();
         turtleFlash.free();
+        SFX_death_0.free();
+        SFX_hit_0.free();
+        SFX_hit_1.free();
+        SFX_hit_2.free();
+        SFX_hit_3.free();
+        SFX_player_hit.free();
+        SFX_sword_slash.free();
+        SFX_sword_swoosh.free();
     }
 
     void confirm(bool val, bool& success)
@@ -130,7 +150,33 @@ public:
         confirm(turtleJump.loadFromFile("data/images/entities/turtle/jump.png", window, renderer), success);
         confirm(turtleLand.loadFromFile("data/images/entities/turtle/land.png", window, renderer), success);
         confirm(turtleFlash.loadFromFile("data/images/entities/turtle/flash.png", window, renderer), success);
+        SFX_death_0.loadFromFileWAV("data/audio/death/death_0.wav");
+        SFX_hit_0.loadFromFileWAV("data/audio/hit/hit_0.wav");
+        SFX_hit_1.loadFromFileWAV("data/audio/hit/hit_1.wav");
+        SFX_hit_2.loadFromFileWAV("data/audio/hit/hit_2.wav");
+        SFX_hit_3.loadFromFileWAV("data/audio/hit/hit_3.wav");
+        SFX_player_hit.loadFromFileWAV("data/audio/hit/player_hit.wav");
+        SFX_sword_slash.loadFromFileWAV("data/audio/sword/slash.wav");
+        SFX_sword_swoosh.loadFromFileWAV("data/audio/sword/swoosh.wav");
         return success;
+    }
+
+    void playDamageSound()
+    {
+        int num{static_cast<int>(std::rand()) % 4};
+        switch (num)
+        {
+            case 0:
+                SFX_hit_0.play();
+            case 1:
+                SFX_hit_1.play();
+            case 2:
+                SFX_hit_2.play();
+            case 3:
+                SFX_hit_3.play();
+            default:
+                return;
+        }
     }
 };
 

@@ -1,6 +1,6 @@
 # TODO
 Week 1:
- - Water & Sparks + some juice (dust when jumping, leaves)
+ - Water + some juice (dust when jumping, leaves)
  - Lava
  - Leaves
  - SFX

@@ -3,7 +3,7 @@
 
 #define SDL_MAIN_HANDLED
 
-#include <SDL2/SDL.h>
+#include "SDL2/SDL.h"
 #include "src/game.hpp"
 
 int main(int argc, char* argv[])

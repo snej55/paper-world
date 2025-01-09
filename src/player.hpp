@@ -1,7 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <SDL2/SDL.h>
+#include "SDL2/SDL.h"
 
 #include "./util.hpp"
 #include "./vec2.hpp"
@@ -125,6 +125,7 @@ public:
 
     double getHealth() {return _health;}
     void setHealth(double val) {_health = val;}
+    double getMaxHealth() {return _max_health;}
     double getRecover() {return _recover;}
     void setRecover(double val) {_recover = val;}
 

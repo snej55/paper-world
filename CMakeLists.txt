@@ -19,7 +19,7 @@ link_directories(${CMAKE_SOURCE_DIR}/lib)
 add_executable(main ${SOURCES})
 
 # libraries to compile with -lSDL2main ...
-set(SDL2_LIBRARIES mingw32 SDL2main SDL2 SDL2_image)
+set(SDL2_LIBRARIES mingw32 SDL2main SDL2 SDL2_image SDL2_mixer)
 
 # link it so ld can find it
 target_link_libraries(main PUBLIC ${SDL2_LIBRARIES})

@@ -1,7 +1,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <SDL2/SDL.h>
+#include "SDL2/SDL.h"
 #include <array>
 #include <vector>
 #include <cstdlib>

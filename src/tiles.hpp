@@ -1,8 +1,8 @@
 #ifndef TILES_H
 #define TILES_H
 
-#include <SDL2/SDL.h>
-#include <JSON/json.hpp>
+#include "SDL2/SDL.h"
+#include "JSON/json.hpp"
 #include <fstream>
 #include <string>
 #include <vector>
