@@ -279,6 +279,11 @@ public:
                 scroll.y += (player_pos.y - static_cast<double>(_Height) / 2.0 - scroll.y) / 50.0 * time_step;
             }
             _Player.update(time_step, _World, &screen_shake);
+            if (_Player.getAd() == 0)
+            {
+                _TexMan.SFX_death_0.play();
+                _TexMan.SFX_sword_slash.play();
+            }
             _Player.tickAd(time_step);
 
             _EMManager.update(time_step, _World, &screen_shake, &_Player, &slomo, &_TexMan);

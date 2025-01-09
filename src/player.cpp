@@ -89,6 +89,7 @@ void Player::damage(double amount, double* screen_shake, double* slomo)
             *slomo = std::min(0.5, *slomo);
             die(screen_shake);
         }
+        _should_damage = true;
     }
 }
 
@@ -267,6 +268,11 @@ void Player::updateParticles(const double& time_step, const int scrollX, const i
     _Particles.update(time_step, scrollX, scrollY, renderer, world, texman);
     _Smoke.update(time_step, scrollX, scrollY, renderer, world, &texman->particle);
     _Fire.update(time_step, scrollX, scrollY, renderer, world, &texman->particleFire);
+    if (_should_damage)
+    {
+        texman->SFX_player_hit.play();
+        _should_damage = false;
+    }
 }
 
 void Player::handleAnim(const double& time_step)

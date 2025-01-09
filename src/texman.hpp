@@ -171,7 +171,7 @@ public:
             case 1:
                 SFX_hit_1.play();
             case 2:
-                SFX_hit_2.play();
+                SFX_hit_3.play();
             case 3:
                 SFX_hit_3.play();
             default:

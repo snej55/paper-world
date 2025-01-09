@@ -88,6 +88,8 @@ private:
     Slash* _Slash{nullptr};
     Sword* _Sword;
 
+    bool _should_damage{false};
+
 public:
     Player(vec2<double> pos, vec2<int> dimensions);
     ~Player();
