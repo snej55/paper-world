@@ -113,6 +113,11 @@ public:
         return 0.0;
     }
 
+    bool getShouldDamage()
+    {
+        return _should_damage;
+    }
+
     double getFalling() {return _falling;}
     void setVelY(const double val) {_vel.y = val;}
     void setVelX(const double val) {_vel.x = val;}

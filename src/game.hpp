@@ -165,6 +165,8 @@ public:
         double slomo{1.0};
 
         float frames{1.0f};
+
+        float last_damaged{100.0f};
         do {
             while (SDL_PollEvent(&e) != 0)
             {
@@ -299,6 +301,12 @@ public:
             // check if the player is not dead. ad stands for 'after death'
             if (_Player.getAd() > 120)
                 _Player.render(render_scroll.x, render_scroll.y, _Renderer);
+            
+            if (_Player.getShouldDamage()) // do it before we reset it in Player.updateParticles();
+            {
+                last_damaged = 1.0f;
+            }
+            last_damaged += 0.03f;
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
 
             _playerHealth += (_Player.getHealth() - _playerHealth) * 0.12 * time_step;
@@ -307,6 +315,15 @@ public:
                 _playerHealth = _Player.getHealth();
             }
             renderPlayerHealthBar();
+            if (last_damaged < 10.0f)
+            {
+                float offset {last_damaged * last_damaged};
+                SDL_Rect alert{2 - static_cast<int>(offset), 2 - static_cast<int>(offset), _Width - 4 + static_cast<int>(offset) * 2, _Height - 4 + static_cast<int>(offset) * 2};
+                SDL_SetRenderDrawBlendMode(_Renderer, SDL_BLENDMODE_BLEND);
+                SDL_SetRenderDrawColor(_Renderer, 0xFF, 0x00, 0x00, static_cast<int>(255.0 - _Player.getHealth() / _Player.getMaxHealth() * 200.0));
+                SDL_RenderDrawRect(_Renderer, &alert);
+                SDL_SetRenderDrawBlendMode(_Renderer, SDL_BLENDMODE_NONE);
+            }
             // render screen
             SDL_SetRenderTarget(_Renderer, NULL);
             _Screen.renderClean(0, 0, _Renderer, 3);
