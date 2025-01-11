@@ -621,6 +621,7 @@ void Turtle::touchPlayer(Player* player, double* screen_shake, double* slomo)
             _landAnim->setFrame(2); // at the bottom
             _wandering = false;
             _wander_timer = 100.0;
+            _jumped_on = true;
         }
     }
     if (player->getAttacking())
@@ -770,6 +771,11 @@ void EntityManager::update(const double& time_step, World& world, double* screen
                 if (entity->getName() == "turtle")
                 {
                     entity->touchPlayer(player, screen_shake, slomo);
+                    if (static_cast<Turtle*>(entity)->getJumpedOn())
+                    {
+                        texman->SFX_turtle.play();
+                        static_cast<Turtle*>(entity)->setJumpedOn(false);
+                    }
                 }
             }
             // some black magic
@@ -831,6 +837,7 @@ void EntityManager::update(const double& time_step, World& world, double* screen
                     {
                         _SparkManager.addSpark(new Spark{entity->getCenter(), Util::random() * M_PI * 2.0, Util::random() * 2.0 + 0.5});
                     }
+                    texman->SFX_turtle.play();
                     _Particles.setPos(entity->getCenter());
                     _Particles.setSpawning(16, {8.0, 8.0}, SDL_Color{0x00, 0x00, 0x00});
                 }

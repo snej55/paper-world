@@ -261,6 +261,7 @@ void Player::handlePhysics(const double& time_step, vec2<double> frame_movement,
         {
             _vel.y = -5;
             spring->setVel(4.0);
+            texman->SFX_spring.play();
             break;
         }
     }

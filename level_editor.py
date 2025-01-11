@@ -13,6 +13,7 @@ CONVERT_TYPES = {
     1: 'rock', 
     2: 'spike',
     3: 'grass_key',
+    4: 'trees'
 }
 AUTO_TILE_TYPES = {'grass', 'rock'}
 AUTO_TILE_MAP = {'0011': 1, '1011': 2, '1001': 3, '0001': 4, '0111': 5, '1111': 6, '1101': 7, '0101': 8, 
@@ -50,6 +51,7 @@ class Editor:
         self.controls = {'right': False, 'left': False, 'up': False, 'down': False, 'l_shift': False}
 
         self.tile_map = {}
+        self.off_grid = []
         self.load(self.path)
 
         self.click = False
@@ -72,6 +74,7 @@ class Editor:
         data = json.load(f)
         f.close()
         self.tile_map = {}
+        self.off_grid = []
         for tile in data['level']['tiles']:
             tile_loc = f"{tile['pos'][0]};{tile['pos'][1]}"
             self.tile_map[tile_loc] = {'type': CONVERT_TYPES[tile['type']], 'variant': tile['variant']}
@@ -79,8 +82,9 @@ class Editor:
             self.tile_map[f"{math.floor(entity['pos'][0] / TILE_SIZE)};{math.floor(entity['pos'][1] / TILE_SIZE)}"] = {'type': entity['type'], 'variant': 0}
         for spring in data['level']['springs']:
             self.tile_map[f"{math.floor(spring['pos'][0] / TILE_SIZE)};{math.floor(spring['pos'][1] / TILE_SIZE)}"] = {'type': "spring", 'variant': 0}
-        self.tile_map['off_grid'] = []
-        self.tile_map['off_grid'].extend(data['level']['off_grid'])
+        self.off_grid.extend(data['level']['off_grid'])
+        for tile in self.off_grid:
+            tile['type'] = CONVERT_TYPES[tile['type']]
         
     
     def save(self, path):
@@ -88,6 +92,7 @@ class Editor:
             tiles = []
             entities = []
             springs = []
+            off_grid = []
             for loc in self.tile_map:
                 tile_type = 0
                 for key in CONVERT_TYPES:
@@ -104,7 +109,13 @@ class Editor:
                         springs.append({'pos': [int(c) * TILE_SIZE for c in loc.split(';')]})
                     else:
                         tiles.append({'pos': [int(c) for c in loc.split(';')], 'type': tile_type, 'variant': self.tile_map[loc]['variant']})
-            json.dump({'level': {'tiles': tiles, 'entities': entities, 'springs': springs}}, f)
+            for tile in self.off_grid:
+                tile_type = 0
+                for key in CONVERT_TYPES:
+                    if tile['type'] == CONVERT_TYPES[key]:
+                        tile_type = key
+                off_grid.append({'pos': tile['pos'], 'type': tile_type, 'variant': tile['variant']});
+            json.dump({'level': {'tiles': tiles, 'entities': entities, 'springs': springs, 'off_grid': off_grid}}, f)
             f.close()
 
     def load_tileset(self, sheet):
@@ -178,8 +189,6 @@ class Editor:
                             except IndexError:
                                 pass
                     del self.tile_map[tile_loc]
-        if not self.grid:
-            pass
         
         for i, particle in sorted(enumerate(self.particles), reverse=True):
             particle[0][0] += particle[1][0] * self.dt
@@ -219,7 +228,7 @@ class Editor:
     def draw(self):
         self.draw_grid()
         self.draw_tiles()
-        for tile in self.tile_map['off_grid']: # tile: [pos, type, variant] absolute pos
+        for tile in self.off_grid: # tile: [pos, type, variant] absolute pos
             self.screen.blit(self.assets[tile['type']][tile['variant']], (tile['pos'][0] - self.scroll.x, tile['pos'][1] - self.scroll.y))
     
         mouse_pos = pygame.mouse.get_pos()
@@ -290,6 +299,18 @@ class Editor:
                         if event.button == 5:
                             self.tile_type = (self.tile_type + 1) % len(self.tile_list)
                             self.tile_variant = 0
+                    if not self.grid:
+                        mouse_pos = pygame.mouse.get_pos()
+                        mouse_pos = [math.floor(mouse_pos[0] / 2 + self.scroll.x), math.floor(mouse_pos[1] / 2 + self.scroll.y)]
+                        if self.click:
+                            if 0 <= mouse_pos[0] < LEVEL_WIDTH * CHUNK_SIZE * TILE_SIZE and 0 <= mouse_pos[1] < LEVEL_HEIGHT * CHUNK_SIZE * TILE_SIZE:
+                                self.off_grid.append({'pos': mouse_pos, 'type': self.tile_list[self.tile_type], 'variant': self.tile_variant}) 
+                        if self.right_click:
+                            for i, tile in sorted(enumerate(self.off_grid), reverse=True):
+                                tile_img = self.assets[tile['type']][tile['variant']];
+                                tile_rect = pygame.Rect(mouse_pos[0], mouse_pos[1], tile_img.get_width(), tile_img.get_height())
+                                if tile_rect.collidepoint(mouse_pos[0], mouse_pos[1]):
+                                    self.off_grid.pop(i)
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         self.click = False

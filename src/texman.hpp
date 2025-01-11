@@ -52,6 +52,9 @@ public:
     Texture enemyHealthBar{};
     Texture playerHealthBar{};
 
+    // Decor!
+    Texture tileTrees{};
+
     // -------- Sounds --------- //
     Sound SFX_death_0{};
     Sound SFX_hit_0{};
@@ -62,6 +65,8 @@ public:
     Sound SFX_sword_slash{};
     Sound SFX_sword_swoosh{};
     Sound SFX_landing{};
+    Sound SFX_turtle{};
+    Sound SFX_spring{};
 
     TexMan()
     {
@@ -73,6 +78,7 @@ public:
         tileRockTex.free();
         tileSpikeTex.free();
         tileSpringTex.free();
+        tileTrees.free();
         particle.free();
         particleFire.free();
         lightTex.free();
@@ -108,6 +114,8 @@ public:
         SFX_sword_slash.free();
         SFX_sword_swoosh.free();
         SFX_landing.free();
+        SFX_turtle.free();
+        SFX_spring.free();
     }
 
     void confirm(bool val, bool& success)
@@ -125,6 +133,7 @@ public:
         confirm(tileRockTex.loadFromFile("data/images/tiles/rock.png", window, renderer), success);
         confirm(tileSpikeTex.loadFromFile("data/images/tiles/spike.png", window, renderer), success);
         confirm(tileSpringTex.loadFromFile("data/images/tiles/spring.png", window, renderer), success);
+        confirm(tileTrees.loadFromFile("data/images/tiles/trees.png", window, renderer), success);
         confirm(particle.loadFromFile("data/images/particles/particle.png", window, renderer), success);
         confirm(particleFire.loadFromFile("data/images/particles/fire.png", window, renderer), success);
         confirm(slimeIdle.loadFromFile("data/images/entities/slime/idle.png", window, renderer), success);
@@ -161,6 +170,8 @@ public:
         SFX_sword_slash.loadFromFileWAV("data/audio/sword/slash.wav");
         SFX_sword_swoosh.loadFromFileWAV("data/audio/sword/swoosh.wav");
         SFX_landing.loadFromFileWAV("data/audio/misc/footstep01.wav");
+        SFX_turtle.loadFromFileWAV("data/audio/misc/turtle.wav");
+        SFX_spring.loadFromFileWAV("data/audio/misc/spring.wav");
         return success;
     }
 

@@ -208,6 +208,12 @@ enum class TileType
     NONE,
 };
 
+enum class DecorType
+{
+    TREE,
+    NONE,
+};
+
 constexpr TileType SOLID_TILES[2] {TileType::GRASS, TileType::ROCK};
 constexpr TileType DANGER_TILES[1] {TileType::SPIKE};
 
@@ -218,18 +224,36 @@ struct Tile
     uint8_t variant; // variant in tileset 0-15
 };
 
+// the offgrid tiles
+struct Decor
+{
+    vec2<int> pos;
+    DecorType type;
+    uint8_t variant;
+};
+
 struct Chunk
 {
     vec2<int> pos; // relaative position. real position = pos.x * TILE_SIZE * CHUNK_SIZE, pos.y * TILE_SIZE * CHUNK_SIZE
     std::vector<Tile> tiles{}; // vec.pushback(tile) in World::load. tiles[CHUNK_sIZE * CHUNK_SIZE] gives a bunch of wasted space. most tiles are air
 };
 
+struct DecorChunk
+{
+    vec2<int> pos; // relative position. see above ^^^^^ for Chunk
+    std::vector<Decor> decor{};
+};
+
 class World
 {
 private:
     Chunk _Chunks[LEVEL_WIDTH * LEVEL_HEIGHT];
+    DecorChunk _DecorChunks[LEVEL_WIDTH * LEVEL_HEIGHT];
+    
     GrassManager* _GrassManager {nullptr};
+    
     std::vector<Spring*> _Springs;
+
 
 public:
 
@@ -393,17 +417,39 @@ public:
         }
     }
 
+    DecorType getDecorType(int type)
+    {
+        switch (type)
+        {
+            case 4:
+                return DecorType::TREE;
+            default:
+                return DecorType::NONE;
+        }
+    }
+
     void loadFromFile(const char* path)
     {
+        // load data
         std::ifstream f{path};
         json data = json::parse(f);
+
         // clear chunks
         for (std::size_t i{0}; i < LEVEL_WIDTH * LEVEL_HEIGHT; ++i)
         {
             _Chunks[i] = Chunk{{0, 0}};
         }
+        for (std::size_t i{0}; i < LEVEL_WIDTH * LEVEL_HEIGHT; ++i)
+        {
+            _DecorChunks[i] = DecorChunk{{0, 0}};
+        }
+
         _Springs.clear();
-        int grass_total{0};
+        
+        
+        int grass_total{0}; // keep track of how much grass there is
+
+        // handle tiles that are on the grid
         for (const auto& tile : data["level"]["tiles"])
         {
             vec2<int> chunk_loc {static_cast<int>(std::floor((double)tile["pos"][0] / (double)CHUNK_SIZE)), static_cast<int>(std::floor((double)tile["pos"][1] / (double)CHUNK_SIZE))};
@@ -421,6 +467,21 @@ public:
                 chunk->pos = chunk_loc;
             }
         }
+
+        // handle decor (offgrid tiles)
+        for (const auto& tile : data["level"]["off_grid"])
+        {
+            vec2<int> chunk_loc {static_cast<int>(std::floor((double)tile["pos"][0] / (double)TILE_SIZE / (double)CHUNK_SIZE)), static_cast<int>(std::floor((double)tile["pos"][1] / (double)TILE_SIZE / (double)CHUNK_SIZE))};
+            if (0 <= chunk_loc.x && chunk_loc.x < LEVEL_WIDTH && 0 <= chunk_loc.y && chunk_loc.y < LEVEL_HEIGHT)
+            {
+                int chunk_idx {chunk_loc.y * LEVEL_WIDTH + chunk_loc.x};
+                DecorChunk* chunk {&(_DecorChunks[chunk_idx])};
+                chunk->decor.push_back(Decor{{tile["pos"][0], tile["pos"][1]}, getDecorType(tile["type"]), tile["variant"]});
+                chunk->pos = chunk_loc;
+            }
+        }
+
+        // handle grass
         if (_GrassManager != nullptr)
         {
             delete _GrassManager;
@@ -433,6 +494,8 @@ public:
                _GrassManager->addGrassTile({tile["pos"][0], tile["pos"][1]}, 4);
             }
         }
+
+        // handle springs
         for (const auto& spring : data["level"]["springs"])
         {
             _Springs.push_back(new Spring{vec2<double>{(double)spring["pos"][0], (double)spring["pos"][1]}});
@@ -456,6 +519,8 @@ public:
                     int chunk_idx{targetY * LEVEL_WIDTH + targetX};
                     Chunk* chunk{&(_Chunks[chunk_idx])};
                     renderChunk(chunk, scrollX, scrollY, window, renderer, texman);
+                    DecorChunk* decor{&(_DecorChunks[chunk_idx])};
+                    renderDecorChunk(decor, scrollX, scrollY, window, renderer, texman);
                 }
             }
         }
@@ -489,13 +554,36 @@ public:
         }
     }
 
+    Texture* getTileTex(const Decor& tile, TexMan* texman)
+    {
+        switch (tile.type)
+        {
+            case (DecorType::TREE):
+                return &(texman->tileTrees);
+            default:
+                // std::cout << static_cast<int>(tile.type) << '\n';
+                return nullptr;
+        }
+    }
+
     SDL_Rect getClipRect(const Tile& tile)
     {
         if (tile.type == TileType::SPIKE)
         {
             SDL_Rect clip{tile.variant * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE};
+            return clip;
         }
         SDL_Rect clip{(tile.variant % 4) * TILE_SIZE, static_cast<int>((tile.variant - (tile.variant % 4)) / 4) * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+        return clip;
+    }
+
+    SDL_Rect getDecorClipRect(const Decor& tile)
+    {
+        SDL_Rect clip{};
+        if (tile.type == DecorType::TREE)
+        {
+            clip = {tile.variant * 32, 0, 32, 32}; // these small trees are 32 * 32
+        }
         return clip;
     }
 
@@ -509,7 +597,16 @@ public:
             y = (variant - x) / w
             */
             SDL_Rect clip{getClipRect(tile)};
-            getTileTex(tile, texman)->render(tile.pos.x * TILE_SIZE * SCALE_FACTOR - scrollX, tile.pos.y * TILE_SIZE * SCALE_FACTOR  - scrollY, renderer, &clip);
+            getTileTex(tile, texman)->render(tile.pos.x * TILE_SIZE - scrollX, tile.pos.y * TILE_SIZE - scrollY, renderer, &clip);
+        }
+    }
+
+    void renderDecorChunk(DecorChunk* chunk, const int scrollX, const int scrollY, SDL_Window* window, SDL_Renderer* renderer, TexMan* texman)
+    {
+        for (const Decor& tile : chunk->decor)
+        {
+            SDL_Rect clip{getDecorClipRect(tile)};
+            getTileTex(tile, texman)->render(tile.pos.x - scrollX, tile.pos.y - scrollY, renderer, &clip);
         }
     }
 

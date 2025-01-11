@@ -210,6 +210,7 @@ private:
     double _damage{4.0};
 
     double _grounded{0.0};
+    bool _jumped_on{false};
 
 public:
     Turtle(vec2<double> pos, vec2<double> vel, double gravity, bool peaceful, std::string name, TexMan* texman);
@@ -219,6 +220,9 @@ public:
     virtual double getHealth() {return _health;}
     virtual double getMaxHealth() {return _maxHealth;}
     virtual void setHealth(double val) {_health = val;}
+
+    virtual bool getJumpedOn() {return _jumped_on;}
+    virtual void setJumpedOn(bool val) {_jumped_on = val;}
 
     void loadAnim(TexMan* texman);
 
