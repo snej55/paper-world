@@ -7,6 +7,7 @@
 #include "./vec2.hpp"
 #include "./tiles.hpp"
 #include "./particles.hpp"
+#include "./sparks.hpp"
 #include "./anim.hpp"
 #include "./weapons.hpp"
 
@@ -62,6 +63,7 @@ private:
     ParticleSpawner _Particles{10000, 0, {50.0, 50.0}, {1.0, 1.0}, 0.125, 0.01, true};
     SmokeSpawner _Smoke{10000, 0, {100.0, 100.0}, 0.15, true};
     FireSpawner _Fire{10000, 0, {200.0, 200.0}, 0.2, true};
+    SparkManager _SparkManager{0.0, 0.2, 1.0, nullptr};
 
     double _max_health{100.0};
     double _health{100.0};
@@ -159,9 +161,9 @@ public:
 
     void die(double* screen_shake);
 
-    void update(const double& time_step, World& world, double* screen_shake);
+    void update(const double& time_step, World& world, double* screen_shake, TexMan* texman);
     void updateVel(const double& time_step);
-    void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake);
+    void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake, TexMan* texman);
     void updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* tex);
 
     void handleAnim(const double& time_step);

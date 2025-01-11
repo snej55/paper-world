@@ -1,10 +1,9 @@
 # TODO
 Week 1:
- - Water + some juice (dust when jumping, leaves)
+ - Water
  - Lava
  - Leaves
  - Art & Music (Decor)
- - Red glow when player loses health
 Week 2:
  - Portals
  - Coins

@@ -81,6 +81,11 @@ void Player::damage(double amount, double* screen_shake, double* slomo)
         _Smoke.setPos(getCenter());
         _Fire.setPos(getCenter());
         _Particles.setSpawning(16, {4.0, 4.0}, _Palette[0]);
+        int num{(std::rand() % 10) + 15};
+        for (int i{0}; i < num; ++i)
+        {
+            _SparkManager.addSpark(new Spark{getCenter(), Util::random() * M_PI * 2.0, Util::random() * 3.0 + 1.0});
+        }
         //_Smoke.setSpawning(2, {1, 2}, {0x88, 0x88, 0x88});
         _recover = 0.0;
         *slomo = std::min(0.7, *slomo);
@@ -103,13 +108,18 @@ void Player::die(double* screen_shake)
     _Particles.setSpawning(128, {16.0, 8.0}, _Palette[0]);
     _Smoke.setSpawning(100, {1, 2}, {0xAA, 0xAA, 0xAA});
     _Fire.setSpawning(100);
+    int num{(std::rand() % 20) + 10};
+    for (int i{0}; i < num; ++i)
+    {
+        _SparkManager.addSpark(new Spark{getCenter(), Util::random() * M_PI * 2.0, Util::random() * 5.0 + 3.0});
+    }
     _pos = _spawn_pos;
     _rect.x = _pos.x;
     _rect.y = _pos.y;
     *screen_shake = std::max(*screen_shake, 16.0);
 }
 
-void Player::update(const double& time_step, World& world, double* screen_shake)
+void Player::update(const double& time_step, World& world, double* screen_shake, TexMan* texman)
 {
     // add all the timers here
     _swordAttacked += time_step;
@@ -119,7 +129,7 @@ void Player::update(const double& time_step, World& world, double* screen_shake)
     if (_ad > 120)
     {
         updateVel(time_step);
-        handlePhysics(time_step, _vel, world, screen_shake);
+        handlePhysics(time_step, _vel, world, screen_shake, texman);
         // updateSword(time_step);
         handleAnim(time_step);
         updateRect();
@@ -188,7 +198,7 @@ void Player::updateVel(const double& time_step)
     _vel.y = std::min(8.0, _vel.y);
 }
 
-void Player::handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake)
+void Player::handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake, TexMan* texman)
 {
     _pos.x += frame_movement.x * time_step;
     _rect.x = _pos.x;
@@ -228,6 +238,12 @@ void Player::handlePhysics(const double& time_step, vec2<double> frame_movement,
             {
                 _rect.y = tile_rect->y - _rect.h;
                 _falling = 0.0;
+                if (_vel.y > 5.0)
+                {
+                    _Particles.setPos(getCenter());
+                    _Particles.setSpawning(16, {4.0, 5.0}, _Palette[0]);
+                    texman->SFX_landing.play();
+                }
             } else { // moving left
                 _rect.y = tile_rect->y + tile_rect->h;
             }
@@ -268,6 +284,8 @@ void Player::updateParticles(const double& time_step, const int scrollX, const i
     _Particles.update(time_step, scrollX, scrollY, renderer, world, texman);
     _Smoke.update(time_step, scrollX, scrollY, renderer, world, &texman->particle);
     _Fire.update(time_step, scrollX, scrollY, renderer, world, &texman->particleFire);
+    _SparkManager.setTexture(&(texman->particle));
+    _SparkManager.update(time_step, scrollX, scrollY, renderer);
     if (_should_damage)
     {
         texman->SFX_player_hit.play();

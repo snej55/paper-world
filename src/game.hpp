@@ -280,7 +280,7 @@ public:
                 scroll.x += (player_pos.x - static_cast<double>(_Width) / 2.0 - scroll.x) / 40.0 * time_step;
                 scroll.y += (player_pos.y - static_cast<double>(_Height) / 2.0 - scroll.y) / 50.0 * time_step;
             }
-            _Player.update(time_step, _World, &screen_shake);
+            _Player.update(time_step, _World, &screen_shake, &_TexMan);
             if (_Player.getAd() == 0)
             {
                 _TexMan.SFX_death_0.play();

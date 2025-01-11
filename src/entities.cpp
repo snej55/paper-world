@@ -68,7 +68,6 @@ void Entity::damage(const double damage, double* screen_shake)
         *screen_shake = std::max(*screen_shake, 8.0);
         die(screen_shake);
     }
-    std::cout << getHealth() << '\n';
 }
 
 void Entity::die(double *screen_shake)
@@ -824,7 +823,6 @@ void EntityManager::update(const double& time_step, World& world, double* screen
             } else if (entity->getShouldDamage())
             {
                 texman->playDamageSound();
-                std::cout << "damaging\n";
                 entity->setShouldDamage(false);
                 if (entity->getName() == "turtle")
                 {

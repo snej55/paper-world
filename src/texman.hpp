@@ -61,6 +61,7 @@ public:
     Sound SFX_player_hit{};
     Sound SFX_sword_slash{};
     Sound SFX_sword_swoosh{};
+    Sound SFX_landing{};
 
     TexMan()
     {
@@ -106,6 +107,7 @@ public:
         SFX_player_hit.free();
         SFX_sword_slash.free();
         SFX_sword_swoosh.free();
+        SFX_landing.free();
     }
 
     void confirm(bool val, bool& success)
@@ -158,6 +160,7 @@ public:
         SFX_player_hit.loadFromFileWAV("data/audio/hit/player_hit.wav");
         SFX_sword_slash.loadFromFileWAV("data/audio/sword/slash.wav");
         SFX_sword_swoosh.loadFromFileWAV("data/audio/sword/swoosh.wav");
+        SFX_landing.loadFromFileWAV("data/audio/misc/footstep01.wav");
         return success;
     }
 
