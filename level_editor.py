@@ -38,7 +38,8 @@ class Editor:
             'bat': [pygame.image.load('data/images/entities/bat/thumb.png').convert()],
             'turtle': [pygame.image.load('data/images/entities/turtle/thumb.png').convert()],
             'spring': [pygame.image.load('data/images/tiles/spring.png').convert()],
-            'grass_key': [pygame.image.load('data/images/tiles/grass_key.png').convert()]
+            'grass_key': [pygame.image.load('data/images/tiles/grass_key.png').convert()],
+            'trees': self.load_sheet(pygame.image.load('data/images/tiles/trees.png').convert(), [32, 32])
         }
         
         for key in self.assets:
@@ -78,6 +79,9 @@ class Editor:
             self.tile_map[f"{math.floor(entity['pos'][0] / TILE_SIZE)};{math.floor(entity['pos'][1] / TILE_SIZE)}"] = {'type': entity['type'], 'variant': 0}
         for spring in data['level']['springs']:
             self.tile_map[f"{math.floor(spring['pos'][0] / TILE_SIZE)};{math.floor(spring['pos'][1] / TILE_SIZE)}"] = {'type': "spring", 'variant': 0}
+        self.tile_map['off_grid'] = []
+        self.tile_map['off_grid'].extend(data['level']['off_grid'])
+        
     
     def save(self, path):
         with open(path, 'w') as f:
@@ -111,6 +115,15 @@ class Editor:
                 tile_surf.blit(sheet, (-x * TILE_SIZE, -y * TILE_SIZE))
                 tile_surf.set_colorkey((0, 0, 0))
                 tiles.append(tile_surf.copy())
+        return tiles
+
+    def load_sheet(self, sheet, tile_size):
+        tiles = []
+        for x in range(math.floor(sheet.get_width() / tile_size[0])):
+            tile_surf = pygame.Surface(tile_size)
+            tile_surf.blit(sheet, (-x * tile_size[0], 0))
+            tile_surf.set_colorkey((0, 0, 0))
+            tiles.append(tile_surf.copy())
         return tiles
     
     def auto_tile(self):
@@ -165,6 +178,8 @@ class Editor:
                             except IndexError:
                                 pass
                     del self.tile_map[tile_loc]
+        if not self.grid:
+            pass
         
         for i, particle in sorted(enumerate(self.particles), reverse=True):
             particle[0][0] += particle[1][0] * self.dt
@@ -204,12 +219,20 @@ class Editor:
     def draw(self):
         self.draw_grid()
         self.draw_tiles()
+        for tile in self.tile_map['off_grid']: # tile: [pos, type, variant] absolute pos
+            self.screen.blit(self.assets[tile['type']][tile['variant']], (tile['pos'][0] - self.scroll.x, tile['pos'][1] - self.scroll.y))
     
         mouse_pos = pygame.mouse.get_pos()
-        mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x) / TILE_SIZE), math.floor((mouse_pos[1] / 2 + self.scroll.y) / TILE_SIZE)]
-        self.screen.blit(self.select_surf, (mouse_pos[0] * TILE_SIZE - self.scroll.x, mouse_pos[1] * TILE_SIZE - self.scroll.y))
-        if not self.right_click:
-            self.screen.blit(self.assets[self.tile_list[self.tile_type]][self.tile_variant], (mouse_pos[0] * TILE_SIZE - self.scroll.x, mouse_pos[1] * TILE_SIZE - self.scroll.y))
+        if self.grid:
+            mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x) / TILE_SIZE), math.floor((mouse_pos[1] / 2 + self.scroll.y) / TILE_SIZE)]
+            self.screen.blit(self.select_surf, (mouse_pos[0] * TILE_SIZE - self.scroll.x, mouse_pos[1] * TILE_SIZE - self.scroll.y))
+            if not self.right_click:
+                self.screen.blit(self.assets[self.tile_list[self.tile_type]][self.tile_variant], (mouse_pos[0] * TILE_SIZE - self.scroll.x, mouse_pos[1] * TILE_SIZE - self.scroll.y))
+        else:
+            mouse_pos = [math.floor(mouse_pos[0] / 2 + self.scroll.x), math.floor(mouse_pos[1] / 2 + self.scroll.y)]
+            self.screen.blit(self.select_surf, (mouse_pos[0] - self.scroll.x, mouse_pos[1] - self.scroll.y))
+            if not self.right_click:
+                self.screen.blit(self.assets[self.tile_list[self.tile_type]][self.tile_variant], (mouse_pos[0] - self.scroll.x, mouse_pos[1] - self.scroll.y))
 
     def run(self):
         while self.running:
