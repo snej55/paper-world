@@ -29,7 +29,8 @@ public:
     {
         if (_Sound != nullptr)
         {
-            delete _Sound;
+            Mix_FreeChunk(_Sound);
+            _Sound = nullptr;
         }
     }
 

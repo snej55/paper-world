@@ -94,6 +94,22 @@ namespace Util {
 
         return indices;
     }
+
+    template <typename T>
+    void printVector(const std::vector<T>& vec)
+    {
+        const std::size_t size{vec.size()};
+        std::cout << "{";
+        for (std::size_t i{0}; i < size; ++i)
+        {
+            std::cout << vec[i];
+            if (i < size - 1)
+            {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "}\n";
+    }
 }
 
 #endif

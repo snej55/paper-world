@@ -98,6 +98,12 @@ build CMakeFiles/main.dir/src/weapons.cpp.obj: CXX_COMPILER__main_unscanned_ C$:
   OBJECT_DIR = CMakeFiles\main.dir
   OBJECT_FILE_DIR = CMakeFiles\main.dir\src
 
+build CMakeFiles/main.dir/src/water.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/water.cpp || cmake_object_order_depends_target_main
+  DEP_FILE = CMakeFiles\main.dir\src\water.cpp.obj.d
+  INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
+  OBJECT_DIR = CMakeFiles\main.dir
+  OBJECT_FILE_DIR = CMakeFiles\main.dir\src
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target main
@@ -106,7 +112,7 @@ build CMakeFiles/main.dir/src/weapons.cpp.obj: CXX_COMPILER__main_unscanned_ C$:
 #############################################
 # Link the executable main.exe
 
-build main.exe: CXX_EXECUTABLE_LINKER__main_ CMakeFiles/main.dir/main.cpp.obj CMakeFiles/main.dir/src/anim.cpp.obj CMakeFiles/main.dir/src/sparks.cpp.obj CMakeFiles/main.dir/src/entities.cpp.obj CMakeFiles/main.dir/src/health_bars.cpp.obj CMakeFiles/main.dir/src/particles.cpp.obj CMakeFiles/main.dir/src/player.cpp.obj CMakeFiles/main.dir/src/timer.cpp.obj CMakeFiles/main.dir/src/weapons.cpp.obj
+build main.exe: CXX_EXECUTABLE_LINKER__main_ CMakeFiles/main.dir/main.cpp.obj CMakeFiles/main.dir/src/anim.cpp.obj CMakeFiles/main.dir/src/sparks.cpp.obj CMakeFiles/main.dir/src/entities.cpp.obj CMakeFiles/main.dir/src/health_bars.cpp.obj CMakeFiles/main.dir/src/particles.cpp.obj CMakeFiles/main.dir/src/player.cpp.obj CMakeFiles/main.dir/src/timer.cpp.obj CMakeFiles/main.dir/src/weapons.cpp.obj CMakeFiles/main.dir/src/water.cpp.obj
   LINK_LIBRARIES = -lmingw32  -lSDL2main  -lSDL2  -lSDL2_image  -lSDL2_mixer  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   LINK_PATH = -LC:/Users/AnkenWannePC/vs_projects/paper-world/lib
   OBJECT_DIR = CMakeFiles\main.dir

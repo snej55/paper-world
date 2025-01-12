@@ -16,6 +16,7 @@
 #include "./particles.hpp"
 #include "./entities.hpp"
 #include "./sparks.hpp"
+#include "./water.hpp"
 
 constexpr SDL_Color PALETTE[8] {{0xa8, 0x60, 0x5d}, {0xd1, 0xa6, 0x7e}, {0xf6, 0xe7, 0x9c}, {0xb6, 0xcf, 0x8e}, {0x60, 0xae, 0x7b}, {0x3c, 0x6b, 0x64}, {0x1f, 0x24, 0x4b}, {0x65, 0x40, 0x53}};
 
@@ -36,6 +37,8 @@ private:
 
     Mix_Chunk* music{NULL};
 
+    Water* _Water;
+
     bool _closed{false};
 
     double _playerHealth{100.0};
@@ -45,6 +48,7 @@ public:
     {
         _Window = nullptr;
         _Renderer = nullptr;
+        _Water = new Water{{1, 22}, {6, 2}, 1.0};
     }
 
     ~Game()
@@ -73,6 +77,7 @@ public:
 
     void Close()
     {
+        delete _Water;
         Mix_FreeChunk(music);
         std::cout << "Closing\n";
         SDL_DestroyRenderer(_Renderer);
@@ -308,6 +313,7 @@ public:
             }
             last_damaged += 0.03f;
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
+            _Water->update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_TexMan, &_Player);
 
             _playerHealth += (_Player.getHealth() - _playerHealth) * 0.12 * time_step;
             if (_Player.getHealth() == _Player.getMaxHealth())
@@ -324,6 +330,20 @@ public:
                 SDL_RenderDrawRect(_Renderer, &alert);
                 SDL_SetRenderDrawBlendMode(_Renderer, SDL_BLENDMODE_NONE);
             }
+
+            // Just testing lol
+            // SDL_Color col{0x00, 0xaa, 0xFF, 0xaa};
+            // std::vector<SDL_Vertex> vertices
+            // {
+            //     {{0.0f, 0.0f}, col, {0.0f, 0.0f}},
+            //     {{50.0f, 20.0f}, col, {0.5f, 0.0f}},
+            //     {{100.0f, 0.0f}, col, {1.0f, 0.0f}},
+            //     {{0.0f, 100.0f}, col, {0.0f, 1.0f}},
+            //     {{50.0f, 100.0f}, col, {0.5f, 1.0f}},
+            //     {{100.0f, 100.0f}, col, {1.0f, 1.0f}}
+            // };
+            // std::vector<int> indices{Util::get_water_indices<SDL_Vertex>(vertices)};
+            // Polygons::renderPolygon(_Renderer, _TexMan.particle.getTexture(), vertices, indices);
             // render screen
             SDL_SetRenderTarget(_Renderer, NULL);
             _Screen.renderClean(0, 0, _Renderer, 3);
