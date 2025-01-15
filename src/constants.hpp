@@ -4,6 +4,8 @@
 inline constexpr int TILE_SIZE {8};
 inline constexpr int CHUNK_SIZE {9};
 
+inline constexpr int MAX_ENTITIES {512}; // max number of entities per entity manager
+
 // level dimensions in chunks
 inline constexpr int LEVEL_WIDTH {14};
 inline constexpr int LEVEL_HEIGHT {7};

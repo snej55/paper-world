@@ -695,7 +695,7 @@ void Turtle::render(const int scrollX, const int scrollY, SDL_Renderer* renderer
 EntityManager::EntityManager(vec2<double> pos, const int total, Entity** entities)
     : _total{total}, _pos{pos}
 {
-    _Entities = new Entity*[total];
+    _Entities = new Entity*[MAX_ENTITIES];
     for (std::size_t i{0}; i < total; ++i)
     {
         _Entities[i] = nullptr;
@@ -708,7 +708,7 @@ EntityManager::EntityManager(vec2<double> pos, const int total, Entity** entitie
 EntityManager::EntityManager(vec2<double> pos, const int total, std::vector<Entity*> entities)
     : _total{total}, _pos{pos}
 {
-    _Entities = new Entity*[512];
+    _Entities = new Entity*[MAX_ENTITIES];
     for (std::size_t i{0}; i < total; ++i)
     {
         _Entities[i] = nullptr;

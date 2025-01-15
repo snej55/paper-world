@@ -46,4 +46,10 @@ public:
     void update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, Player* player);
 };
 
+// class WaterManager
+// {
+// private:
+
+// };
+
 #endif
