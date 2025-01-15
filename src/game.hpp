@@ -204,6 +204,22 @@ public:
                         case SDLK_RIGHT:
                             controller->setControl(Control::RIGHT, true);
                             break;
+                        case SDLK_w:
+                            if (!(controller->getControl(Control::UP)))
+                            {
+                                controller->setJumping(0.0);
+                                controller->setControl(Control::UP, true);
+                            }
+                            break;
+                        case SDLK_s:
+                            controller->setControl(Control::DOWN, true);
+                            break;  
+                        case SDLK_a:
+                            controller->setControl(Control::LEFT, true);
+                            break;
+                        case SDLK_d:
+                            controller->setControl(Control::RIGHT, true);
+                            break;
                         case SDLK_p:
                             //Entity* _Entity = new Entity{{static_cast<double>(std::rand() % 100 + 50), 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false, "default"};
                             //_EMManager.addEntity(_Entity);
@@ -231,6 +247,18 @@ public:
                             controller->setControl(Control::LEFT, false);
                             break;
                         case SDLK_RIGHT:
+                            controller->setControl(Control::RIGHT, false);
+                            break;
+                        case SDLK_w:
+                            controller->setControl(Control::UP, false);
+                            break;
+                        case SDLK_s:
+                            controller->setControl(Control::DOWN, false);
+                            break;
+                        case SDLK_a:
+                            controller->setControl(Control::LEFT, false);
+                            break;
+                        case SDLK_d:
                             controller->setControl(Control::RIGHT, false);
                             break;
                         default:
