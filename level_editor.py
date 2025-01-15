@@ -52,6 +52,8 @@ class Editor:
 
         self.tile_map = {}
         self.off_grid = []
+        self.water_list = []
+        self.water_rect = None
         self.load(self.path)
 
         self.click = False
@@ -66,6 +68,7 @@ class Editor:
         self.tile_variant = 0
 
         self.grid = True
+        self.water = False
 
         self.particles = []
     
@@ -75,6 +78,7 @@ class Editor:
         f.close()
         self.tile_map = {}
         self.off_grid = []
+        self.water_list = []
         for tile in data['level']['tiles']:
             tile_loc = f"{tile['pos'][0]};{tile['pos'][1]}"
             self.tile_map[tile_loc] = {'type': CONVERT_TYPES[tile['type']], 'variant': tile['variant']}
@@ -82,10 +86,11 @@ class Editor:
             self.tile_map[f"{math.floor(entity['pos'][0] / TILE_SIZE)};{math.floor(entity['pos'][1] / TILE_SIZE)}"] = {'type': entity['type'], 'variant': 0}
         for spring in data['level']['springs']:
             self.tile_map[f"{math.floor(spring['pos'][0] / TILE_SIZE)};{math.floor(spring['pos'][1] / TILE_SIZE)}"] = {'type': "spring", 'variant': 0}
+        for rect in data['level']['water']:
+            self.water_list.append(pygame.Rect(rect[0], rect[1], rect[2], rect[3]))
         self.off_grid.extend(data['level']['off_grid'])
         for tile in self.off_grid:
             tile['type'] = CONVERT_TYPES[tile['type']]
-        
     
     def save(self, path):
         with open(path, 'w') as f:
@@ -115,7 +120,7 @@ class Editor:
                     if tile['type'] == CONVERT_TYPES[key]:
                         tile_type = key
                 off_grid.append({'pos': tile['pos'], 'type': tile_type, 'variant': tile['variant']});
-            json.dump({'level': {'tiles': tiles, 'entities': entities, 'springs': springs, 'off_grid': off_grid}}, f)
+            json.dump({'level': {'tiles': tiles, 'entities': entities, 'springs': springs, 'off_grid': off_grid, 'water': [[rect.x, rect.y, rect.w, rect.h] for rect in self.water_list]}}, f)
             f.close()
 
     def load_tileset(self, sheet):
@@ -166,29 +171,54 @@ class Editor:
         mouse_pos = pygame.mouse.get_pos()
         mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x) / TILE_SIZE), math.floor((mouse_pos[1] / 2 + self.scroll.y) / TILE_SIZE)]
 
-        if self.click and self.grid:
-            if 0 <= mouse_pos[0] < LEVEL_WIDTH * CHUNK_SIZE and 0 <= mouse_pos[1] < LEVEL_HEIGHT * CHUNK_SIZE:
-                tile_loc = f"{mouse_pos[0]};{mouse_pos[1]}"
-                if tile_loc in self.tile_map:
-                    if self.tile_map[tile_loc]['type'] == self.tile_list[self.tile_type] and self.tile_map[tile_loc]['variant'] == self.tile_variant:
-                        pass
+        if not self.water:
+            if self.click and self.grid:
+                if 0 <= mouse_pos[0] < LEVEL_WIDTH * CHUNK_SIZE and 0 <= mouse_pos[1] < LEVEL_HEIGHT * CHUNK_SIZE:
+                    tile_loc = f"{mouse_pos[0]};{mouse_pos[1]}"
+                    if tile_loc in self.tile_map:
+                        if self.tile_map[tile_loc]['type'] == self.tile_list[self.tile_type] and self.tile_map[tile_loc]['variant'] == self.tile_variant:
+                            pass
+                        else:
+                            self.tile_map[tile_loc] = {'type': self.tile_list[self.tile_type], 'variant': self.tile_variant}
                     else:
                         self.tile_map[tile_loc] = {'type': self.tile_list[self.tile_type], 'variant': self.tile_variant}
+            if self.right_click and self.grid:
+                if 0 <= mouse_pos[0] < LEVEL_WIDTH * CHUNK_SIZE and 0 <= mouse_pos[1] < LEVEL_HEIGHT * CHUNK_SIZE:
+                    tile_loc = f"{mouse_pos[0]};{mouse_pos[1]}"
+                    if tile_loc in self.tile_map:
+                        for y in range(TILE_SIZE):
+                            for x in range(TILE_SIZE):
+                                try:
+                                    angle = random.random() * math.pi * 2
+                                    #self.particles.append([[mouse_pos[0] * TILE_SIZE + random.random() * TILE_SIZE, mouse_pos[1] * TILE_SIZE + random.random() * TILE_SIZE], [random.random() * 2 - 1, random.random() * 4 - 3], 0, random.choice([(96, 174, 123), (60, 107, 100), (31, 36, 75), (101, 64, 83), (168, 96, 93), (209, 166, 126), (246, 231, 156), (182, 207, 142)])])
+                                    self.particles.append([[mouse_pos[0] * TILE_SIZE + x, mouse_pos[1] * TILE_SIZE + y], [math.sin(angle), math.cos(angle)], 0, self.assets[self.tile_map[tile_loc]['type']][self.tile_map[tile_loc]['variant']].get_at((x, y))])
+                                except IndexError:
+                                    pass
+                        del self.tile_map[tile_loc]
+        else:
+            if self.click and self.grid:
+                mouse_pos[0] *= TILE_SIZE
+                mouse_pos[1] *= TILE_SIZE
+                if mouse_pos[0] < self.water_rect.x:
+                    self.water_rect.w = self.water_rect.x - mouse_pos[0]
+                    self.water_rect.x = mouse_pos[0]
                 else:
-                    self.tile_map[tile_loc] = {'type': self.tile_list[self.tile_type], 'variant': self.tile_variant}
-        if self.right_click and self.grid:
-            if 0 <= mouse_pos[0] < LEVEL_WIDTH * CHUNK_SIZE and 0 <= mouse_pos[1] < LEVEL_HEIGHT * CHUNK_SIZE:
-                tile_loc = f"{mouse_pos[0]};{mouse_pos[1]}"
-                if tile_loc in self.tile_map:
-                    for y in range(TILE_SIZE):
-                        for x in range(TILE_SIZE):
-                            try:
-                                angle = random.random() * math.pi * 2
-                                #self.particles.append([[mouse_pos[0] * TILE_SIZE + random.random() * TILE_SIZE, mouse_pos[1] * TILE_SIZE + random.random() * TILE_SIZE], [random.random() * 2 - 1, random.random() * 4 - 3], 0, random.choice([(96, 174, 123), (60, 107, 100), (31, 36, 75), (101, 64, 83), (168, 96, 93), (209, 166, 126), (246, 231, 156), (182, 207, 142)])])
-                                self.particles.append([[mouse_pos[0] * TILE_SIZE + x, mouse_pos[1] * TILE_SIZE + y], [math.sin(angle), math.cos(angle)], 0, self.assets[self.tile_map[tile_loc]['type']][self.tile_map[tile_loc]['variant']].get_at((x, y))])
-                            except IndexError:
-                                pass
-                    del self.tile_map[tile_loc]
+                    self.water_rect.w = mouse_pos[0] - self.water_rect.x
+                if mouse_pos[1] < self.water_rect.y:
+                    self.water_rect.h = self.water_rect.y - mouse_pos[1]
+                    self.water_rect.y = mouse_pos[1]
+                else:
+                    self.water_rect.h = mouse_pos[1] - self.water_rect.y
+                pygame.draw.rect(self.screen, (200, 200, 200, 200), (self.water_rect.x - self.scroll.x, self.water_rect.y - self.scroll.y, self.water_rect.w, self.water_rect.h))
+            if self.right_click:
+                mouse_pos = pygame.mouse.get_pos()
+                mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x)), math.floor((mouse_pos[1] / 2 + self.scroll.y))]
+                for i, rect in sorted(enumerate(self.water_list), reverse=True):
+                    if rect.collidepoint(mouse_pos[0], mouse_pos[1]):
+                        self.water_list.pop(i)
+        for rect in self.water_list:
+            pygame.draw.rect(self.screen, (0, 100, 255, 255), (rect.x - self.scroll.x, rect.y - self.scroll.y, rect.w, rect.h))
+                
         
         for i, particle in sorted(enumerate(self.particles), reverse=True):
             particle[0][0] += particle[1][0] * self.dt
@@ -271,6 +301,8 @@ class Editor:
                         self.save(self.path)
                     if event.key == pygame.K_g:
                         self.grid = not self.grid
+                    if event.key == pygame.K_w:
+                        self.water = not self.water
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_RIGHT:
                         self.controls['right'] = False
@@ -285,6 +317,10 @@ class Editor:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.click = True
+                        if self.water:
+                            mouse_pos = pygame.mouse.get_pos()
+                            mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x) / TILE_SIZE), math.floor((mouse_pos[1] / 2 + self.scroll.y) / TILE_SIZE)]
+                            self.water_rect = pygame.Rect(mouse_pos[0] * TILE_SIZE, mouse_pos[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE)
                     if event.button == 3:
                         self.right_click = True
                     if self.controls['l_shift']:
@@ -302,18 +338,21 @@ class Editor:
                     if not self.grid:
                         mouse_pos = pygame.mouse.get_pos()
                         mouse_pos = [math.floor(mouse_pos[0] / 2 + self.scroll.x), math.floor(mouse_pos[1] / 2 + self.scroll.y)]
-                        if self.click:
-                            if 0 <= mouse_pos[0] < LEVEL_WIDTH * CHUNK_SIZE * TILE_SIZE and 0 <= mouse_pos[1] < LEVEL_HEIGHT * CHUNK_SIZE * TILE_SIZE:
-                                self.off_grid.append({'pos': mouse_pos, 'type': self.tile_list[self.tile_type], 'variant': self.tile_variant}) 
-                        if self.right_click:
-                            for i, tile in sorted(enumerate(self.off_grid), reverse=True):
-                                tile_img = self.assets[tile['type']][tile['variant']];
-                                tile_rect = pygame.Rect(mouse_pos[0], mouse_pos[1], tile_img.get_width(), tile_img.get_height())
-                                if tile_rect.collidepoint(mouse_pos[0], mouse_pos[1]):
-                                    self.off_grid.pop(i)
+                        if not self.water:
+                            if self.click:
+                                if 0 <= mouse_pos[0] < LEVEL_WIDTH * CHUNK_SIZE * TILE_SIZE and 0 <= mouse_pos[1] < LEVEL_HEIGHT * CHUNK_SIZE * TILE_SIZE:
+                                    self.off_grid.append({'pos': mouse_pos, 'type': self.tile_list[self.tile_type], 'variant': self.tile_variant}) 
+                            if self.right_click:
+                                for i, tile in sorted(enumerate(self.off_grid), reverse=True):
+                                    tile_img = self.assets[tile['type']][tile['variant']];
+                                    tile_rect = pygame.Rect(mouse_pos[0], mouse_pos[1], tile_img.get_width(), tile_img.get_height())
+                                    if tile_rect.collidepoint(mouse_pos[0], mouse_pos[1]):
+                                        self.off_grid.pop(i)
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         self.click = False
+                        if self.water:
+                            self.water_list.append(self.water_rect.copy())
                     if event.button == 3:
                         self.right_click = False
             self.update()
