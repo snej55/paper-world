@@ -1,6 +1,8 @@
 #ifndef WATER_H
 #define WATER_H
 
+#include "JSON/json.hpp"
+
 #include "./constants.hpp"
 #include "./texman.hpp"
 #include "./vec2.hpp"
@@ -11,6 +13,10 @@
 
 #include <vector>
 #include <cmath>
+#include <string>
+#include <fstream>
+
+using json = nlohmann::json;
 
 struct WaterSpring
 {
@@ -46,10 +52,23 @@ public:
     void update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, Player* player);
 };
 
-// class WaterManager
-// {
-// private:
+class WaterManager
+{
+private:
+    std::vector<Water*> _Water{};
 
-// };
+public:
+    WaterManager()
+    {
+    }
+
+    WaterManager(const char* path);
+
+    ~WaterManager();
+
+    void loadFromFile(const char* path);
+
+    void update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, Player* player);
+};
 
 #endif

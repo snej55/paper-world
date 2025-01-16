@@ -30,14 +30,14 @@ private:
     TexMan _TexMan{};
     World _World{};
     Player _Player{{40.0, 40.0}, {4, 8}};
-    EMManager _EMManager{}; // this is the entity manager :)
+    EMManager _EMManager{}; // this is the entity manager :) "The Manager of the Managers"
+    WaterManager* _WaterManager{nullptr};
+
 
     int _Width {SCR_WIDTH};
     int _Height {SCR_HEIGHT};
 
     Mix_Chunk* music{NULL};
-
-    Water* _Water;
 
     bool _closed{false};
 
@@ -48,7 +48,6 @@ public:
     {
         _Window = nullptr;
         _Renderer = nullptr;
-        _Water = new Water{{1, 22}, {6, 2}, 1.0};
     }
 
     ~Game()
@@ -77,7 +76,6 @@ public:
 
     void Close()
     {
-        delete _Water;
         Mix_FreeChunk(music);
         std::cout << "Closing\n";
         SDL_DestroyRenderer(_Renderer);
@@ -137,6 +135,8 @@ public:
         _World.loadFromFile("data/maps/0.json");
         _EMManager.loadFromPath("data/maps/0.json", &_TexMan);
         _Player.loadAnim(&_TexMan);
+        _WaterManager = new WaterManager{};
+        _WaterManager->loadFromFile("data/maps/0.json");
 
         music = Mix_LoadWAV("data/audio/hit/hit_0.wav");
         if (music == NULL)
@@ -341,7 +341,7 @@ public:
             }
             last_damaged += 0.03f;
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
-            _Water->update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_TexMan, &_Player);
+            _WaterManager->update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_TexMan, &_Player);
 
             _playerHealth += (_Player.getHealth() - _playerHealth) * 0.12 * time_step;
             if (_Player.getHealth() == _Player.getMaxHealth())

@@ -91,6 +91,7 @@ private:
     Sword* _Sword;
 
     bool _should_damage{false};
+    double _in_water{150.0};
 
 public:
     Player(vec2<double> pos, vec2<int> dimensions);
@@ -119,6 +120,9 @@ public:
     {
         return _should_damage;
     }
+
+    double getInWater() {return _in_water;}
+    void setInWater(double val) {_in_water = val;}
 
     double getFalling() {return _falling;}
     void setVelY(const double val) {_vel.y = val;}

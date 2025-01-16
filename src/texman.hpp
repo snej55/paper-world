@@ -67,6 +67,8 @@ public:
     Sound SFX_landing{};
     Sound SFX_turtle{};
     Sound SFX_spring{};
+    Sound SFX_water_in{};
+    Sound SFX_water_out{};
 
     TexMan()
     {
@@ -116,6 +118,8 @@ public:
         SFX_landing.free();
         SFX_turtle.free();
         SFX_spring.free();
+        SFX_water_in.free();
+        SFX_water_out.free();
     }
 
     void confirm(bool val, bool& success)
@@ -172,6 +176,8 @@ public:
         SFX_landing.loadFromFileWAV("data/audio/misc/footstep01.wav");
         SFX_turtle.loadFromFileWAV("data/audio/misc/turtle.wav");
         SFX_spring.loadFromFileWAV("data/audio/misc/spring.wav");
+        SFX_water_in.loadFromFileWAV("data/audio/misc/water_in.wav");
+        SFX_water_out.loadFromFileWAV("data/audio/misc/water_out.wav");
         return success;
     }
 

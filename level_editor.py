@@ -87,7 +87,7 @@ class Editor:
         for spring in data['level']['springs']:
             self.tile_map[f"{math.floor(spring['pos'][0] / TILE_SIZE)};{math.floor(spring['pos'][1] / TILE_SIZE)}"] = {'type': "spring", 'variant': 0}
         for rect in data['level']['water']:
-            self.water_list.append(pygame.Rect(rect[0], rect[1], rect[2], rect[3]))
+            self.water_list.append(pygame.Rect(rect[0] * 8, rect[1] * 8, rect[2] * 8, rect[3] * 8))
         self.off_grid.extend(data['level']['off_grid'])
         for tile in self.off_grid:
             tile['type'] = CONVERT_TYPES[tile['type']]
@@ -120,7 +120,7 @@ class Editor:
                     if tile['type'] == CONVERT_TYPES[key]:
                         tile_type = key
                 off_grid.append({'pos': tile['pos'], 'type': tile_type, 'variant': tile['variant']});
-            json.dump({'level': {'tiles': tiles, 'entities': entities, 'springs': springs, 'off_grid': off_grid, 'water': [[rect.x, rect.y, rect.w, rect.h] for rect in self.water_list]}}, f)
+            json.dump({'level': {'tiles': tiles, 'entities': entities, 'springs': springs, 'off_grid': off_grid, 'water': [[int(rect.x / 8), int(rect.y / 8), int(rect.w / 8), int(rect.h / 8)] for rect in self.water_list]}}, f)
             f.close()
 
     def load_tileset(self, sheet):

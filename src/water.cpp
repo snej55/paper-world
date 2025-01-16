@@ -32,6 +32,7 @@ void Water::loadSprings()
     {
         _Springs.push_back(new WaterSpring{{static_cast<double>(_pos.x * TILE_SIZE) + _spacing * (double)i, static_cast<double>(_pos.y * TILE_SIZE) + 4.0}, static_cast<double>(_pos.y * TILE_SIZE) + 4.0});
     }
+    std::cout << "yo again\n";
 }
 
 SDL_Rect* Water::getRect()
@@ -110,4 +111,65 @@ void Water::update(const double& time_step, const int scrollX, const int scrollY
     SDL_RenderDrawLines(renderer, line.data(), static_cast<int>(line.size()));
     //SDL_RenderFillRect(renderer, &fillRect);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+
+    const bool in_water{Util::checkCollision(getRect(), player->getRect())};
+    if (in_water)
+    {
+        if (player->getInWater() > 120.0)
+        {
+            texman->SFX_water_in.play();
+        }
+        player->setInWater(0.0);
+        return;
+    } else {
+        if (player->getInWater() > 6.0 && player->getInWater() < 120.0)
+        {
+            texman->SFX_water_out.play();
+            player->setInWater(130.0);
+        }
+    }
+}
+
+WaterManager::WaterManager(const char* path)
+{
+    loadFromFile(path);
+}
+
+WaterManager::~WaterManager()
+{
+    for (std::size_t i{0}; i < _Water.size(); ++i)
+    {
+        _Water[i]->free();
+        delete _Water[i];
+    }
+    _Water.clear();
+    std::cout << "Freed water manager!\n";
+}
+
+void WaterManager::loadFromFile(const char* path)
+{
+    std::ifstream f{path};
+    json data = json::parse(f);
+
+    for (std::size_t i{0}; i < _Water.size(); ++i)
+    {
+        _Water[i]->free();
+        delete _Water[i];
+    }
+    _Water.clear();
+
+    for (const auto& rect : data["level"]["water"])
+    {
+        _Water.push_back(new Water{vec2<int>{rect[0], rect[1]}, vec2<int>{rect[2], rect[3]}, 1.0});
+    }
+
+    f.close();
+}
+
+void WaterManager::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, Player* player)
+{
+    for (std::size_t i{0}; i < _Water.size(); ++i)
+    {
+        _Water[i]->update(time_step, scrollX, scrollY, renderer, texman, player);
+    }
 }

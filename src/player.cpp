@@ -124,6 +124,7 @@ void Player::update(const double& time_step, World& world, double* screen_shake,
     // add all the timers here
     _swordAttacked += time_step;
     _falling += time_step;
+    _in_water += time_step;
     _Controller.update(time_step);
 
     if (_ad > 120)
