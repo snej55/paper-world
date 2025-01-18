@@ -17,6 +17,8 @@
 #include "./texman.hpp"
 #include "./timer.hpp"
 
+#include "./leaf.hpp"
+
 using json = nlohmann::json;
 
 constexpr int GRASS_VARIATIONS{18}; // number of different types of grass
@@ -251,6 +253,7 @@ private:
     DecorChunk _DecorChunks[LEVEL_WIDTH * LEVEL_HEIGHT];
     
     GrassManager* _GrassManager {nullptr};
+    LeafManager _LeafManager{};
     
     std::vector<Spring*> _Springs;
 
@@ -445,7 +448,9 @@ public:
         }
 
         _Springs.clear();
-        
+
+        // the leaf spawner rects
+        std::vector<LeafSpawner> leaf_spawner_rects{};        
         
         int grass_total{0}; // keep track of how much grass there is
 
@@ -461,6 +466,10 @@ public:
                 if (tile["type"] != 3) // grass key
                 {
                     chunk->tiles.push_back(Tile{{tile["pos"][0], tile["pos"][1]}, getTileType(tile["type"]), tile["variant"]});
+                    if (tile["type"] == 0 && tile["variant"] == 1)
+                    {
+                        leaf_spawner_rects.push_back(LeafSpawner{{static_cast<int>(tile["pos"][0]) * TILE_SIZE, static_cast<int>(tile["pos"][1]) * TILE_SIZE, TILE_SIZE, TILE_SIZE}, false});
+                    }
                 } else {
                     ++grass_total;
                 }
@@ -476,6 +485,16 @@ public:
             {
                 int chunk_idx {chunk_loc.y * LEVEL_WIDTH + chunk_loc.x};
                 DecorChunk* chunk {&(_DecorChunks[chunk_idx])};
+                if (tile["type"] == 4)
+                {
+                    if (tile["variant"] == 0)
+                    {
+                        leaf_spawner_rects.push_back(LeafSpawner{{static_cast<int>(tile["pos"][0]) + 2, static_cast<int>(tile["pos"][1]) + TILE_SIZE, TILE_SIZE * 2, TILE_SIZE + 4}, false});
+                    } else if (tile["variant"] == 1)
+                    {
+                        leaf_spawner_rects.push_back(LeafSpawner{{static_cast<int>(tile["pos"][0]) + TILE_SIZE, static_cast<int>(tile["pos"][1]) + TILE_SIZE * 3, TILE_SIZE * 2, TILE_SIZE}, false});
+                    }
+                }
                 chunk->decor.push_back(Decor{{tile["pos"][0], tile["pos"][1]}, getDecorType(tile["type"]), tile["variant"]});
                 chunk->pos = chunk_loc;
             }
@@ -500,6 +519,10 @@ public:
         {
             _Springs.push_back(new Spring{vec2<double>{(double)spring["pos"][0], (double)spring["pos"][1]}});
         }
+
+        _LeafManager.free();
+        _LeafManager.loadRects(leaf_spawner_rects);
+
         f.close();
     }
 
@@ -529,6 +552,11 @@ public:
         {
             spring->render(scrollX, scrollY, renderer, texman);
         }
+    }
+
+    void updateLeaves(const double& time_step, const int scrollX, const int scrollY, const int width, const int height, TexMan* texman, SDL_Renderer* renderer)
+    {
+        _LeafManager.update(time_step, scrollX, scrollY, width, height, texman, renderer);
     }
 
     void handleSprings(const double& time_step)

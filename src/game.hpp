@@ -340,6 +340,7 @@ public:
                 last_damaged = 1.0f;
             }
             last_damaged += 0.03f;
+            _World.updateLeaves(time_step, render_scroll.x, render_scroll.y, _Width, _Height, &_TexMan, _Renderer);
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
             _WaterManager->update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_TexMan, &_Player);
 

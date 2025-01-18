@@ -39,6 +39,8 @@ public:
     double getAngle() {return _angle;}
     void reset();
 
+    double getFrame() {return _frame;}
+
     void setFrame(double frame)
     {
         _frame = frame;
