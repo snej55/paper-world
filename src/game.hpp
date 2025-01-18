@@ -357,7 +357,7 @@ public:
             // for testing
             if (Util::random() < 0.1)
                 _CoinManager.addCoin({100.0, 20.0}, {Util::random() * 2.0 - 1.0, Util::random() * -2.0});
-            _CoinManager.update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, _Player.getRect());
+            _CoinManager.update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan, _Player.getRect());
             _WaterManager->update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_TexMan, &_Player);
 
             _playerHealth += (_Player.getHealth() - _playerHealth) * 0.12 * time_step;
@@ -365,6 +365,11 @@ public:
             {
                 _playerHealth = _Player.getHealth();
             }
+            SDL_Rect uiRect{0, 0, _Width, 14};
+            SDL_SetRenderDrawColor(_Renderer, 0x1f, 0x24, 0x4b, 0xFF);
+            SDL_RenderFillRect(_Renderer, &uiRect);
+            SDL_SetRenderDrawColor(_Renderer, 0xF6, 0xe7, 0x9c, 0xFF);
+            SDL_RenderDrawLine(_Renderer, 0, 14, _Width, 14);
             renderPlayerHealthBar();
             if (last_damaged < 10.0f)
             {
@@ -372,6 +377,9 @@ public:
                 SDL_Rect alert{2 - static_cast<int>(offset), 2 - static_cast<int>(offset), _Width - 4 + static_cast<int>(offset) * 2, _Height - 4 + static_cast<int>(offset) * 2};
                 SDL_SetRenderDrawBlendMode(_Renderer, SDL_BLENDMODE_BLEND);
                 SDL_SetRenderDrawColor(_Renderer, 0xFF, 0x00, 0x00, static_cast<int>(255.0 - _Player.getHealth() / _Player.getMaxHealth() * 200.0));
+                SDL_RenderDrawRect(_Renderer, &alert);
+                SDL_SetRenderDrawColor(_Renderer, 0xFF, 0xFF, 0xFF, static_cast<int>(255.0 - _Player.getHealth() / _Player.getMaxHealth() * 200.0));
+                alert = SDL_Rect{1 - static_cast<int>(offset), 1 - static_cast<int>(offset), _Width - 2 + static_cast<int>(offset) * 2, _Height - 2 + static_cast<int>(offset) * 1};
                 SDL_RenderDrawRect(_Renderer, &alert);
                 SDL_SetRenderDrawBlendMode(_Renderer, SDL_BLENDMODE_NONE);
             }
@@ -399,6 +407,10 @@ public:
             text << static_cast<int>(_Player.getMaxHealth());
             fontTex.loadFromRenderedText(text.str().c_str(), {0xF6, 0xe7, 0x9c, 0xFF}, _TexMan.baseFontBold, _Renderer);
             fontTex.render(110, 10, _Renderer);
+            std::stringstream score{};
+            score << "$" << _CoinManager.getScore();
+            fontTex.loadFromRenderedText(score.str().c_str(), {0xF6, 0xe7, 0x9c, 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0), 10, _Renderer);
 
             SDL_RenderPresent(_Renderer);
 

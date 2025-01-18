@@ -1,12 +1,14 @@
 #include "./coin.hpp"
 #include "./tiles.hpp"
 
-CoinManager::CoinManager() // do nothing
+CoinManager::CoinManager()
 {
+    timer.start();
 }
 
 CoinManager::CoinManager(Texture* coinTex, Texture* glowTex)
 {
+    timer.start();
     setTex(coinTex, glowTex);
 }
 
@@ -70,13 +72,13 @@ void CoinManager::updateCoin(Coin* coin, const double& time_step, void* world)
                 coinRect.x = tileRect->x + tileRect->w;
             }
             coin->pos.x = coinRect.x;
-            coin->vel.x *= -0.7; // bounce
+            coin->vel.x *= -0.5; // bounce
             coin->vel.y *= 0.9; // friction
         }
     }
 
     // repeat for vel-y
-    coin->vel.y += 0.1 * time_step;
+    coin->vel.y += 0.07 * time_step;
     coin->pos.y += coin->vel.y * time_step;
     coinRect = {static_cast<int>(coin->pos.x), static_cast<int>(coin->pos.y), 3, 4};
     static_cast<World*>(world)->getTilesAroundPos(coin->pos, rects);
@@ -92,11 +94,20 @@ void CoinManager::updateCoin(Coin* coin, const double& time_step, void* world)
                 coinRect.y = tileRect->y + tileRect->h;
             }
             coin->pos.y = coinRect.y;
-            coin->vel.y *= -0.7; // bounce
+            coin->vel.y *= -0.5; // bounce
             coin->vel.x *= 0.9; // friction
         }
     }
 
+    static_cast<World*>(world)->getDangerAroundPos(coin->pos, rects);
+    for (int i{0}; i < 9; ++i)
+    {
+        SDL_Rect* tileRect{&(rects[i])};
+        if (Util::checkCollision(&coinRect, tileRect))
+        {
+            coin->dead = true;
+        }
+    }
     // ------------------------ Other Stuff ------------------------ //
 
     coin->anim->tick(time_step);
@@ -107,7 +118,7 @@ void CoinManager::renderCoin(Coin* coin, const int scrollX, const int scrollY, S
     coin->anim->render(static_cast<int>(coin->pos.x), static_cast<int>(coin->pos.y), scrollX, scrollY, renderer);
 }
 
-void CoinManager::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, void* world, SDL_Rect* player_rect)
+void CoinManager::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, void* world, TexMan* texman, SDL_Rect* player_rect)
 {
     for (std::size_t i{0}; i < _Coins.size(); ++i)
     {
@@ -119,12 +130,28 @@ void CoinManager::update(const double& time_step, const int scrollX, const int s
             SDL_Rect coinRect {static_cast<int>(coin->pos.x), static_cast<int>(coin->pos.y), 3, 4};
             if (Util::checkCollision(&coinRect, player_rect))
             {
-                int num{static_cast<int>(Util::random() * 5.0) + 10};
+                int num{(std::rand() % 5) + 10};
+                for (int i{0}; i < num; ++i)
+                {
+                    _SparkManager.addSpark(new Spark{coin->pos, Util::random() * M_PI * 2.0, Util::random() * 2.0 + 0.5});
+                }
+                num = static_cast<int>(Util::random() * 5.0) + 10;
                 for (int i{0}; i < num; ++i)
                 {
                     double angle{Util::random() * M_PI * 2.0};
                     double speed(Util::random() * 2.0 + 1.0);
                     addGlow(coin->pos, {std::cos(angle) * speed, std::sin(angle) * speed});
+                }
+                delete coin->anim;
+                delete coin;
+                _Coins[i] = nullptr;
+                texman->SFX_coin_collect.play();
+            } else if (coin->dead)
+            {
+                int num{(std::rand() % 5) + 10};
+                for (int i{0}; i < num; ++i)
+                {
+                    _SparkManager.addSpark(new Spark{coin->pos, Util::random() * M_PI * 2.0, Util::random() * 2.0 + 0.5});
                 }
                 delete coin->anim;
                 delete coin;
@@ -141,15 +168,20 @@ void CoinManager::update(const double& time_step, const int scrollX, const int s
         glow->vel.y *= 0.9;
         glow->pos.x += glow->vel.x * time_step;
         glow->pos.y += glow->vel.y * time_step;
-        glow->size -= 0.1 * time_step; // decay
+        glow->size -= 0.4 * time_step; // decay
         if (glow->size <= 0.0)
         {
-            delete glow;
-            _Glow[i] = nullptr;
-            _glowTex->setBlendMode(SDL_BLENDMODE_ADD);
-            _glowTex->setAlpha(static_cast<Uint8>(static_cast<int>(255.0)));
-            SDL_Rect renderQuad{static_cast<int>(glow->pos.x) - 3 - scrollX, static_cast<int>(glow->pos.y) - 3 - scrollY, 7, 7};
-            SDL_RenderCopyEx(renderer, _glowTex->getTexture(), NULL, &renderQuad, 0, NULL, SDL_FLIP_NONE);
+            if (glow->size < -0.5 * Util::random())
+            {
+                ++_score;
+                // flash effect
+                _glowTex->setBlendMode(SDL_BLENDMODE_ADD);
+                _glowTex->setAlpha(static_cast<Uint8>(static_cast<int>(255.0)));
+                SDL_Rect renderQuad{static_cast<int>(glow->pos.x) - 1 - scrollX, static_cast<int>(glow->pos.y) - 1 - scrollY, 3, 3};
+                SDL_RenderCopyEx(renderer, _glowTex->getTexture(), NULL, &renderQuad, 0, NULL, SDL_FLIP_NONE);
+                delete glow;
+                _Glow[i] = nullptr;
+            }
         } else {
             _glowTex->setBlendMode(SDL_BLENDMODE_ADD);
             _glowTex->setAlpha(static_cast<Uint8>(static_cast<int>(glow->size / 10.0 * 255.0)));
@@ -158,4 +190,6 @@ void CoinManager::update(const double& time_step, const int scrollX, const int s
         }
     }
     _Glow.erase(std::remove_if(_Glow.begin(), _Glow.end(), [](Glow* glow){return (glow == nullptr);}), _Glow.end());
+    _SparkManager.setTexture(&(texman->particle));
+    _SparkManager.update(time_step, scrollX, scrollY, renderer);
 }
