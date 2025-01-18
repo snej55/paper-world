@@ -10,7 +10,6 @@ Week 2:
 Week 3:
  - Menu
  - Ui
- - Text
  - Buttons
 Week 4:
  - Extra Enemies

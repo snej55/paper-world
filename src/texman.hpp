@@ -22,6 +22,9 @@ public:
     Texture lightTex{};
     Texture leafTex{};
 
+    Texture coin{};
+    Texture circle{};
+
     // Entity Textures
     Texture slimeIdle{};
     Texture slimeRun{};
@@ -99,6 +102,7 @@ public:
             particle.free();
             particleFire.free();
             lightTex.free();
+            circle.free();
             leafTex.free();
             slimeIdle.free();
             slimeRun.free();
@@ -189,6 +193,8 @@ public:
         confirm(turtleLand.loadFromFile("data/images/entities/turtle/land.png", window, renderer), success);
         confirm(turtleFlash.loadFromFile("data/images/entities/turtle/flash.png", window, renderer), success);
         confirm(leafTex.loadFromFile("data/images/particles/leaf.png", window, renderer), success);
+        confirm(coin.loadFromFile("data/images/collectables/coin.png", window, renderer), success);
+        confirm(circle.loadFromFile("data/images/particles/circle.png", window, renderer), success);
         SFX_death_0.loadFromFileWAV("data/audio/death/death_0.wav");
         SFX_hit_0.loadFromFileWAV("data/audio/hit/hit_0.wav");
         SFX_hit_1.loadFromFileWAV("data/audio/hit/hit_1.wav");

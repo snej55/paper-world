@@ -18,6 +18,7 @@
 #include "./entities.hpp"
 #include "./sparks.hpp"
 #include "./water.hpp"
+#include "./coin.hpp"
 
 constexpr SDL_Color PALETTE[8] {{0xa8, 0x60, 0x5d}, {0xd1, 0xa6, 0x7e}, {0xf6, 0xe7, 0x9c}, {0xb6, 0xcf, 0x8e}, {0x60, 0xae, 0x7b}, {0x3c, 0x6b, 0x64}, {0x1f, 0x24, 0x4b}, {0x65, 0x40, 0x53}};
 
@@ -33,6 +34,7 @@ private:
     Player _Player{{40.0, 40.0}, {4, 8}};
     EMManager _EMManager{}; // this is the entity manager :) "The Manager of the Managers"
     WaterManager* _WaterManager{nullptr};
+    CoinManager _CoinManager{};
 
 
     int _Width {SCR_WIDTH};
@@ -146,6 +148,7 @@ public:
         _Player.loadAnim(&_TexMan);
         _WaterManager = new WaterManager{};
         _WaterManager->loadFromFile("data/maps/0.json");
+        _CoinManager.setTex(&(_TexMan.coin), &(_TexMan.lightTex));
 
         music = Mix_LoadWAV("data/audio/hit/hit_0.wav");
         if (music == NULL)
@@ -351,6 +354,10 @@ public:
             last_damaged += 0.03f;
             _World.updateLeaves(time_step, render_scroll.x, render_scroll.y, _Width, _Height, &_TexMan, _Renderer);
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
+            // for testing
+            if (Util::random() < 0.1)
+                _CoinManager.addCoin({100.0, 20.0}, {Util::random() * 2.0 - 1.0, Util::random() * -2.0});
+            _CoinManager.update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, _Player.getRect());
             _WaterManager->update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_TexMan, &_Player);
 
             _playerHealth += (_Player.getHealth() - _playerHealth) * 0.12 * time_step;

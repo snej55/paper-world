@@ -245,7 +245,7 @@ void Player::handlePhysics(const double& time_step, vec2<double> frame_movement,
                     _Particles.setSpawning(16, {4.0, 5.0}, _Palette[0]);
                     texman->SFX_landing.play();
                 }
-            } else { // moving left
+            } else { // moving up
                 _rect.y = tile_rect->y + tile_rect->h;
             }
             _vel.y = 0.0;
