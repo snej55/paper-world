@@ -2,6 +2,8 @@
 #define TEXMAN_H
 
 #include "SDL2/SDL_mixer.h"
+#include "SDL2/SDL_ttf.h"
+
 #include "./texture.hpp"
 #include "./audio.hpp"
 
@@ -71,57 +73,75 @@ public:
     Sound SFX_water_in{};
     Sound SFX_water_out{};
 
+    TTF_Font* baseFont{nullptr};
+    TTF_Font* baseFontBold{nullptr};
+
+    bool freed{false};
+
     TexMan()
     {
     }
 
     ~TexMan()
     {
-        tileGrassTex.free();
-        tileRockTex.free();
-        tileSpikeTex.free();
-        tileSpringTex.free();
-        tileTrees.free();
-        particle.free();
-        particleFire.free();
-        lightTex.free();
-        leafTex.free();
-        slimeIdle.free();
-        slimeRun.free();
-        slimeJump.free();
-        slimeFlash.free();
-        bat.free();
-        batFlash.free();
-        playerIdle.free();
-        playerRun.free();
-        playerJump.free();
-        playerLand.free();
-        grass.free();
-        swordBase.free();
-        slash.free();
-        blasterBase.free();
-        laserBlue.free();
-        laserRed.free();
-        enemyHealthBar.free();
-        playerHealthBar.free();
-        turtleIdle.free();
-        turtleRun.free();
-        turtleJump.free();
-        turtleLand.free();
-        turtleFlash.free();
-        SFX_death_0.free();
-        SFX_hit_0.free();
-        SFX_hit_1.free();
-        SFX_hit_2.free();
-        SFX_hit_3.free();
-        SFX_player_hit.free();
-        SFX_sword_slash.free();
-        SFX_sword_swoosh.free();
-        SFX_landing.free();
-        SFX_turtle.free();
-        SFX_spring.free();
-        SFX_water_in.free();
-        SFX_water_out.free();
+        free();
+    }
+
+    void free()
+    {
+        if (!freed)
+        {
+            tileGrassTex.free();
+            tileRockTex.free();
+            tileSpikeTex.free();
+            tileSpringTex.free();
+            tileTrees.free();
+            particle.free();
+            particleFire.free();
+            lightTex.free();
+            leafTex.free();
+            slimeIdle.free();
+            slimeRun.free();
+            slimeJump.free();
+            slimeFlash.free();
+            bat.free();
+            batFlash.free();
+            playerIdle.free();
+            playerRun.free();
+            playerJump.free();
+            playerLand.free();
+            grass.free();
+            swordBase.free();
+            slash.free();
+            blasterBase.free();
+            laserBlue.free();
+            laserRed.free();
+            enemyHealthBar.free();
+            playerHealthBar.free();
+            turtleIdle.free();
+            turtleRun.free();
+            turtleJump.free();
+            turtleLand.free();
+            turtleFlash.free();
+            SFX_death_0.free();
+            SFX_hit_0.free();
+            SFX_hit_1.free();
+            SFX_hit_2.free();
+            SFX_hit_3.free();
+            SFX_player_hit.free();
+            SFX_sword_slash.free();
+            SFX_sword_swoosh.free();
+            SFX_landing.free();
+            SFX_turtle.free();
+            SFX_spring.free();
+            SFX_water_in.free();
+            SFX_water_out.free();
+
+            TTF_CloseFont(baseFont);
+            TTF_CloseFont(baseFontBold);
+            std::cout << "closed fonts\n";
+            freed = true;
+        }
     }
 
     void confirm(bool val, bool& success)
@@ -135,6 +155,7 @@ public:
     bool load(SDL_Window* window, SDL_Renderer* renderer)
     {
         bool success{true};
+        freed = false;
         confirm(tileGrassTex.loadFromFile("data/images/tiles/grass.png", window, renderer), success);
         confirm(tileRockTex.loadFromFile("data/images/tiles/rock.png", window, renderer), success);
         confirm(tileSpikeTex.loadFromFile("data/images/tiles/spike.png", window, renderer), success);
@@ -181,6 +202,9 @@ public:
         SFX_spring.loadFromFileWAV("data/audio/misc/spring.wav");
         SFX_water_in.loadFromFileWAV("data/audio/misc/water_in.wav");
         SFX_water_out.loadFromFileWAV("data/audio/misc/water_out.wav");
+
+        baseFont = TTF_OpenFont("data/fonts/PixelOperator.ttf", 20);
+        baseFontBold = TTF_OpenFont("data/fonts/PixelOperator-Bold.ttf", 20);
         return success;
     }
 

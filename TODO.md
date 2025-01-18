@@ -1,8 +1,6 @@
 # TODO
 Week 1:
- - Water
  - Lava
- - Leaves
 Week 2:
  - Portals
  - Coins

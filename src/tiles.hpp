@@ -466,7 +466,7 @@ public:
                 if (tile["type"] != 3) // grass key
                 {
                     chunk->tiles.push_back(Tile{{tile["pos"][0], tile["pos"][1]}, getTileType(tile["type"]), tile["variant"]});
-                    if (tile["type"] == 0 && tile["variant"] == 1)
+                    if (tile["type"] == 0 && (tile["variant"] == 1 || tile["variant"] == 13))
                     {
                         leaf_spawner_rects.push_back(LeafSpawner{{static_cast<int>(tile["pos"][0]) * TILE_SIZE, static_cast<int>(tile["pos"][1]) * TILE_SIZE, TILE_SIZE, TILE_SIZE}, false});
                     }

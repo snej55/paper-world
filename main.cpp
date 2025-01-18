@@ -17,8 +17,11 @@ int main(int argc, char* argv[])
     game.start();
     game.Close();
     std::cout << "Finished!\n";
-    Mix_Quit();
+
+    // Quit SDL subsystems
+    TTF_Quit();
     IMG_Quit();
+    Mix_Quit();
     SDL_Quit();
     std::cout << "Quit SDL!\n";
     return 0;

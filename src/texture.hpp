@@ -4,6 +4,7 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_video.h"
+#include "SDL2/SDL_ttf.h"
 
 #include "./constants.hpp"
 
@@ -105,6 +106,29 @@ public:
             SDL_FreeSurface(_SurfacePixels);
             _SurfacePixels = NULL;
         }
+        return _Texture != NULL;
+    }
+
+    bool loadFromRenderedText(const char* text, SDL_Color textColor, TTF_Font* font, SDL_Renderer* renderer)
+    {
+        free();
+        SDL_Surface* textSurface = TTF_RenderText_Solid(font, text, textColor);
+        if (textSurface == NULL)
+        {
+            std::cout << "Unable to render text surface! SDL_ttf error: " << TTF_GetError << '\n';
+        } else {
+            _Texture = SDL_CreateTextureFromSurface(renderer, textSurface);
+            if (_Texture == NULL)
+            {
+                std::cout << "Unable to create texture form rendered text! SDL_Error: " << SDL_GetError() << '\n';
+            } else {
+                _Width = textSurface->w;
+                _Height = textSurface->h;
+            }
+
+            SDL_FreeSurface(textSurface);
+        }
+
         return _Texture != NULL;
     }
 

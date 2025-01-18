@@ -4,6 +4,7 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_mixer.h"
+#include "SDL2/SDL_ttf.h"
 
 #include "./constants.hpp"
 #include "./texture.hpp"
@@ -76,6 +77,7 @@ public:
 
     void Close()
     {
+        _TexMan.free();
         Mix_FreeChunk(music);
         std::cout << "Closing\n";
         SDL_DestroyRenderer(_Renderer);
@@ -102,6 +104,13 @@ public:
             if ((!(IMG_Init(imgFlags))) & imgFlags)
             {
                 std::cout << "INIT::ERROR Failed to initialize SDL_Image! SDL_Image Error: " << IMG_GetError() << '\n';
+                success = false;
+            }
+            
+            // Initialize SDL_ttf
+            if (TTF_Init() == -1)
+            {
+                std::cout << "INIT::ERROR Failed to initialize SDL_ttf! SDL_ttf Error: " << TTF_GetError() << '\n';
                 success = false;
             }
         }
@@ -376,6 +385,13 @@ public:
             // render screen
             SDL_SetRenderTarget(_Renderer, NULL);
             _Screen.renderClean(0, 0, _Renderer, 3);
+            Texture fontTex{};
+            std::stringstream text{};
+            text << static_cast<int>(_playerHealth);
+            text << "/";
+            text << static_cast<int>(_Player.getMaxHealth());
+            fontTex.loadFromRenderedText(text.str().c_str(), {0xF6, 0xe7, 0x9c, 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(110, 10, _Renderer);
 
             SDL_RenderPresent(_Renderer);
 
