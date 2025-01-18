@@ -18,6 +18,7 @@ public:
     Texture particle{};
     Texture particleFire{};
     Texture lightTex{};
+    Texture leafTex{};
 
     // Entity Textures
     Texture slimeIdle{};
@@ -84,6 +85,7 @@ public:
         particle.free();
         particleFire.free();
         lightTex.free();
+        leafTex.free();
         slimeIdle.free();
         slimeRun.free();
         slimeJump.free();
@@ -165,6 +167,7 @@ public:
         confirm(turtleJump.loadFromFile("data/images/entities/turtle/jump.png", window, renderer), success);
         confirm(turtleLand.loadFromFile("data/images/entities/turtle/land.png", window, renderer), success);
         confirm(turtleFlash.loadFromFile("data/images/entities/turtle/flash.png", window, renderer), success);
+        confirm(leafTex.loadFromFile("data/images/particles/leaf.png", window, renderer), success);
         SFX_death_0.loadFromFileWAV("data/audio/death/death_0.wav");
         SFX_hit_0.loadFromFileWAV("data/audio/hit/hit_0.wav");
         SFX_hit_1.loadFromFileWAV("data/audio/hit/hit_1.wav");
