@@ -6,6 +6,8 @@
 #include "SDL2/SDL_mixer.h"
 #include "SDL2/SDL_ttf.h"
 
+#include "JSON/json.hpp"
+
 #include "./constants.hpp"
 #include "./texture.hpp"
 #include "./timer.hpp"
@@ -19,6 +21,10 @@
 #include "./sparks.hpp"
 #include "./water.hpp"
 #include "./coin.hpp"
+#include "./buttons.hpp"
+#include "./shockwaves.hpp"
+
+using json = nlohmann::json;
 
 constexpr SDL_Color PALETTE[8] {{0xa8, 0x60, 0x5d}, {0xd1, 0xa6, 0x7e}, {0xf6, 0xe7, 0x9c}, {0xb6, 0xcf, 0x8e}, {0x60, 0xae, 0x7b}, {0x3c, 0x6b, 0x64}, {0x1f, 0x24, 0x4b}, {0x65, 0x40, 0x53}};
 
@@ -36,7 +42,10 @@ private:
     WaterManager* _WaterManager{nullptr};
     LavaManager* _LavaManager{nullptr};
     CoinManager _CoinManager{};
+    ShockWaveManager _ShockWaveManager{};
 
+    std::vector<std::string> _levels {"data/maps/0.json", "data/maps/1.json"};
+    int _level{0};
 
     int _Width {SCR_WIDTH};
     int _Height {SCR_HEIGHT};
@@ -46,6 +55,7 @@ private:
     bool _closed{false};
 
     double _playerHealth{100.0};
+    vec2<double> _portal_pos{0.0, 0.0};
 
 public:
     Game()
@@ -73,7 +83,10 @@ public:
                 std::cerr << "GAME::ERROR Failed to load media!\n";
             } else {
                 std::cout << "Ready!\n";
-                run();
+                if (!(menu()))
+                {
+                    run();
+                }
             }
         }
     }
@@ -129,11 +142,43 @@ public:
         }
         if( Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 ) == -1 )
         {
-            success = false; 
+            success = false;
         }
         if (success)
             std::cout << "Successfully Initialized!" << std::endl;
         return success;
+    }
+
+    void loadLevel(int level)
+    {
+        std::string path{_levels[level % static_cast<int>(_levels.size())]};
+        _World.loadFromFile(path.c_str());
+        std::cout << "loaded world!\n";
+        _EMManager.loadFromPath(path, &_TexMan);
+        std::cout << "loaded entities!\n";
+
+        // Water & Lava
+        if (_WaterManager == nullptr)
+        {
+            _WaterManager = new WaterManager{};
+        }
+        if (_LavaManager == nullptr)
+        {
+            _LavaManager = new LavaManager{};
+        }
+        _WaterManager->loadFromFile(path.c_str());
+        std::cout << "loaded water!\n";
+        _LavaManager->loadFromFile(path.c_str());
+        std::cout << "loaded lava\n";
+        setPlayerSpawnPos(path.c_str());
+    }
+
+    void setPlayerSpawnPos(const char* path)
+    {
+        std::ifstream f{path};
+        json data = json::parse(f);
+        _Player.setSpawnPos({static_cast<double>(data["player_spawn_pos"][0]), static_cast<double>(data["player_spawn_pos"][1])});
+        _portal_pos = vec2<double>{static_cast<double>(data["portal_pos"][0]), static_cast<double>(data["portal_pos"][1])};
     }
 
     bool loadMedia()
@@ -146,13 +191,19 @@ public:
             success = false;
         }
         _TexMan.load(_Window, _Renderer);
-        _World.loadFromFile("data/maps/0.json");
-        _EMManager.loadFromPath("data/maps/0.json", &_TexMan);
         _Player.loadAnim(&_TexMan);
-        _WaterManager = new WaterManager{};
-        _WaterManager->loadFromFile("data/maps/0.json");
-        _LavaManager = new LavaManager{};
-        _LavaManager->loadFromFile("data/maps/0.json");
+        _ShockWaveManager.setTex(&(_TexMan.shockwave));
+
+        // _World.loadFromFile("data/maps/1.json");
+        // setPlayerSpawnPos("data/maps/1.json");
+        // _EMManager.loadFromPath("data/maps/1.json", &_TexMan);
+        // _WaterManager = new WaterManager{};
+        // _WaterManager->loadFromFile("data/maps/1.json");
+        // _LavaManager = new LavaManager{};
+        // _LavaManager->loadFromFile("data/maps/1.json");
+        loadLevel(0);
+        //loadLevel(0);
+
         _CoinManager.setTex(&(_TexMan.coin), &(_TexMan.lightTex));
 
         music = Mix_LoadWAV("data/audio/hit/hit_0.wav");
@@ -165,6 +216,12 @@ public:
         if (success)
             std::cout << "Loaded!\n";
         return success;
+    }
+
+    void nextLevel()
+    {
+        ++_level;
+        loadLevel(_level);
     }
 
     void run()
@@ -181,7 +238,8 @@ public:
         int mouseX, mouseY;
         int windowX, windowY;
 
-        vec2<double> scroll;
+        vec2<double> player_pos{_Player.getCenter()};
+        vec2<double> scroll{player_pos.x - static_cast<double>(_Width) / 2.0, player_pos.y - static_cast<double>(_Height) / 2.0};
 
         double screen_shake{0};
         double slomo{1.0};
@@ -189,6 +247,10 @@ public:
         float frames{1.0f};
 
         float last_damaged{100.0f};
+
+        double fade{static_cast<double>(_Height * 3)};
+        bool fading{false};
+        bool changing{false};
         do {
             while (SDL_PollEvent(&e) != 0)
             {
@@ -230,7 +292,7 @@ public:
                             break;
                         case SDLK_s:
                             controller->setControl(Control::DOWN, true);
-                            break;  
+                            break;
                         case SDLK_a:
                             controller->setControl(Control::LEFT, true);
                             break;
@@ -240,8 +302,8 @@ public:
                         case SDLK_p:
                             //Entity* _Entity = new Entity{{static_cast<double>(std::rand() % 100 + 50), 20.0}, {0.0, 0.0}, {8, 8}, 0.2, false, "default"};
                             //_EMManager.addEntity(_Entity);
-                            Mix_PlayChannel(-1, music, 0);
-                            _Player.damage(30, &screen_shake, &slomo);
+                            //fading = !fading;
+                            _ShockWaveManager.addShockWave(_Player.getCenter());
                             break;
                         case SDLK_x:
                             _Player.attackSword(&_TexMan);
@@ -324,13 +386,15 @@ public:
             SDL_RenderClear(_Renderer);
 
             // do updateing here
-            vec2<double> player_pos{_Player.getPos()};
+            vec2<double> player_pos{_Player.getCenter()};
             if (_Player.getAd() > 120)
             {
                 scroll.x += (player_pos.x - static_cast<double>(_Width) / 2.0 - scroll.x) / 40.0 * time_step;
                 scroll.y += (player_pos.y - static_cast<double>(_Height) / 2.0 - scroll.y) / 50.0 * time_step;
             }
-            _Player.update(time_step, _World, &screen_shake, &_TexMan);
+            scroll.x = std::max(static_cast<double>(TILE_SIZE), std::min(scroll.x, static_cast<double>(LEVEL_WIDTH * CHUNK_SIZE * TILE_SIZE - TILE_SIZE)));
+            scroll.y = std::max(0.0, std::min(scroll.y, static_cast<double>(LEVEL_HEIGHT * CHUNK_SIZE * TILE_SIZE - _Height)));
+            _Player.update(time_step, _World, &screen_shake, &_TexMan, _ShockWaveManager);
             if (_Player.getAd() == 0)
             {
                 _TexMan.SFX_death_0.play();
@@ -338,15 +402,15 @@ public:
             }
             _Player.tickAd(time_step);
 
-            _EMManager.update(time_step, _World, &screen_shake, &_Player, &slomo, &_TexMan, &_CoinManager);
+            _EMManager.update(time_step, _World, &screen_shake, &_Player, &slomo, &_TexMan, &_CoinManager, _ShockWaveManager);
             // do rendering here
 
             screen_shake = std::max(0.0, screen_shake - time_step);
             vec2<int> render_scroll{static_cast<int>(scroll.x + Util::random() * screen_shake - screen_shake / 2.0), static_cast<int>(scroll.y + Util::random() * screen_shake - screen_shake / 2.0)};
             // fairly obvious what this does
             _World.handleSprings(time_step);
-            _World.handleGrass(render_scroll.x, render_scroll.y, _Renderer, &_TexMan, _Width, _Height, _Player.getRect(), time_step);
             _World.render(render_scroll.x, render_scroll.y, _Window, _Renderer, &_TexMan, _Width, _Height);
+            _World.handleGrass(render_scroll.x, render_scroll.y, _Renderer, &_TexMan, _Width, _Height, _Player.getRect(), time_step);
             _EMManager.render(render_scroll.x, render_scroll.y, _Renderer, time_step, &_World, &_TexMan);
             // check if the player is not dead. ad stands for 'after death'
             if (_Player.getAd() > 120)
@@ -357,12 +421,28 @@ public:
                 last_damaged = 1.0f;
             }
             last_damaged += 0.03f;
+
+            // handle portal
+            _TexMan.portalTex.render(static_cast<int>(_portal_pos.x) - render_scroll.x, static_cast<int>(_portal_pos.y + std::sin(fpsTimer.getTicks() * 0.001) * 4.0) - render_scroll.y, _Renderer);
+            SDL_Rect portalRect{static_cast<int>(_portal_pos.x), static_cast<int>(_portal_pos.y + std::sin(fpsTimer.getTicks() * 0.001) * 4.0), 13, 21};
+            if (Util::checkCollision(_Player.getRect(), &portalRect))
+            {
+                if (!changing)
+                {
+                    changing = true;
+                    screen_shake = std::max(screen_shake, 32.0);
+                    _Player.setAd(0.0);
+                    fading = true;
+                }
+            }
+
             _World.updateLeaves(time_step, render_scroll.x, render_scroll.y, _Width, _Height, &_TexMan, _Renderer);
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
             // for testing
             _CoinManager.update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan, _Player.getRect());
             _WaterManager->update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_TexMan, &_Player);
             _LavaManager->update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_TexMan, &_Player);
+            _ShockWaveManager.update(time_step, render_scroll.x, render_scroll.y, _Renderer);
 
             _playerHealth += (_Player.getHealth() - _playerHealth) * 0.12 * time_step;
             if (_Player.getHealth() == _Player.getMaxHealth())
@@ -416,6 +496,33 @@ public:
             fontTex.loadFromRenderedText(score.str().c_str(), {0xF6, 0xe7, 0x9c, 0xFF}, _TexMan.baseFontBold, _Renderer);
             fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0), 10, _Renderer);
 
+            if (fading)
+            {
+                fade = std::max(-10.0, std::min(static_cast<double>(_Height) * 3.0 + 10.0, fade + time_step * static_cast<double>(_Height * 3) / 60.0));
+            } else {
+                fade = std::max(-10.0, std::min(static_cast<double>(_Height) * 3.0 + 10.0, fade - time_step * static_cast<double>(_Height * 3) / 60.0));
+            }
+            SDL_Rect fadeRect{0, 0, _Width * 3, static_cast<int>(fade)};
+            SDL_SetRenderDrawColor(_Renderer, 0x1f, 0x24, 0x4b, 0xFF);
+            SDL_RenderFillRect(_Renderer, &fadeRect);
+
+            if (changing)
+            {
+                if (fade > static_cast<double>(_Height) * 3.0 + 5.0)
+                {
+                    fading = false;
+                    changing = false;
+                    nextLevel();
+                    scroll = {_Player.getCenter().x - static_cast<double>(_Width) / 2.0, _Player.getCenter().y - static_cast<double>(_Height) / 2.0};
+                    _Player.setHealth(_Player.getMaxHealth());
+                }
+            }
+
+            std::stringstream levelText{};
+            levelText << "Level " << _level + 1;
+            fontTex.loadFromRenderedText(levelText.str().c_str(), {0xF6, 0xe7, 0x9c, 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, std::min(_Height * 3 / 2, static_cast<int>(fade) - 32), _Renderer);
+
             SDL_RenderPresent(_Renderer);
 
             float avgFPS {frames / (fpsTimer.getTicks() / 1000.0f)};
@@ -446,6 +553,102 @@ public:
         SDL_SetRenderDrawColor(_Renderer, darkColor.r, darkColor.g, darkColor.b, 0xFF);
         fillRect = SDL_Rect{5, 7, static_cast<int>(26.0 * _playerHealth / _Player.getMaxHealth()), 2};
         SDL_RenderFillRect(_Renderer, &fillRect);
+    }
+
+    bool menu()
+    {
+        SDL_Event e;
+        bool running {true};
+
+        Timer timer;
+        timer.start();
+        double time_step {1.0};
+
+        int mouseX, mouseY;
+        int windowX, windowY;
+
+        Button playButton{{0, 0}, &(_TexMan.uiPlay)};
+
+        do {
+            while (SDL_PollEvent(&e) != 0)
+            {
+                if (e.type == SDL_QUIT)
+                {
+                    return true;
+                } else if (e.type == SDL_MOUSEMOTION)
+                {
+                    SDL_GetGlobalMouseState(&mouseX, &mouseY);
+                    mouseX -= windowX;
+                    mouseY -= windowY;
+                } else if (e.type == SDL_KEYDOWN)
+                {
+                    switch (e.key.keysym.sym)
+                    {
+                        case (SDLK_RETURN):
+                            running = false;
+                        default:
+                            break;
+                    }
+                } else if (e.type == SDL_KEYUP)
+                {
+                    switch (e.key.keysym.sym)
+                    {
+                        default:
+                            break;
+                    }
+                } else if (e.type == SDL_WINDOWEVENT)
+                {
+                    // handle window events
+                    switch (e.window.event)
+                    {
+                        case (SDL_WINDOWEVENT_RESIZED):
+                            _Width = e.window.data1 / 3;
+                            _Height = e.window.data2 / 3;
+                            _Screen.free();
+                            _Screen.createBlank(_Width, _Height, _Renderer, SDL_TEXTUREACCESS_TARGET);
+                            SDL_RenderPresent(_Renderer);
+                            break;
+                        case (SDL_WINDOWEVENT_SIZE_CHANGED):
+                            _Width = e.window.data1 / 3;
+                            _Height = e.window.data2 / 3;
+                            _Screen.free();
+                            _Screen.createBlank(_Width, _Height, _Renderer, SDL_TEXTUREACCESS_TARGET);
+                            SDL_RenderPresent(_Renderer);
+                            break;
+                        default:
+                            break;
+                    }
+                } else if (e.type == SDL_MOUSEBUTTONDOWN)
+                {
+                    SDL_Rect mouseRect{mouseX / 3, mouseY / 3, 1, 1};
+                    if (Util::checkCollision(&mouseRect, playButton.getRect()))
+                    {
+                        running = false;
+                    }
+                }
+            }
+
+            time_step = timer.getTicks() / 1000.0 * 60.0;
+            time_step = std::min(time_step, 3.0);
+            timer.start();
+
+            SDL_GetWindowPosition(_Window, &windowX, &windowY);
+            // set screen as render target
+            _Screen.setAsRenderTarget(_Renderer);
+
+            // clear screen (0x1f, 0x24, 0x4b)
+            SDL_SetRenderDrawColor(_Renderer, 0x00, 0x00, 0x00, 0xFF);
+            SDL_RenderClear(_Renderer);
+
+            playButton.setPos(vec2<int>{_Width / 2 - 35, _Height / 2 - 5});
+            playButton.update(time_step, mouseX / 3, mouseY / 3, _Renderer);
+
+            SDL_SetRenderTarget(_Renderer, NULL);
+            _Screen.renderClean(0, 0, _Renderer, 3);
+
+            SDL_RenderPresent(_Renderer);
+        } while (running);
+        return false;
     }
 };
 

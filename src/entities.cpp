@@ -177,7 +177,7 @@ void Entity::render(const int scrollX, const int scrollY, SDL_Renderer *renderer
     SDL_RenderFillRect(renderer, &renderRect);
 }
 
-void Entity::touchPlayer(Player *player, double *screen_shake, double* slomo)
+void Entity::touchPlayer(Player *player, double *screen_shake, double* slomo, ShockWaveManager& shockwaves)
 {
     _rect.x = _pos.x;
     _rect.y = _pos.y;
@@ -191,7 +191,7 @@ void Entity::touchPlayer(Player *player, double *screen_shake, double* slomo)
         }
     } else if (Util::checkCollision(player_rect, &_rect) && _recover > _recover_time && player->getRecover() > 10.0)
     {
-        player->damage(_damage, screen_shake, slomo);
+        player->damage(_damage, screen_shake, slomo, shockwaves);
     }
 }
 
@@ -466,7 +466,7 @@ void Bat::damage(const double damage, double* screen_shake)
     _vel.y += std::sin(angle) * 5.0;
 }
 
-void Bat::touchPlayer(Player* player, double* screen_shake, double* slomo)
+void Bat::touchPlayer(Player* player, double* screen_shake, double* slomo, ShockWaveManager& shockwaves)
 {
     _rect.x = _pos.x;
     _rect.y = _pos.y;
@@ -483,7 +483,7 @@ void Bat::touchPlayer(Player* player, double* screen_shake, double* slomo)
         double angle = Util::random() * 2.0 * M_PI;
         _vel.x += std::cos(angle) * 5.0;
         _vel.y += std::sin(angle) * 5.0;
-        player->damage(_damage, screen_shake, slomo);
+        player->damage(_damage, screen_shake, slomo, shockwaves);
     }
 }
 
@@ -607,7 +607,7 @@ void Turtle::damage(const double damage, double* screen_shake)
     Entity::damage(damage, screen_shake);
 }
 
-void Turtle::touchPlayer(Player* player, double* screen_shake, double* slomo)
+void Turtle::touchPlayer(Player* player, double* screen_shake, double* slomo, ShockWaveManager& shockwaves)
 {
     _rect.x = _pos.x;
     _rect.y = _pos.y;
@@ -753,7 +753,7 @@ void EntityManager::addEntity(Entity* entity)
     ++_total;
 }
 
-void EntityManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman, CoinManager* coinmanager)
+void EntityManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman, CoinManager* coinmanager, ShockWaveManager& shockwaves)
 {
     const int num{_total};
     for (std::size_t i{0}; i < num; ++i)
@@ -765,12 +765,12 @@ void EntityManager::update(const double& time_step, World& world, double* screen
             if (!(entity->getPeaceful()))
             {
                 entity->followPlayer(player, &world, time_step);
-                entity->touchPlayer(player, screen_shake, slomo);
+                entity->touchPlayer(player, screen_shake, slomo, shockwaves);
             } else {
                 entity->wander(&world, time_step);
                 if (entity->getName() == "turtle")
                 {
-                    entity->touchPlayer(player, screen_shake, slomo);
+                    entity->touchPlayer(player, screen_shake, slomo, shockwaves);
                     if (static_cast<Turtle*>(entity)->getJumpedOn())
                     {
                         texman->SFX_turtle.play();
@@ -827,6 +827,7 @@ void EntityManager::update(const double& time_step, World& world, double* screen
                 {
                     coinmanager->addCoin(entity->getCenter(), {Util::random() * 2.0 - 1.0, Util::random() * -2.0});
                 }
+                shockwaves.addShockWave(entity->getCenter());
                 Util::swap(&_Entities[i], &_Entities[_total - 1]); // swap dead entity with last entity in the array
                 delete _Entities[_total - 1]; // deallocate dead entity
                 _Entities[_total - 1] = nullptr;
@@ -996,11 +997,11 @@ void EMManager::addEntity(Entity* entity)
     _Managers.push_back(new EntityManager{vec2<double>{0, 0}, 1, std::vector<Entity*>{entity}});
 }
 
-void EMManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman, CoinManager* coinmanager)
+void EMManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman, CoinManager* coinmanager, ShockWaveManager& shockwaves)
 {
     for (std::size_t i{0}; i < _Managers.size(); ++i)
     {
-        _Managers[i]->update(time_step, world, screen_shake, player, slomo, texman, coinmanager);
+        _Managers[i]->update(time_step, world, screen_shake, player, slomo, texman, coinmanager, shockwaves);
     }
 }
 // updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman)

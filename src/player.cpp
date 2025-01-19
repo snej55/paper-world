@@ -70,7 +70,7 @@ vec2<double> Player::getCenter()
     return {_pos.x + _dimensions.x / 2.0, _pos.y + _dimensions.y / 2.0};
 }
 
-void Player::damage(double amount, double* screen_shake, double* slomo)
+void Player::damage(double amount, double* screen_shake, double* slomo, ShockWaveManager& shockwaves)
 {
     // we can add buffs later
     if (_recover > _recover_time + 30)
@@ -92,13 +92,13 @@ void Player::damage(double amount, double* screen_shake, double* slomo)
         if (_health < 0.0)
         {
             *slomo = std::min(0.5, *slomo);
-            die(screen_shake);
+            die(screen_shake, shockwaves);
         }
         _should_damage = true;
     }
 }
 
-void Player::die(double* screen_shake)
+void Player::die(double* screen_shake, ShockWaveManager& shockwaves)
 {
     _health = _max_health;
     _ad = 0;
@@ -108,6 +108,7 @@ void Player::die(double* screen_shake)
     _Particles.setSpawning(128, {16.0, 8.0}, _Palette[0]);
     _Smoke.setSpawning(100, {1, 2}, {0xAA, 0xAA, 0xAA});
     _Fire.setSpawning(100);
+    shockwaves.addShockWave(getCenter());
     int num{(std::rand() % 20) + 10};
     for (int i{0}; i < num; ++i)
     {
@@ -119,7 +120,7 @@ void Player::die(double* screen_shake)
     *screen_shake = std::max(*screen_shake, 16.0);
 }
 
-void Player::update(const double& time_step, World& world, double* screen_shake, TexMan* texman)
+void Player::update(const double& time_step, World& world, double* screen_shake, TexMan* texman, ShockWaveManager& shockwaves)
 {
     // add all the timers here
     _swordAttacked += time_step;
@@ -130,7 +131,7 @@ void Player::update(const double& time_step, World& world, double* screen_shake,
     if (_ad > 120)
     {
         updateVel(time_step);
-        handlePhysics(time_step, _vel, world, screen_shake, texman);
+        handlePhysics(time_step, _vel, world, screen_shake, texman, shockwaves);
         // updateSword(time_step);
         handleAnim(time_step);
         updateRect();
@@ -199,7 +200,7 @@ void Player::updateVel(const double& time_step)
     _vel.y = std::min(8.0, _vel.y);
 }
 
-void Player::handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake, TexMan* texman)
+void Player::handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake, TexMan* texman, ShockWaveManager& shockwaves)
 {
     _pos.x += frame_movement.x * time_step;
     _rect.x = _pos.x;
@@ -275,13 +276,13 @@ void Player::handlePhysics(const double& time_step, vec2<double> frame_movement,
         if (Util::checkCollision(&_rect, tile_rect))
         {
             // we died
-            die(screen_shake);
+            die(screen_shake, shockwaves);
             return;
         }
     }
     if (_lava_struck)
     {
-        die(screen_shake);
+        die(screen_shake, shockwaves);
     }
 }
 

@@ -102,7 +102,7 @@ public:
 
     virtual void render(const int scrollX, const int scrollY, SDL_Renderer* renderer);
 
-    virtual void touchPlayer(Player* player, double* screen_shake, double* slomo);
+    virtual void touchPlayer(Player* player, double* screen_shake, double* slomo, ShockWaveManager& shockwaves);
 
     virtual void followPlayer(Player* player, World* world, const double& time_step);
 
@@ -184,7 +184,7 @@ public:
 
     virtual void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake);
 
-    virtual void touchPlayer(Player* player, double* screen_shake, double* slomo);
+    virtual void touchPlayer(Player* player, double* screen_shake, double* slomo, ShockWaveManager& shockwaves);
 
     virtual void followPlayer(Player* player, World* world, const double& time_step);
 
@@ -236,7 +236,7 @@ public:
 
     virtual void damage(const double damage, double* screen_shake);
 
-    virtual void touchPlayer(Player* player, double* screen_shake, double* slomo);
+    virtual void touchPlayer(Player* player, double* screen_shake, double* slomo, ShockWaveManager& shockwaves);
 
     virtual void wander(World* world, const double& time_step);
 
@@ -277,7 +277,7 @@ public:
 
     virtual void addEntity(Entity* entity);
 
-    virtual void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman, CoinManager* coinmanager);
+    virtual void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman, CoinManager* coinmanager, ShockWaveManager& shockwaves);
 
     virtual void updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman);
 
@@ -302,7 +302,7 @@ public:
 
     void addEntity(Entity* entity);
 
-    void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman, CoinManager* coinmanager);
+    void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman, CoinManager* coinmanager, ShockWaveManager& shockwaves);
 
     void render(const int scrollX, const int scrollY, SDL_Renderer* renderer, const double& time_step, World* world, TexMan* texman);
 };

@@ -10,6 +10,7 @@
 #include "./sparks.hpp"
 #include "./anim.hpp"
 #include "./weapons.hpp"
+#include "./shockwaves.hpp"
 
 enum class Control
 {
@@ -125,6 +126,8 @@ public:
         return _should_damage;
     }
 
+    void setSpawnPos(vec2<double> pos) {_pos = pos; _spawn_pos = pos;}
+
     double getInWater() {return _in_water;}
     void setInWater(double val) {_in_water = val;}
 
@@ -146,9 +149,10 @@ public:
     double getRecover() {return _recover;}
     void setRecover(double val) {_recover = val;}
 
-    void damage(double amount, double* screen_shake, double* slomo);
+    void damage(double amount, double* screen_shake, double* slomo, ShockWaveManager& shockwaves);
 
     double getAd() {return _ad;}
+    void setAd(double val) {_ad = val;}
     void tickAd(const double& time_step)
     {
         if (_ad < 60.0)
@@ -179,11 +183,11 @@ public:
         _recover += time_step;
     }
 
-    void die(double* screen_shake);
+    void die(double* screen_shake, ShockWaveManager& shockwaves);
 
-    void update(const double& time_step, World& world, double* screen_shake, TexMan* texman);
+    void update(const double& time_step, World& world, double* screen_shake, TexMan* texman, ShockWaveManager& shockwaves);
     void updateVel(const double& time_step);
-    void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake, TexMan* texman);
+    void handlePhysics(const double& time_step, vec2<double> frame_movement, World& world, double* screen_shake, TexMan* texman, ShockWaveManager& shockwaves);
     void updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* tex);
 
     void handleAnim(const double& time_step);

@@ -213,6 +213,7 @@ enum class TileType
 enum class DecorType
 {
     TREE,
+    LARGE_DECOR,
     NONE,
 };
 
@@ -426,6 +427,8 @@ public:
         {
             case 4:
                 return DecorType::TREE;
+            case 5:
+                return DecorType::LARGE_DECOR;
             default:
                 return DecorType::NONE;
         }
@@ -494,6 +497,24 @@ public:
                     {
                         leaf_spawner_rects.push_back(LeafSpawner{{static_cast<int>(tile["pos"][0]) + TILE_SIZE, static_cast<int>(tile["pos"][1]) + TILE_SIZE * 3, TILE_SIZE * 2, TILE_SIZE}, false});
                     }
+                } else if (tile["type"] == 5)
+                {
+                    if (tile["variant"] == 0)
+                    {
+                        leaf_spawner_rects.push_back(LeafSpawner{{static_cast<int>(tile["pos"][0]) + 4, static_cast<int>(tile["pos"][1]) + 4, TILE_SIZE * 5, TILE_SIZE + 3}, false});
+                    } else if (tile["variant"] == 1)
+                    {
+                        leaf_spawner_rects.push_back(LeafSpawner{{static_cast<int>(tile["pos"][0]) + TILE_SIZE, static_cast<int>(tile["pos"][1]) + TILE_SIZE, TILE_SIZE * 2, TILE_SIZE}, false});
+                    } else if (tile["variant"] == 2)
+                    {
+                        leaf_spawner_rects.push_back(LeafSpawner{{static_cast<int>(tile["pos"][0]) + TILE_SIZE, static_cast<int>(tile["pos"][1]) + TILE_SIZE * 2, TILE_SIZE * 2, TILE_SIZE}, false});
+                    } else if (tile["variant"] == 3)
+                    {
+                        leaf_spawner_rects.push_back(LeafSpawner{{static_cast<int>(tile["pos"][0]) + TILE_SIZE, static_cast<int>(tile["pos"][1]) + TILE_SIZE, TILE_SIZE * 2, TILE_SIZE}, false});
+                    } else if (tile["variant"] == 4)
+                    {
+                        leaf_spawner_rects.push_back(LeafSpawner{{static_cast<int>(tile["pos"][0]) + TILE_SIZE, static_cast<int>(tile["pos"][1]) + TILE_SIZE * 3, TILE_SIZE * 2, TILE_SIZE}, false});
+                    }
                 }
                 chunk->decor.push_back(Decor{{tile["pos"][0], tile["pos"][1]}, getDecorType(tile["type"]), tile["variant"]});
                 chunk->pos = chunk_loc;
@@ -540,10 +561,10 @@ public:
                 if (0 <= targetX && targetX < LEVEL_WIDTH && 0 <= targetY && targetY < LEVEL_HEIGHT)
                 {
                     int chunk_idx{targetY * LEVEL_WIDTH + targetX};
-                    Chunk* chunk{&(_Chunks[chunk_idx])};
-                    renderChunk(chunk, scrollX, scrollY, window, renderer, texman);
                     DecorChunk* decor{&(_DecorChunks[chunk_idx])};
                     renderDecorChunk(decor, scrollX, scrollY, window, renderer, texman);
+                    Chunk* chunk{&(_Chunks[chunk_idx])};
+                    renderChunk(chunk, scrollX, scrollY, window, renderer, texman);
                 }
             }
         }
@@ -588,6 +609,8 @@ public:
         {
             case (DecorType::TREE):
                 return &(texman->tileTrees);
+            case (DecorType::LARGE_DECOR):
+                return &(texman->largeDecor);
             default:
                 // std::cout << static_cast<int>(tile.type) << '\n';
                 return nullptr;
@@ -611,6 +634,9 @@ public:
         if (tile.type == DecorType::TREE)
         {
             clip = {tile.variant * 32, 0, 32, 32}; // these small trees are 32 * 32
+        } else if (tile.type == DecorType::LARGE_DECOR)
+        {
+            clip = {tile.variant * 50, 0, 50, 50}; // big boys
         }
         return clip;
     }

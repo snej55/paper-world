@@ -21,3 +21,12 @@ Extra:
  - Conveyer belts
  - Wind tunnel (to carry you up)
  - Cloth (hard)
+
+Evorush
+Wildside
+Geocell
+Crossember
+Defblade
+Maniascape
+Grimluster
+Roguebooty

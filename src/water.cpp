@@ -247,11 +247,11 @@ void Lava::update(const double& time_step, const int scrollX, const int scrollY,
             if (glow->size < -0.5 * Util::random())
             {
                 // flash effect
-                texman->lightTex.setBlendMode(SDL_BLENDMODE_ADD);
-                texman->lightTex.setAlpha(static_cast<Uint8>(static_cast<int>(255.0)));
-                texman->lightTex.setColor(0xff, 0x53, 0x53);
-                SDL_Rect renderQuad{static_cast<int>(glow->pos.x) - 1 - scrollX, static_cast<int>(glow->pos.y) - 1 - scrollY, 3, 3};
-                SDL_RenderCopyEx(renderer, texman->lightTex.getTexture(), NULL, &renderQuad, 0, NULL, SDL_FLIP_NONE);
+                // texman->lightTex.setBlendMode(SDL_BLENDMODE_ADD);
+                // texman->lightTex.setAlpha(static_cast<Uint8>(static_cast<int>(255.0)));
+                // texman->lightTex.setColor(0xff, 0x53, 0x53);
+                // SDL_Rect renderQuad{static_cast<int>(glow->pos.x) - 1 - scrollX, static_cast<int>(glow->pos.y) - 1 - scrollY, 3, 3};
+                // SDL_RenderCopyEx(renderer, texman->lightTex.getTexture(), NULL, &renderQuad, 0, NULL, SDL_FLIP_NONE);
                 delete glow;
                 _Glow[i] = nullptr;
             }
@@ -268,7 +268,7 @@ void Lava::update(const double& time_step, const int scrollX, const int scrollY,
     texman->lightTex.setColor(246, 231, 156);
     _Glow.erase(std::remove_if(_Glow.begin(), _Glow.end(), [](LavaGlow* glow){return (glow == nullptr);}), _Glow.end());
     std::vector<SDL_Vertex> points{};
-    SDL_Color col{0xff, 0x53, 0x53, 0xbb};
+    SDL_Color col{192, 41, 49, 150};//{0xff, 0x53, 0x53, 0xbb};
     for (int i{0}; i < static_cast<int>(std::size(_Springs)); ++i)
     {
         WaterSpring* spring{_Springs[i]};
@@ -282,9 +282,9 @@ void Lava::update(const double& time_step, const int scrollX, const int scrollY,
                     spring->vel += (std::max(-3.0, std::min(8.0, player->getVelY() * 3.0)) + -std::abs(std::max(-3.0, std::min(3.0, player->getVelX())))) * 0.5 * time_step;
             }
         }
-        if (Util::random() * 10000.0 < 128.0 / time_step)
+        if (Util::random() * 7000.0 < 128.0 / time_step)
         {
-            addGlow(spring->pos, {0.0, Util::random() * -2.0});
+            addGlow(spring->pos, {0.0, Util::random() * -1.0});
         }
         if (std::abs(spring->target_y - spring->pos.y) < 3.0)
         {
@@ -325,8 +325,20 @@ void Lava::update(const double& time_step, const int scrollX, const int scrollY,
     {
         line[i] = SDL_Point{static_cast<int>(_Springs[i]->pos.x) - scrollX, static_cast<int>(_Springs[i]->pos.y) - scrollY};
     }
-    SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0x88);
+    SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xaa);
     SDL_RenderDrawLines(renderer, line.data(), static_cast<int>(line.size()));
+    for (int j{0}; j < _dimensions.y * TILE_SIZE - 8; ++j)
+    {
+        line.clear();
+        line.resize(std::size(_Springs));
+        for (int i{0}; i < static_cast<int>(std::size(_Springs)); ++i)
+        {
+            line[i] = SDL_Point{static_cast<int>(_Springs[i]->pos.x) - scrollX, static_cast<int>(_Springs[i]->pos.y) - scrollY + 1 + j};
+        }
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_ADD);
+        SDL_SetRenderDrawColor(renderer, 0xff, 0x76, 0x00, static_cast<Uint8>(static_cast<int>(static_cast<double>(_dimensions.y * TILE_SIZE - 8 - j) / static_cast<double>(_dimensions.y * TILE_SIZE - 8) * 200.0)));
+        SDL_RenderDrawLines(renderer, line.data(), static_cast<int>(line.size()));
+    }
     //SDL_RenderFillRect(renderer, &fillRect);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
     if (Util::checkCollision(player->getRect(), getRect()))

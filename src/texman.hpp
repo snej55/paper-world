@@ -16,6 +16,8 @@ public:
     Texture tileSpikeTex{};
     Texture tileSpringTex{};
 
+    Texture portalTex{};
+
     // Particle Textures
     Texture particle{};
     Texture particleFire{};
@@ -24,6 +26,8 @@ public:
 
     Texture coin{};
     Texture circle{};
+
+    Texture shockwave{};
 
     // Entity Textures
     Texture slimeIdle{};
@@ -57,6 +61,7 @@ public:
     // HUD
     Texture enemyHealthBar{};
     Texture playerHealthBar{};
+    Texture uiPlay{};
 
     // Decor!
     Texture tileTrees{};
@@ -104,9 +109,11 @@ public:
             tileSpringTex.free();
             tileTrees.free();
             largeDecor.free();
+            portalTex.free();
             particle.free();
             particleFire.free();
             lightTex.free();
+            shockwave.free();
             circle.free();
             leafTex.free();
             slimeIdle.free();
@@ -132,6 +139,7 @@ public:
             turtleJump.free();
             turtleLand.free();
             turtleFlash.free();
+            uiPlay.free();
             SFX_death_0.free();
             SFX_hit_0.free();
             SFX_hit_1.free();
@@ -204,6 +212,9 @@ public:
         confirm(leafTex.loadFromFile("data/images/particles/leaf.png", window, renderer), success);
         confirm(coin.loadFromFile("data/images/collectables/coin.png", window, renderer), success);
         confirm(circle.loadFromFile("data/images/particles/circle.png", window, renderer), success);
+        confirm(uiPlay.loadFromFile("data/images/ui/play.png", window, renderer), success);
+        confirm(shockwave.loadFromFile("data/images/vfx/shockwave.png", window, renderer), success);
+        confirm(portalTex.loadFromFile("data/images/tiles/portal.png", window, renderer), success);
         SFX_death_0.loadFromFileWAV("data/audio/death/death_0.wav");
         SFX_hit_0.loadFromFileWAV("data/audio/hit/hit_0.wav");
         SFX_hit_1.loadFromFileWAV("data/audio/hit/hit_1.wav");

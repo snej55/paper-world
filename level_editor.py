@@ -13,7 +13,8 @@ CONVERT_TYPES = {
     1: 'rock', 
     2: 'spike',
     3: 'grass_key',
-    4: 'trees'
+    4: 'trees',
+    5: 'large_decor',
 }
 AUTO_TILE_TYPES = {'grass', 'rock'}
 AUTO_TILE_MAP = {'0011': 1, '1011': 2, '1001': 3, '0001': 4, '0111': 5, '1111': 6, '1101': 7, '0101': 8, 
@@ -40,8 +41,11 @@ class Editor:
             'turtle': [pygame.image.load('data/images/entities/turtle/thumb.png').convert()],
             'spring': [pygame.image.load('data/images/tiles/spring.png').convert()],
             'grass_key': [pygame.image.load('data/images/tiles/grass_key.png').convert()],
-            'trees': self.load_sheet(pygame.image.load('data/images/tiles/trees.png').convert(), [32, 32])
+            'trees': self.load_sheet(pygame.image.load('data/images/tiles/trees.png').convert(), [32, 32]),
+            'large_decor': self.load_sheet(pygame.image.load('data/images/tiles/large_decor.png').convert(), [50, 50])
         }
+        self.portal_img = pygame.image.load('data/images/tiles/portal.png').convert()
+        self.portal_img.set_colorkey((0, 0, 0))
         
         for key in self.assets:
             for surf in self.assets[key]:
@@ -56,6 +60,8 @@ class Editor:
         self.water_rect = None
         self.lava_list = []
         self.lava_rect = None
+        self.player_spawn_pos = [40, 40]
+        self.portal_pos = [50.0, 10.0]
         self.load(self.path)
 
         self.click = False
@@ -75,27 +81,38 @@ class Editor:
 
         self.particles = []
     
-    def load(self, path):
-        f = open(path, 'r')
-        data = json.load(f)
+    def create_new(self, path):
+        f = open(path, 'w')
+        json.dump({'level': {'tiles': [], 'entities': [], 'springs': [], 'off_grid': [], 'water': [], 'lava': []}, 'player_spawn_pos': [40, 40], "portal_pos": [50.0, 10.0]}, f)
         f.close()
-        self.tile_map = {}
-        self.off_grid = []
-        self.water_list = []
-        for tile in data['level']['tiles']:
-            tile_loc = f"{tile['pos'][0]};{tile['pos'][1]}"
-            self.tile_map[tile_loc] = {'type': CONVERT_TYPES[tile['type']], 'variant': tile['variant']}
-        for entity in data['level']['entities']:
-            self.tile_map[f"{math.floor(entity['pos'][0] / TILE_SIZE)};{math.floor(entity['pos'][1] / TILE_SIZE)}"] = {'type': entity['type'], 'variant': 0}
-        for spring in data['level']['springs']:
-            self.tile_map[f"{math.floor(spring['pos'][0] / TILE_SIZE)};{math.floor(spring['pos'][1] / TILE_SIZE)}"] = {'type': "spring", 'variant': 0}
-        for rect in data['level']['water']:
-            self.water_list.append(pygame.Rect(rect[0] * 8, rect[1] * 8, rect[2] * 8, rect[3] * 8))
-        for rect in data['level']['lava']:
-            self.lava_list.append(pygame.Rect(rect[0] * 8, rect[1] * 8, rect[2] * 8, rect[3] * 8))
-        self.off_grid.extend(data['level']['off_grid'])
-        for tile in self.off_grid:
-            tile['type'] = CONVERT_TYPES[tile['type']]
+    
+    def load(self, path):
+        try:
+            f = open(path, 'r')
+            data = json.load(f)
+            f.close()
+            self.player_spawn_pos = data['player_spawn_pos']
+            self.portal_pos = data['portal_pos']
+            self.tile_map = {}
+            self.off_grid = []
+            self.water_list = []
+            for tile in data['level']['tiles']:
+                tile_loc = f"{tile['pos'][0]};{tile['pos'][1]}"
+                self.tile_map[tile_loc] = {'type': CONVERT_TYPES[tile['type']], 'variant': tile['variant']}
+            for entity in data['level']['entities']:
+                self.tile_map[f"{math.floor(entity['pos'][0] / TILE_SIZE)};{math.floor(entity['pos'][1] / TILE_SIZE)}"] = {'type': entity['type'], 'variant': 0}
+            for spring in data['level']['springs']:
+                self.tile_map[f"{math.floor(spring['pos'][0] / TILE_SIZE)};{math.floor(spring['pos'][1] / TILE_SIZE)}"] = {'type': "spring", 'variant': 0}
+            for rect in data['level']['water']:
+                self.water_list.append(pygame.Rect(rect[0] * 8, rect[1] * 8, rect[2] * 8, rect[3] * 8))
+            for rect in data['level']['lava']:
+                self.lava_list.append(pygame.Rect(rect[0] * 8, rect[1] * 8, rect[2] * 8, rect[3] * 8))
+            self.off_grid.extend(data['level']['off_grid'])
+            for tile in self.off_grid:
+                tile['type'] = CONVERT_TYPES[tile['type']]
+        except FileNotFoundError:
+            self.create_new(path)
+            self.load(path)
     
     def save(self, path):
         with open(path, 'w') as f:
@@ -125,7 +142,7 @@ class Editor:
                     if tile['type'] == CONVERT_TYPES[key]:
                         tile_type = key
                 off_grid.append({'pos': tile['pos'], 'type': tile_type, 'variant': tile['variant']});
-            json.dump({'level': {'tiles': tiles, 'entities': entities, 'springs': springs, 'off_grid': off_grid, 'water': [[int(rect.x / 8), int(rect.y / 8), int(rect.w / 8), int(rect.h / 8)] for rect in self.water_list], 'lava': [[int(rect.x / 8), int(rect.y / 8), int(rect.w / 8), int(rect.h / 8)] for rect in self.lava_list]}}, f)
+            json.dump({'level': {'tiles': tiles, 'entities': entities, 'springs': springs, 'off_grid': off_grid, 'water': [[int(rect.x / 8), int(rect.y / 8), int(rect.w / 8), int(rect.h / 8)] for rect in self.water_list], 'lava': [[int(rect.x / 8), int(rect.y / 8), int(rect.w / 8), int(rect.h / 8)] for rect in self.lava_list]}, 'player_spawn_pos': self.player_spawn_pos, 'portal_pos': self.portal_pos}, f)
             f.close()
 
     def load_tileset(self, sheet):
@@ -286,9 +303,9 @@ class Editor:
 
     def draw(self):
         self.draw_grid()
-        self.draw_tiles()
         for tile in self.off_grid: # tile: [pos, type, variant] absolute pos
             self.screen.blit(self.assets[tile['type']][tile['variant']], (tile['pos'][0] - self.scroll.x, tile['pos'][1] - self.scroll.y))
+        self.draw_tiles()
     
         mouse_pos = pygame.mouse.get_pos()
         if self.grid:
@@ -301,6 +318,8 @@ class Editor:
             self.screen.blit(self.select_surf, (mouse_pos[0] - self.scroll.x, mouse_pos[1] - self.scroll.y))
             if not self.right_click:
                 self.screen.blit(self.assets[self.tile_list[self.tile_type]][self.tile_variant], (mouse_pos[0] - self.scroll.x, mouse_pos[1] - self.scroll.y))
+        pygame.draw.rect(self.screen, (0, 255, 255), (self.player_spawn_pos[0] - self.scroll.x, self.player_spawn_pos[1] - self.scroll.y, TILE_SIZE, TILE_SIZE), 3)
+        self.screen.blit(self.portal_img, (self.portal_pos[0] - self.scroll.x, self.portal_pos[1] - self.scroll.y))
 
     def run(self):
         while self.running:
@@ -334,6 +353,14 @@ class Editor:
                         self.water = not self.water
                     if event.key == pygame.K_l:
                         self.lava = not self.lava
+                    if event.key == pygame.K_p:
+                        mouse_pos = pygame.mouse.get_pos()
+                        mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x) / TILE_SIZE), math.floor((mouse_pos[1] / 2 + self.scroll.y) / TILE_SIZE)]
+                        self.player_spawn_pos = [mouse_pos[0] * TILE_SIZE, mouse_pos[1] * TILE_SIZE]
+                    if event.key == pygame.K_s:
+                        mouse_pos = pygame.mouse.get_pos()
+                        mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x) / TILE_SIZE), math.floor((mouse_pos[1] / 2 + self.scroll.y) / TILE_SIZE)]
+                        self.portal_pos = [mouse_pos[0] * TILE_SIZE, mouse_pos[1] * TILE_SIZE]
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_RIGHT:
                         self.controls['right'] = False
@@ -380,7 +407,7 @@ class Editor:
                             if self.right_click:
                                 for i, tile in sorted(enumerate(self.off_grid), reverse=True):
                                     tile_img = self.assets[tile['type']][tile['variant']];
-                                    tile_rect = pygame.Rect(mouse_pos[0], mouse_pos[1], tile_img.get_width(), tile_img.get_height())
+                                    tile_rect = pygame.Rect(tile['pos'][0], tile['pos'][1], tile_img.get_width(), tile_img.get_height())
                                     if tile_rect.collidepoint(mouse_pos[0], mouse_pos[1]):
                                         self.off_grid.pop(i)
                 if event.type == pygame.MOUSEBUTTONUP:
