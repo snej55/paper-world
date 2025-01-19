@@ -18,6 +18,13 @@
 
 using json = nlohmann::json;
 
+struct LavaGlow // for the lava
+{
+    vec2<double> pos;
+    vec2<double> vel;
+    double size;
+};
+
 struct WaterSpring
 {
     vec2<double> pos;
@@ -66,6 +73,8 @@ public:
 
     ~WaterManager();
 
+    std::vector<Water*>& getWater() {return _Water;}
+
     void loadFromFile(const char* path);
 
     void update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, Player* player);
@@ -78,12 +87,13 @@ private:
     vec2<int> _dimensions; // relative tile dimensions
     double _spacing;
 
-    double _tension{0.15};
+    double _tension{0.07};
 
     std::vector<WaterSpring*> _Springs{};
     SDL_Rect _Rect;
 
     Timer timer{};
+    std::vector<LavaGlow*> _Glow;
 
 public:
     Lava(vec2<int> pos, vec2<int> dimensions, double spacing);
@@ -91,6 +101,8 @@ public:
 
     void free();
     void loadSprings();
+    
+    void addGlow(vec2<double> pos, vec2<double> vel);
 
     SDL_Rect* getRect();
 
@@ -111,6 +123,9 @@ public:
     LavaManager(const char* path);
 
     ~LavaManager();
+
+
+    std::vector<Lava*>& getLava() {return _Lava;}
 
     void loadFromFile(const char* path);
 

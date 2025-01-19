@@ -753,7 +753,7 @@ void EntityManager::addEntity(Entity* entity)
     ++_total;
 }
 
-void EntityManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman)
+void EntityManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman, CoinManager* coinmanager)
 {
     const int num{_total};
     for (std::size_t i{0}; i < num; ++i)
@@ -821,6 +821,11 @@ void EntityManager::update(const double& time_step, World& world, double* screen
                     {
                         _SparkManager.addSpark(new Spark{entity->getCenter(), Util::random() * M_PI * 2.0, Util::random() * 2.0 + 1.0});
                     }
+                }
+                int num{(std::rand() % 10) + 5};
+                for (int i{0}; i < num; ++i)
+                {
+                    coinmanager->addCoin(entity->getCenter(), {Util::random() * 2.0 - 1.0, Util::random() * -2.0});
                 }
                 Util::swap(&_Entities[i], &_Entities[_total - 1]); // swap dead entity with last entity in the array
                 delete _Entities[_total - 1]; // deallocate dead entity
@@ -991,11 +996,11 @@ void EMManager::addEntity(Entity* entity)
     _Managers.push_back(new EntityManager{vec2<double>{0, 0}, 1, std::vector<Entity*>{entity}});
 }
 
-void EMManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman)
+void EMManager::update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman, CoinManager* coinmanager)
 {
     for (std::size_t i{0}; i < _Managers.size(); ++i)
     {
-        _Managers[i]->update(time_step, world, screen_shake, player, slomo, texman);
+        _Managers[i]->update(time_step, world, screen_shake, player, slomo, texman, coinmanager);
     }
 }
 // updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman)

@@ -92,12 +92,16 @@ private:
 
     bool _should_damage{false};
     double _in_water{150.0};
+    bool _lava_struck{false};
 
 public:
     Player(vec2<double> pos, vec2<int> dimensions);
     ~Player();
 
     void loadAnim(TexMan* texman);
+
+    bool getLavaStruck() {return _lava_struck;}
+    void setLavaStruck(bool val) {_lava_struck = val;}
 
     SDL_Rect* getRect();
     void updateRect()
@@ -158,6 +162,18 @@ public:
         if (_ad < 2 && _ad > 0)
         {
             _Particles.setSpawning(48, {1.0, 20.0}, _Palette[0]);
+        }
+        if (_lava_struck)
+        {
+            if (_ad < 110.0)
+            {
+                _Fire.setSpawning(std::max(_Fire.getSpawning(), 10));
+                _Smoke.setSpawning(std::max(_Smoke.getSpawning(), 2), {1, 2}, {0x88, 0x88, 0xBB});
+            }
+        }
+        if (_ad + time_step > _death_time)
+        {
+            _lava_struck = false;
         }
         _ad += time_step;
         _recover += time_step;

@@ -54,6 +54,8 @@ class Editor:
         self.off_grid = []
         self.water_list = []
         self.water_rect = None
+        self.lava_list = []
+        self.lava_rect = None
         self.load(self.path)
 
         self.click = False
@@ -69,6 +71,7 @@ class Editor:
 
         self.grid = True
         self.water = False
+        self.lava = False
 
         self.particles = []
     
@@ -88,6 +91,8 @@ class Editor:
             self.tile_map[f"{math.floor(spring['pos'][0] / TILE_SIZE)};{math.floor(spring['pos'][1] / TILE_SIZE)}"] = {'type': "spring", 'variant': 0}
         for rect in data['level']['water']:
             self.water_list.append(pygame.Rect(rect[0] * 8, rect[1] * 8, rect[2] * 8, rect[3] * 8))
+        for rect in data['level']['lava']:
+            self.lava_list.append(pygame.Rect(rect[0] * 8, rect[1] * 8, rect[2] * 8, rect[3] * 8))
         self.off_grid.extend(data['level']['off_grid'])
         for tile in self.off_grid:
             tile['type'] = CONVERT_TYPES[tile['type']]
@@ -120,7 +125,7 @@ class Editor:
                     if tile['type'] == CONVERT_TYPES[key]:
                         tile_type = key
                 off_grid.append({'pos': tile['pos'], 'type': tile_type, 'variant': tile['variant']});
-            json.dump({'level': {'tiles': tiles, 'entities': entities, 'springs': springs, 'off_grid': off_grid, 'water': [[int(rect.x / 8), int(rect.y / 8), int(rect.w / 8), int(rect.h / 8)] for rect in self.water_list]}}, f)
+            json.dump({'level': {'tiles': tiles, 'entities': entities, 'springs': springs, 'off_grid': off_grid, 'water': [[int(rect.x / 8), int(rect.y / 8), int(rect.w / 8), int(rect.h / 8)] for rect in self.water_list], 'lava': [[int(rect.x / 8), int(rect.y / 8), int(rect.w / 8), int(rect.h / 8)] for rect in self.lava_list]}}, f)
             f.close()
 
     def load_tileset(self, sheet):
@@ -171,53 +176,77 @@ class Editor:
         mouse_pos = pygame.mouse.get_pos()
         mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x) / TILE_SIZE), math.floor((mouse_pos[1] / 2 + self.scroll.y) / TILE_SIZE)]
 
-        if not self.water:
-            if self.click and self.grid:
-                if 0 <= mouse_pos[0] < LEVEL_WIDTH * CHUNK_SIZE and 0 <= mouse_pos[1] < LEVEL_HEIGHT * CHUNK_SIZE:
-                    tile_loc = f"{mouse_pos[0]};{mouse_pos[1]}"
-                    if tile_loc in self.tile_map:
-                        if self.tile_map[tile_loc]['type'] == self.tile_list[self.tile_type] and self.tile_map[tile_loc]['variant'] == self.tile_variant:
-                            pass
+        if not self.lava:
+            if not self.water:
+                if self.click and self.grid:
+                    if 0 <= mouse_pos[0] < LEVEL_WIDTH * CHUNK_SIZE and 0 <= mouse_pos[1] < LEVEL_HEIGHT * CHUNK_SIZE:
+                        tile_loc = f"{mouse_pos[0]};{mouse_pos[1]}"
+                        if tile_loc in self.tile_map:
+                            if self.tile_map[tile_loc]['type'] == self.tile_list[self.tile_type] and self.tile_map[tile_loc]['variant'] == self.tile_variant:
+                                pass
+                            else:
+                                self.tile_map[tile_loc] = {'type': self.tile_list[self.tile_type], 'variant': self.tile_variant}
                         else:
                             self.tile_map[tile_loc] = {'type': self.tile_list[self.tile_type], 'variant': self.tile_variant}
+                if self.right_click and self.grid:
+                    if 0 <= mouse_pos[0] < LEVEL_WIDTH * CHUNK_SIZE and 0 <= mouse_pos[1] < LEVEL_HEIGHT * CHUNK_SIZE:
+                        tile_loc = f"{mouse_pos[0]};{mouse_pos[1]}"
+                        if tile_loc in self.tile_map:
+                            for y in range(TILE_SIZE):
+                                for x in range(TILE_SIZE):
+                                    try:
+                                        angle = random.random() * math.pi * 2
+                                        #self.particles.append([[mouse_pos[0] * TILE_SIZE + random.random() * TILE_SIZE, mouse_pos[1] * TILE_SIZE + random.random() * TILE_SIZE], [random.random() * 2 - 1, random.random() * 4 - 3], 0, random.choice([(96, 174, 123), (60, 107, 100), (31, 36, 75), (101, 64, 83), (168, 96, 93), (209, 166, 126), (246, 231, 156), (182, 207, 142)])])
+                                        self.particles.append([[mouse_pos[0] * TILE_SIZE + x, mouse_pos[1] * TILE_SIZE + y], [math.sin(angle), math.cos(angle)], 0, self.assets[self.tile_map[tile_loc]['type']][self.tile_map[tile_loc]['variant']].get_at((x, y))])
+                                    except IndexError:
+                                        pass
+                            del self.tile_map[tile_loc]
+            else:
+                if self.click and self.grid:
+                    mouse_pos[0] *= TILE_SIZE
+                    mouse_pos[1] *= TILE_SIZE
+                    if mouse_pos[0] < self.water_rect.x:
+                        self.water_rect.w = self.water_rect.x - mouse_pos[0]
+                        self.water_rect.x = mouse_pos[0]
                     else:
-                        self.tile_map[tile_loc] = {'type': self.tile_list[self.tile_type], 'variant': self.tile_variant}
-            if self.right_click and self.grid:
-                if 0 <= mouse_pos[0] < LEVEL_WIDTH * CHUNK_SIZE and 0 <= mouse_pos[1] < LEVEL_HEIGHT * CHUNK_SIZE:
-                    tile_loc = f"{mouse_pos[0]};{mouse_pos[1]}"
-                    if tile_loc in self.tile_map:
-                        for y in range(TILE_SIZE):
-                            for x in range(TILE_SIZE):
-                                try:
-                                    angle = random.random() * math.pi * 2
-                                    #self.particles.append([[mouse_pos[0] * TILE_SIZE + random.random() * TILE_SIZE, mouse_pos[1] * TILE_SIZE + random.random() * TILE_SIZE], [random.random() * 2 - 1, random.random() * 4 - 3], 0, random.choice([(96, 174, 123), (60, 107, 100), (31, 36, 75), (101, 64, 83), (168, 96, 93), (209, 166, 126), (246, 231, 156), (182, 207, 142)])])
-                                    self.particles.append([[mouse_pos[0] * TILE_SIZE + x, mouse_pos[1] * TILE_SIZE + y], [math.sin(angle), math.cos(angle)], 0, self.assets[self.tile_map[tile_loc]['type']][self.tile_map[tile_loc]['variant']].get_at((x, y))])
-                                except IndexError:
-                                    pass
-                        del self.tile_map[tile_loc]
+                        self.water_rect.w = mouse_pos[0] - self.water_rect.x
+                    if mouse_pos[1] < self.water_rect.y:
+                        self.water_rect.h = self.water_rect.y - mouse_pos[1]
+                        self.water_rect.y = mouse_pos[1]
+                    else:
+                        self.water_rect.h = mouse_pos[1] - self.water_rect.y
+                    pygame.draw.rect(self.screen, (200, 200, 200, 200), (self.water_rect.x - self.scroll.x, self.water_rect.y - self.scroll.y, self.water_rect.w, self.water_rect.h))
+                if self.right_click:
+                    mouse_pos = pygame.mouse.get_pos()
+                    mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x)), math.floor((mouse_pos[1] / 2 + self.scroll.y))]
+                    for i, rect in sorted(enumerate(self.water_list), reverse=True):
+                        if rect.collidepoint(mouse_pos[0], mouse_pos[1]):
+                            self.water_list.pop(i)
         else:
             if self.click and self.grid:
                 mouse_pos[0] *= TILE_SIZE
                 mouse_pos[1] *= TILE_SIZE
-                if mouse_pos[0] < self.water_rect.x:
-                    self.water_rect.w = self.water_rect.x - mouse_pos[0]
-                    self.water_rect.x = mouse_pos[0]
+                if mouse_pos[0] < self.lava_rect.x:
+                    self.lava_rect.w = self.lava_rect.x - mouse_pos[0]
+                    self.lava_rect.x = mouse_pos[0]
                 else:
-                    self.water_rect.w = mouse_pos[0] - self.water_rect.x
-                if mouse_pos[1] < self.water_rect.y:
-                    self.water_rect.h = self.water_rect.y - mouse_pos[1]
-                    self.water_rect.y = mouse_pos[1]
+                    self.lava_rect.w = mouse_pos[0] - self.lava_rect.x
+                if mouse_pos[1] < self.lava_rect.y:
+                    self.lava_rect.h = self.lava_rect.y - mouse_pos[1]
+                    self.lava_rect.y = mouse_pos[1]
                 else:
-                    self.water_rect.h = mouse_pos[1] - self.water_rect.y
-                pygame.draw.rect(self.screen, (200, 200, 200, 200), (self.water_rect.x - self.scroll.x, self.water_rect.y - self.scroll.y, self.water_rect.w, self.water_rect.h))
+                    self.lava_rect.h = mouse_pos[1] - self.lava_rect.y
+                pygame.draw.rect(self.screen, (200, 200, 200, 200), (self.lava_rect.x - self.scroll.x, self.lava_rect.y - self.scroll.y, self.lava_rect.w, self.lava_rect.h))
             if self.right_click:
                 mouse_pos = pygame.mouse.get_pos()
                 mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x)), math.floor((mouse_pos[1] / 2 + self.scroll.y))]
-                for i, rect in sorted(enumerate(self.water_list), reverse=True):
+                for i, rect in sorted(enumerate(self.lava_list), reverse=True):
                     if rect.collidepoint(mouse_pos[0], mouse_pos[1]):
-                        self.water_list.pop(i)
+                        self.lava_list.pop(i)
         for rect in self.water_list:
             pygame.draw.rect(self.screen, (0, 100, 255, 255), (rect.x - self.scroll.x, rect.y - self.scroll.y, rect.w, rect.h))
+        for rect in self.lava_list:
+            pygame.draw.rect(self.screen, (255, 100, 0, 255), (rect.x - self.scroll.x, rect.y - self.scroll.y, rect.w, rect.h))
                 
         
         for i, particle in sorted(enumerate(self.particles), reverse=True):
@@ -303,6 +332,8 @@ class Editor:
                         self.grid = not self.grid
                     if event.key == pygame.K_w:
                         self.water = not self.water
+                    if event.key == pygame.K_l:
+                        self.lava = not self.lava
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_RIGHT:
                         self.controls['right'] = False
@@ -321,6 +352,10 @@ class Editor:
                             mouse_pos = pygame.mouse.get_pos()
                             mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x) / TILE_SIZE), math.floor((mouse_pos[1] / 2 + self.scroll.y) / TILE_SIZE)]
                             self.water_rect = pygame.Rect(mouse_pos[0] * TILE_SIZE, mouse_pos[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+                        if self.lava:
+                            mouse_pos = pygame.mouse.get_pos()
+                            mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x) / TILE_SIZE), math.floor((mouse_pos[1] / 2 + self.scroll.y) / TILE_SIZE)]
+                            self.lava_rect = pygame.Rect(mouse_pos[0] * TILE_SIZE, mouse_pos[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE)
                     if event.button == 3:
                         self.right_click = True
                     if self.controls['l_shift']:
@@ -353,6 +388,8 @@ class Editor:
                         self.click = False
                         if self.water:
                             self.water_list.append(self.water_rect.copy())
+                        if self.lava:
+                            self.lava_list.append(self.lava_rect.copy())
                     if event.button == 3:
                         self.right_click = False
             self.update()

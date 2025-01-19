@@ -34,6 +34,7 @@ private:
     Player _Player{{40.0, 40.0}, {4, 8}};
     EMManager _EMManager{}; // this is the entity manager :) "The Manager of the Managers"
     WaterManager* _WaterManager{nullptr};
+    LavaManager* _LavaManager{nullptr};
     CoinManager _CoinManager{};
 
 
@@ -79,6 +80,8 @@ public:
 
     void Close()
     {
+        delete _WaterManager;
+        delete _LavaManager;
         _TexMan.free();
         Mix_FreeChunk(music);
         std::cout << "Closing\n";
@@ -148,6 +151,8 @@ public:
         _Player.loadAnim(&_TexMan);
         _WaterManager = new WaterManager{};
         _WaterManager->loadFromFile("data/maps/0.json");
+        _LavaManager = new LavaManager{};
+        _LavaManager->loadFromFile("data/maps/0.json");
         _CoinManager.setTex(&(_TexMan.coin), &(_TexMan.lightTex));
 
         music = Mix_LoadWAV("data/audio/hit/hit_0.wav");
@@ -333,7 +338,7 @@ public:
             }
             _Player.tickAd(time_step);
 
-            _EMManager.update(time_step, _World, &screen_shake, &_Player, &slomo, &_TexMan);
+            _EMManager.update(time_step, _World, &screen_shake, &_Player, &slomo, &_TexMan, &_CoinManager);
             // do rendering here
 
             screen_shake = std::max(0.0, screen_shake - time_step);
@@ -355,10 +360,9 @@ public:
             _World.updateLeaves(time_step, render_scroll.x, render_scroll.y, _Width, _Height, &_TexMan, _Renderer);
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
             // for testing
-            if (Util::random() < 0.1)
-                _CoinManager.addCoin({100.0, 20.0}, {Util::random() * 2.0 - 1.0, Util::random() * -2.0});
             _CoinManager.update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan, _Player.getRect());
             _WaterManager->update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_TexMan, &_Player);
+            _LavaManager->update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_TexMan, &_Player);
 
             _playerHealth += (_Player.getHealth() - _playerHealth) * 0.12 * time_step;
             if (_Player.getHealth() == _Player.getMaxHealth())

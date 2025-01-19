@@ -14,6 +14,7 @@
 #include "./anim.hpp"
 #include "./health_bars.hpp"
 #include "./sparks.hpp"
+#include "./coin.hpp"
 
 class Entity
 {
@@ -276,7 +277,7 @@ public:
 
     virtual void addEntity(Entity* entity);
 
-    virtual void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman);
+    virtual void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman, CoinManager* coinmanager);
 
     virtual void updateParticles(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, TexMan* texman);
 
@@ -301,7 +302,7 @@ public:
 
     void addEntity(Entity* entity);
 
-    void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman);
+    void update(const double& time_step, World& world, double* screen_shake, Player* player, double* slomo, TexMan* texman, CoinManager* coinmanager);
 
     void render(const int scrollX, const int scrollY, SDL_Renderer* renderer, const double& time_step, World* world, TexMan* texman);
 };

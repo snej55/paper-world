@@ -276,8 +276,12 @@ void Player::handlePhysics(const double& time_step, vec2<double> frame_movement,
         {
             // we died
             die(screen_shake);
-            break;
+            return;
         }
+    }
+    if (_lava_struck)
+    {
+        die(screen_shake);
     }
 }
 

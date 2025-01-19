@@ -60,6 +60,7 @@ public:
 
     // Decor!
     Texture tileTrees{};
+    Texture largeDecor{};
 
     // -------- Sounds --------- //
     Sound SFX_death_0{};
@@ -77,6 +78,7 @@ public:
     Sound SFX_water_out{};
     Sound SFX_coin_collect{};
     Sound SFX_money_gain{};
+    Sound SFX_fire{};
 
     TTF_Font* baseFont{nullptr};
     TTF_Font* baseFontBold{nullptr};
@@ -101,6 +103,7 @@ public:
             tileSpikeTex.free();
             tileSpringTex.free();
             tileTrees.free();
+            largeDecor.free();
             particle.free();
             particleFire.free();
             lightTex.free();
@@ -144,6 +147,7 @@ public:
             SFX_water_out.free();
             SFX_money_gain.free();
             SFX_coin_collect.free();
+            SFX_fire.free();
 
             TTF_CloseFont(baseFont);
             TTF_CloseFont(baseFontBold);
@@ -169,6 +173,7 @@ public:
         confirm(tileSpikeTex.loadFromFile("data/images/tiles/spike.png", window, renderer), success);
         confirm(tileSpringTex.loadFromFile("data/images/tiles/spring.png", window, renderer), success);
         confirm(tileTrees.loadFromFile("data/images/tiles/trees.png", window, renderer), success);
+        confirm(largeDecor.loadFromFile("data/images/tiles/large_decor.png", window, renderer), success);
         confirm(particle.loadFromFile("data/images/particles/particle.png", window, renderer), success);
         confirm(particleFire.loadFromFile("data/images/particles/fire.png", window, renderer), success);
         confirm(slimeIdle.loadFromFile("data/images/entities/slime/idle.png", window, renderer), success);
@@ -214,6 +219,7 @@ public:
         SFX_water_out.loadFromFileWAV("data/audio/misc/water_out.wav");
         SFX_money_gain.loadFromFileWAV("data/audio/misc/money_gain.wav");
         SFX_coin_collect.loadFromFileWAV("data/audio/misc/coin_collect.wav");
+        SFX_fire.loadFromFileWAV("data/audio/misc/fire.wav");
 
         baseFont = TTF_OpenFont("data/fonts/PixelOperator.ttf", 20);
         baseFontBold = TTF_OpenFont("data/fonts/PixelOperator-Bold.ttf", 20);

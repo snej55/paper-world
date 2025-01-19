@@ -202,6 +202,7 @@ void SmokeSpawner::renderSmoke(Smoke* smoke, const int scrollX, const int scroll
     tex->setAlpha(smoke->color.a);
     tex->setBlendMode(SDL_BLENDMODE_ADD);
     tex->render((int)smoke->pos.x - scrollX - smoke->size / 2, (int)smoke->pos.y - scrollY - smoke->size / 2, renderer, smoke->angle, NULL, SDL_FLIP_NONE, NULL, smoke->size);
+    tex->setBlendMode(SDL_BLENDMODE_NONE);
 }
 
 void SmokeSpawner::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex)
@@ -282,6 +283,7 @@ void FireSpawner::renderFire(Fire* fire, const int scrollX, const int scrollY, S
     tex->setAlpha(0x88);
     tex->setBlendMode(SDL_BLENDMODE_ADD);
     tex->render(static_cast<int>(fire->pos.x - 2.5) - scrollX, static_cast<int>(fire->pos.y - 2.5) - scrollY, renderer, &clip);
+    tex->setBlendMode(SDL_BLENDMODE_NONE);
 }
 
 void FireSpawner::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, World* world, Texture* tex)

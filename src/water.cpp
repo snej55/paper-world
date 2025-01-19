@@ -97,9 +97,11 @@ void Water::update(const double& time_step, const int scrollX, const int scrollY
     // }
     SDL_SetRenderDrawColor(renderer, 0x28, 0xca, 0xb1, 0xaa);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    texman->particle.setBlendMode(SDL_BLENDMODE_BLEND);
     Polygons::renderPolygon(renderer, texman->particle.getTexture(), points, indices);
     SDL_Rect fillRect{_pos.x * TILE_SIZE - scrollX, _pos.y * TILE_SIZE - scrollY, _dimensions.x * TILE_SIZE, _dimensions.y * TILE_SIZE};
     SDL_SetRenderDrawColor(renderer, 0x28, 0xca, 0xb1, 0xaa);
+    texman->particle.setBlendMode(SDL_BLENDMODE_NONE);
     
     std::vector<SDL_Point> line;
     line.resize(std::size(_Springs));
@@ -198,6 +200,11 @@ void Lava::free()
     std::cout << "Lava freed!\n";
 }
 
+void Lava::addGlow(vec2<double> pos, vec2<double> vel)
+{
+    _Glow.push_back(new LavaGlow{pos, vel, 10.0 - Util::random()});
+}
+
 void Lava::loadSprings()
 {
     free();
@@ -216,7 +223,7 @@ SDL_Rect* Lava::getRect()
 
 void Lava::updateSpring(WaterSpring* spring, WaterSpring* left, WaterSpring* right, const double& time_step)
 {
-    double dh{spring->target_y - ((spring->pos.y - left->pos.y) + (spring->pos.y - right->pos.y)) - spring->pos.y};
+    double dh{spring->target_y - ((spring->pos.y - left->pos.y) + (spring->pos.y - right->pos.y)) * 1.5 - spring->pos.y};
     if (std::abs(dh) < 0.01)
     {
         spring->pos.y = spring->target_y;
@@ -227,8 +234,41 @@ void Lava::updateSpring(WaterSpring* spring, WaterSpring* left, WaterSpring* rig
 
 void Lava::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, Player* player)
 {
+    for (std::size_t i{0}; i < _Glow.size(); ++i)
+    {
+        LavaGlow* glow{_Glow[i]};
+        glow->vel.x *= 0.9;
+        glow->vel.y *= 0.9;
+        glow->pos.x += glow->vel.x * time_step;
+        glow->pos.y += glow->vel.y * time_step;
+        glow->size -= 0.4 * time_step; // decay
+        if (glow->size <= 0.0)
+        {
+            if (glow->size < -0.5 * Util::random())
+            {
+                // flash effect
+                texman->lightTex.setBlendMode(SDL_BLENDMODE_ADD);
+                texman->lightTex.setAlpha(static_cast<Uint8>(static_cast<int>(255.0)));
+                texman->lightTex.setColor(0xff, 0x53, 0x53);
+                SDL_Rect renderQuad{static_cast<int>(glow->pos.x) - 1 - scrollX, static_cast<int>(glow->pos.y) - 1 - scrollY, 3, 3};
+                SDL_RenderCopyEx(renderer, texman->lightTex.getTexture(), NULL, &renderQuad, 0, NULL, SDL_FLIP_NONE);
+                delete glow;
+                _Glow[i] = nullptr;
+            }
+        } else {
+            texman->lightTex.setBlendMode(SDL_BLENDMODE_ADD);
+            texman->lightTex.setAlpha(static_cast<Uint8>(static_cast<int>(glow->size / 10.0 * 255.0)));
+            texman->lightTex.setColor(0xff, 0x53, 0x53); //0xd1, 0xa6, 0x7e
+            SDL_Rect renderQuad{static_cast<int>(glow->pos.x) - 1 - scrollX, static_cast<int>(glow->pos.y) - 1 - scrollY, 3, 3};
+            SDL_RenderCopyEx(renderer, texman->lightTex.getTexture(), NULL, &renderQuad, 0, NULL, SDL_FLIP_NONE);
+        }
+    }
+    // reset color
+    //texman->circle.setColor(246, 231, 156);
+    texman->lightTex.setColor(246, 231, 156);
+    _Glow.erase(std::remove_if(_Glow.begin(), _Glow.end(), [](LavaGlow* glow){return (glow == nullptr);}), _Glow.end());
     std::vector<SDL_Vertex> points{};
-    SDL_Color col{0x28, 0xca, 0xb1, 0xaa};
+    SDL_Color col{0xff, 0x53, 0x53, 0xbb};
     for (int i{0}; i < static_cast<int>(std::size(_Springs)); ++i)
     {
         WaterSpring* spring{_Springs[i]};
@@ -241,6 +281,10 @@ void Lava::update(const double& time_step, const int scrollX, const int scrollY,
                 if (std::abs(spring->target_y - spring->pos.y) < 3.0)
                     spring->vel += (std::max(-3.0, std::min(8.0, player->getVelY() * 3.0)) + -std::abs(std::max(-3.0, std::min(3.0, player->getVelX())))) * 0.5 * time_step;
             }
+        }
+        if (Util::random() * 10000.0 < 128.0 / time_step)
+        {
+            addGlow(spring->pos, {0.0, Util::random() * -2.0});
         }
         if (std::abs(spring->target_y - spring->pos.y) < 3.0)
         {
@@ -269,11 +313,11 @@ void Lava::update(const double& time_step, const int scrollX, const int scrollY,
     //     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     //     SDL_RenderDrawPointF(renderer, points[i].position.x, points[i].position.y - 3.0f);
     // }
-    SDL_SetRenderDrawColor(renderer, 0x28, 0xca, 0xb1, 0xaa);
-    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_ADD);
+    texman->particle.setBlendMode(SDL_BLENDMODE_ADD);
     Polygons::renderPolygon(renderer, texman->particle.getTexture(), points, indices);
     SDL_Rect fillRect{_pos.x * TILE_SIZE - scrollX, _pos.y * TILE_SIZE - scrollY, _dimensions.x * TILE_SIZE, _dimensions.y * TILE_SIZE};
-    SDL_SetRenderDrawColor(renderer, 0x28, 0xca, 0xb1, 0xaa);
+    texman->particle.setBlendMode(SDL_BLENDMODE_NONE);
     
     std::vector<SDL_Point> line;
     line.resize(std::size(_Springs));
@@ -281,10 +325,20 @@ void Lava::update(const double& time_step, const int scrollX, const int scrollY,
     {
         line[i] = SDL_Point{static_cast<int>(_Springs[i]->pos.x) - scrollX, static_cast<int>(_Springs[i]->pos.y) - scrollY};
     }
-    SDL_SetRenderDrawColor(renderer, 0xb2, 0xde, 0xd8, 0x88);
+    SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0x88);
     SDL_RenderDrawLines(renderer, line.data(), static_cast<int>(line.size()));
     //SDL_RenderFillRect(renderer, &fillRect);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+    if (Util::checkCollision(player->getRect(), getRect()))
+    {
+        double player_x{player->getCenter().x - static_cast<double>(_pos.x * TILE_SIZE)};
+        player_x = player_x / _spacing;
+        int spring_x {std::min(static_cast<int>(_Springs.size() - 1), std::max(0, static_cast<int>(player_x)))};
+        _Springs[spring_x]->vel = -30;
+        player->setLavaStruck(true);
+        texman->SFX_water_out.play();
+        texman->SFX_fire.play();
+    }
 }
 
 LavaManager::LavaManager(const char* path)
