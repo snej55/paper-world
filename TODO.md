@@ -1,16 +1,25 @@
 # TODO
-Week 1:
- - Lava
+Today/Tommorow:
+ - Portal sound
+ - Logo
+ - Score decrease on player death
+ - Gameover
+ - Clouds
+ - Background
+ - More levels
+ - Enemy levels (dark) and platforming levels (light)
+
+Wednesday/Thursday
+ - Soundtrack
+ - Fix DLLs
+ - Get some playtesters.
+
 Week 2:
- - Portals
- - Coins
  - Lasers/Guns
  - Shop
  - Soundtrack
 Week 3:
- - Menu
  - Ui
- - Buttons
 Week 4:
  - Extra Enemies
  - Backgrounds

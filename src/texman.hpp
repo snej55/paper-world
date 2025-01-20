@@ -84,6 +84,8 @@ public:
     Sound SFX_coin_collect{};
     Sound SFX_money_gain{};
     Sound SFX_fire{};
+    Sound SFX_portal_0{};
+    Sound SFX_portal_1{};
 
     TTF_Font* baseFont{nullptr};
     TTF_Font* baseFontBold{nullptr};
@@ -156,6 +158,8 @@ public:
             SFX_money_gain.free();
             SFX_coin_collect.free();
             SFX_fire.free();
+            SFX_portal_0.free();
+            SFX_portal_1.free();
 
             TTF_CloseFont(baseFont);
             TTF_CloseFont(baseFontBold);
@@ -231,6 +235,8 @@ public:
         SFX_money_gain.loadFromFileWAV("data/audio/misc/money_gain.wav");
         SFX_coin_collect.loadFromFileWAV("data/audio/misc/coin_collect.wav");
         SFX_fire.loadFromFileWAV("data/audio/misc/fire.wav");
+        SFX_portal_0.loadFromFileWAV("data/audio/misc/next_level_0.wav");
+        SFX_portal_1.loadFromFileWAV("data/audio/misc/next_level_1.wav");
 
         baseFont = TTF_OpenFont("data/fonts/PixelOperator.ttf", 20);
         baseFontBold = TTF_OpenFont("data/fonts/PixelOperator-Bold.ttf", 20);

@@ -512,6 +512,7 @@ public:
                 {
                     fading = false;
                     changing = false;
+                    _TexMan.SFX_portal_0.play();
                     nextLevel();
                     scroll = {_Player.getCenter().x - static_cast<double>(_Width) / 2.0, _Player.getCenter().y - static_cast<double>(_Height) / 2.0};
                     _Player.setHealth(_Player.getMaxHealth());
@@ -648,6 +649,7 @@ public:
 
             SDL_RenderPresent(_Renderer);
         } while (running);
+        _TexMan.SFX_portal_0.play();
         return false;
     }
 };
