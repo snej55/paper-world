@@ -23,7 +23,7 @@ ENTITIES = {'slime', 'bat', 'turtle'}
 
 class Editor:
     def __init__(self):
-        self.path = 'data/maps/0.json'
+        self.path = 'data/maps/1.json'
 
         self.display = pygame.display.set_mode((1000, 800))
         self.screen = pygame.Surface((500, 400))
