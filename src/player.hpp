@@ -46,6 +46,7 @@ class Player
 private:
     const SDL_Color _Palette[5] {{0xa8, 0x60, 0x5d}, {0xd1, 0xa6, 0x7e}, {0xf6, 0xe7, 0x9c}, {0x65, 0x40, 0x53}, {0x1f, 0x24, 0x4b}};
     vec2<double> _pos;
+    vec2<double> _last_pos{0.0, 0.0};
     vec2<int> _dimensions;
     vec2<double> _spawn_pos;
 
@@ -103,6 +104,8 @@ public:
 
     bool getLavaStruck() {return _lava_struck;}
     void setLavaStruck(bool val) {_lava_struck = val;}
+
+    vec2<double> getLastPos() {return _last_pos;}
 
     SDL_Rect* getRect();
     void updateRect()

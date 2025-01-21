@@ -1,7 +1,5 @@
 # TODO
 Today/Tommorow:
- - Portal sound
- - Logo
  - Score decrease on player death
  - Gameover
  - Clouds

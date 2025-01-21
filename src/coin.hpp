@@ -17,6 +17,7 @@ struct Coin
     vec2<double> vel;
     Anim* anim;
     bool dead{false};
+    Timer timer{};
 };
 
 struct Glow
@@ -47,6 +48,7 @@ public:
     ~CoinManager();
 
     int getScore() {return _score;}
+    void setScore(int val) {_score = val;}
 
     void setTex(Texture* coinTex, Texture* glowTex);
     

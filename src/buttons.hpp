@@ -22,6 +22,11 @@ public:
         _rect = SDL_Rect{_pos.x, _pos.y, _tex->getWidth(), _tex->getHeight()};
     }
 
+    void setExpand(double val)
+    {
+        _expand = val;
+    }
+
     void setPos(vec2<int> pos)
     {
         _pos = pos;

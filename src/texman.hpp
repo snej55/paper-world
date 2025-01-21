@@ -62,6 +62,7 @@ public:
     Texture enemyHealthBar{};
     Texture playerHealthBar{};
     Texture uiPlay{};
+    Texture logo{};
 
     // Decor!
     Texture tileTrees{};
@@ -86,6 +87,8 @@ public:
     Sound SFX_fire{};
     Sound SFX_portal_0{};
     Sound SFX_portal_1{};
+    Sound SFX_intro{};
+    Sound SFX_button{};
 
     TTF_Font* baseFont{nullptr};
     TTF_Font* baseFontBold{nullptr};
@@ -142,6 +145,7 @@ public:
             turtleLand.free();
             turtleFlash.free();
             uiPlay.free();
+            logo.free();
             SFX_death_0.free();
             SFX_hit_0.free();
             SFX_hit_1.free();
@@ -160,6 +164,8 @@ public:
             SFX_fire.free();
             SFX_portal_0.free();
             SFX_portal_1.free();
+            SFX_intro.free();
+            SFX_button.free();
 
             TTF_CloseFont(baseFont);
             TTF_CloseFont(baseFontBold);
@@ -219,6 +225,7 @@ public:
         confirm(uiPlay.loadFromFile("data/images/ui/play.png", window, renderer), success);
         confirm(shockwave.loadFromFile("data/images/vfx/shockwave.png", window, renderer), success);
         confirm(portalTex.loadFromFile("data/images/tiles/portal.png", window, renderer), success);
+        confirm(logo.loadFromFile("data/images/ui/logo.png", window, renderer), success);
         SFX_death_0.loadFromFileWAV("data/audio/death/death_0.wav");
         SFX_hit_0.loadFromFileWAV("data/audio/hit/hit_0.wav");
         SFX_hit_1.loadFromFileWAV("data/audio/hit/hit_1.wav");
@@ -237,6 +244,8 @@ public:
         SFX_fire.loadFromFileWAV("data/audio/misc/fire.wav");
         SFX_portal_0.loadFromFileWAV("data/audio/misc/next_level_0.wav");
         SFX_portal_1.loadFromFileWAV("data/audio/misc/next_level_1.wav");
+        SFX_intro.loadFromFileWAV("data/audio/misc/intro.wav");
+        SFX_button.loadFromFileWAV("data/audio/misc/button.wav");
 
         baseFont = TTF_OpenFont("data/fonts/PixelOperator.ttf", 20);
         baseFontBold = TTF_OpenFont("data/fonts/PixelOperator-Bold.ttf", 20);

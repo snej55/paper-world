@@ -100,6 +100,7 @@ void Player::damage(double amount, double* screen_shake, double* slomo, ShockWav
 
 void Player::die(double* screen_shake, ShockWaveManager& shockwaves)
 {
+    _last_pos = _pos;
     _health = _max_health;
     _ad = 0;
     _Particles.setPos(getCenter());

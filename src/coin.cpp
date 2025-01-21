@@ -48,6 +48,7 @@ void CoinManager::addCoin(vec2<double> pos, vec2<double> vel)
     Anim* anim{new Anim{3, 4, 2, 0.2, true, _coinTex}};
     anim->setFrame(static_cast<int>(Util::random() * 4.0));
     Coin* coin{new Coin{pos, vel, anim}};
+    coin->timer.start();
     _Coins.push_back(coin);
 }
 
@@ -153,6 +154,11 @@ void CoinManager::update(const double& time_step, const int scrollX, const int s
                 {
                     _SparkManager.addSpark(new Spark{coin->pos, Util::random() * M_PI * 2.0, Util::random() * 2.0 + 0.5});
                 }
+                delete coin->anim;
+                delete coin;
+                _Coins[i] = nullptr;
+            } else if (coin->timer.getTicks() > 20000)
+            {
                 delete coin->anim;
                 delete coin;
                 _Coins[i] = nullptr;

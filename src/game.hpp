@@ -170,6 +170,7 @@ public:
         std::cout << "loaded water!\n";
         _LavaManager->loadFromFile(path.c_str());
         std::cout << "loaded lava\n";
+        _CoinManager.free();
         setPlayerSpawnPos(path.c_str());
     }
 
@@ -241,12 +242,16 @@ public:
         vec2<double> player_pos{_Player.getCenter()};
         vec2<double> scroll{player_pos.x - static_cast<double>(_Width) / 2.0, player_pos.y - static_cast<double>(_Height) / 2.0};
 
+        _CoinManager.setScore(1000);
+
         double screen_shake{0};
         double slomo{1.0};
 
         float frames{1.0f};
 
         float last_damaged{100.0f};
+
+        double last_coin{0.0};
 
         double fade{static_cast<double>(_Height * 3)};
         bool fading{false};
@@ -399,6 +404,14 @@ public:
             {
                 _TexMan.SFX_death_0.play();
                 _TexMan.SFX_sword_slash.play();
+                last_coin = -1;
+                int num{(std::rand() % 10) + 5};
+                for (int i{0}; i < num; ++i)
+                {
+                    _CoinManager.addCoin(_Player.getLastPos(), {Util::random() * 2.0 - 1.0, Util::random() * -1.0});
+                    _CoinManager.setScore(_CoinManager.getScore() - (static_cast<int>(Util::random() * 5.0) + 10));
+                }
+                _TexMan.SFX_money_gain.play();
             }
             _Player.tickAd(time_step);
 
@@ -493,7 +506,16 @@ public:
             fontTex.render(110, 10, _Renderer);
             std::stringstream score{};
             score << "$" << _CoinManager.getScore();
-            fontTex.loadFromRenderedText(score.str().c_str(), {0xF6, 0xe7, 0x9c, 0xFF}, _TexMan.baseFontBold, _Renderer);
+
+            last_coin += (0.0 - last_coin) * 0.01 * time_step;
+
+            SDL_Color moneyBaseColor{0xF6, 0xe7, 0x9c, 0xFF};
+            SDL_Color moneyRedColor{0xa8, 0x60, 0x5d, 0xFF};
+            SDL_Color moneyGreenColor{0x60, 0xae, 0x7b, 0xFF};
+            SDL_Color moneyBlend{Util::lerpColor(moneyBaseColor, moneyRedColor, std::abs(std::min(0.0, last_coin)))};
+            SDL_Color moneyColor{Util::lerpColor(moneyBlend, moneyGreenColor, std::max(0.0, last_coin))};
+
+            fontTex.loadFromRenderedText(score.str().c_str(), moneyColor, _TexMan.baseFontBold, _Renderer);
             fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0), 10, _Renderer);
 
             if (fading)
@@ -568,6 +590,11 @@ public:
         int mouseX, mouseY;
         int windowX, windowY;
 
+        Timer animTimer{};
+        animTimer.start();
+        bool logo_shown{false};
+        bool play_shown{false};
+
         Button playButton{{0, 0}, &(_TexMan.uiPlay)};
 
         do {
@@ -633,6 +660,7 @@ public:
             time_step = std::min(time_step, 3.0);
             timer.start();
 
+
             SDL_GetWindowPosition(_Window, &windowX, &windowY);
             // set screen as render target
             _Screen.setAsRenderTarget(_Renderer);
@@ -640,12 +668,38 @@ public:
             // clear screen (0x1f, 0x24, 0x4b)
             SDL_SetRenderDrawColor(_Renderer, 0x00, 0x00, 0x00, 0xFF);
             SDL_RenderClear(_Renderer);
-
-            playButton.setPos(vec2<int>{_Width / 2 - 35, _Height / 2 - 5});
-            playButton.update(time_step, mouseX / 3, mouseY / 3, _Renderer);
+            
+            if (!logo_shown)
+            {
+                if (animTimer.getTicks() > 1000)
+                {
+                    logo_shown = true;
+                    _TexMan.SFX_intro.play();
+                }
+            } else {
+                _TexMan.logo.render(_Width / 2 - 60, _Height / 2 - 60, _Renderer);
+            }
+            
+            if (play_shown)
+            {
+                playButton.setPos(vec2<int>{_Width / 2 - 35, _Height / 2 - 5});
+                playButton.update(time_step, mouseX / 3, mouseY / 3, _Renderer);
+            } else {
+                playButton.setExpand(-35.0);
+                if (animTimer.getTicks() > 2000)
+                {
+                    play_shown = true;
+                    _TexMan.SFX_button.play();
+                }
+            }
 
             SDL_SetRenderTarget(_Renderer, NULL);
             _Screen.renderClean(0, 0, _Renderer, 3);
+
+            Texture fontTex{};
+            double faded{static_cast<double>(std::min(static_cast<Uint32>(5000), animTimer.getTicks())) / 5000.0};
+            fontTex.loadFromRenderedText("A game by @snej55", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, _Height * 3 - 50, _Renderer);
 
             SDL_RenderPresent(_Renderer);
         } while (running);
