@@ -1,9 +1,6 @@
 # TODO
 Today/Tommorow:
- - Gameover
  - Signs/boxes small_decor
- - Background
- - More levels
  - Enemy levels (dark) and platforming levels (light)
 
 Wednesday/Thursday

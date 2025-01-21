@@ -15,6 +15,11 @@ Player::Player(vec2<double> pos, vec2<int> dimensions)
 
 Player::~Player()
 {
+    free();
+}
+
+void Player::free()
+{
     delete _idleAnim;
     delete _runAnim;
     delete _jumpAnim;
@@ -27,6 +32,14 @@ Player::~Player()
     {
         delete _Slash;
     }
+}
+
+void Player::reset()
+{
+    _Controller.setControl(Control::UP, false);
+    _Controller.setControl(Control::DOWN, false);
+    _Controller.setControl(Control::RIGHT, false);
+    _Controller.setControl(Control::LEFT, false);
 }
 
 void Player::loadAnim(TexMan* texman)

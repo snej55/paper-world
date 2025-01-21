@@ -100,6 +100,10 @@ public:
     Player(vec2<double> pos, vec2<int> dimensions);
     ~Player();
 
+    void free();
+
+    void reset();
+
     void loadAnim(TexMan* texman);
 
     bool getLavaStruck() {return _lava_struck;}

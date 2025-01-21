@@ -86,9 +86,16 @@ public:
                 std::cerr << "GAME::ERROR Failed to load media!\n";
             } else {
                 std::cout << "Ready!\n";
-                if (!(menu()))
+                bool playAgain{true};
+                while (playAgain)
                 {
-                    run();
+                    if (!menu())
+                    {
+                        playAgain = run();
+                        reset();
+                    } else {
+                        playAgain = false;
+                    }
                 }
             }
         }
@@ -185,6 +192,14 @@ public:
         _portal_pos = vec2<double>{static_cast<double>(data["portal_pos"][0]), static_cast<double>(data["portal_pos"][1])};
     }
 
+    void reset()
+    {
+        _level = 0;
+        _Player.reset();
+        loadLevel(_level);
+        _CoinManager.setScore(START_COINS);
+    }
+
     bool loadMedia()
     {
         std::cout << "Loading assets...\n";
@@ -229,7 +244,7 @@ public:
         loadLevel(_level);
     }
 
-    void run()
+    bool run()
     {
         SDL_Event e;
         bool running {true};
@@ -246,7 +261,7 @@ public:
         vec2<double> player_pos{_Player.getCenter()};
         vec2<double> scroll{player_pos.x - static_cast<double>(_Width) / 2.0, player_pos.y - static_cast<double>(_Height) / 2.0};
 
-        _CoinManager.setScore(1000);
+        _CoinManager.setScore(START_COINS);
 
         double screen_shake{0};
         double slomo{1.0};
@@ -461,7 +476,7 @@ public:
                 {
                     changing = true;
                     screen_shake = std::max(screen_shake, 32.0);
-                    _Player.setAd(0.0);
+                    // _Player.setAd(1.0);
                     fading = true;
                 }
             }
@@ -568,7 +583,14 @@ public:
             float avgFPS {frames / (fpsTimer.getTicks() / 1000.0f)};
             setWindowTitle(avgFPS); 
             ++frames;
+            if (_CoinManager.getScore() < 0)
+            {
+                bool play_again{gameover()};
+                running = false;
+                return play_again;
+            }
         } while (running);
+        return false;
     }
 
     void setWindowTitle(float avgFPS)
@@ -722,6 +744,134 @@ public:
         } while (running);
         _TexMan.SFX_portal_0.play();
         return false;
+    }
+
+    bool gameover()
+    {
+        SDL_Event e;
+        bool running {true};
+
+        Timer timer;
+        timer.start();
+        double time_step {1.0};
+
+        int mouseX, mouseY;
+        int windowX, windowY;
+
+        Timer animTimer{};
+        animTimer.start();
+        bool play_shown{false};
+
+        Button playButton{{0, 0}, &(_TexMan.uiPlay)};
+
+        bool playAgain{false};
+
+        do {
+            while (SDL_PollEvent(&e) != 0)
+            {
+                if (e.type == SDL_QUIT)
+                {
+                    return false;
+                } else if (e.type == SDL_MOUSEMOTION)
+                {
+                    SDL_GetGlobalMouseState(&mouseX, &mouseY);
+                    mouseX -= windowX;
+                    mouseY -= windowY;
+                } else if (e.type == SDL_KEYDOWN)
+                {
+                    switch (e.key.keysym.sym)
+                    {
+                        case (SDLK_RETURN):
+                            running = false;
+                            playAgain = true;
+                        default:
+                            break;
+                    }
+                } else if (e.type == SDL_KEYUP)
+                {
+                    switch (e.key.keysym.sym)
+                    {
+                        default:
+                            break;
+                    }
+                } else if (e.type == SDL_WINDOWEVENT)
+                {
+                    // handle window events
+                    switch (e.window.event)
+                    {
+                        case (SDL_WINDOWEVENT_RESIZED):
+                            _Width = e.window.data1 / 3;
+                            _Height = e.window.data2 / 3;
+                            _Screen.free();
+                            _Screen.createBlank(_Width, _Height, _Renderer, SDL_TEXTUREACCESS_TARGET);
+                            SDL_RenderPresent(_Renderer);
+                            break;
+                        case (SDL_WINDOWEVENT_SIZE_CHANGED):
+                            _Width = e.window.data1 / 3;
+                            _Height = e.window.data2 / 3;
+                            _Screen.free();
+                            _Screen.createBlank(_Width, _Height, _Renderer, SDL_TEXTUREACCESS_TARGET);
+                            SDL_RenderPresent(_Renderer);
+                            break;
+                        default:
+                            break;
+                    }
+                } else if (e.type == SDL_MOUSEBUTTONDOWN)
+                {
+                    SDL_Rect mouseRect{mouseX / 3, mouseY / 3, 1, 1};
+                    if (Util::checkCollision(&mouseRect, playButton.getRect()))
+                    {
+                        playAgain = true;
+                        running = false;
+                    }
+                }
+            }
+
+            time_step = timer.getTicks() / 1000.0 * 60.0;
+            time_step = std::min(time_step, 3.0);
+            timer.start();
+
+            SDL_GetWindowPosition(_Window, &windowX, &windowY);
+            // set screen as render target
+            _Screen.setAsRenderTarget(_Renderer);
+
+            // clear screen (0x1f, 0x24, 0x4b)
+            SDL_SetRenderDrawColor(_Renderer, 0x00, 0x00, 0x00, 0xFF);
+            SDL_RenderClear(_Renderer);
+            
+            if (play_shown)
+            {
+                playButton.setPos(vec2<int>{_Width / 2 - 35, _Height / 2 - 5});
+                playButton.update(time_step, mouseX / 3, mouseY / 3, _Renderer);
+            } else {
+                playButton.setExpand(-35.0);
+                if (animTimer.getTicks() > 2000)
+                {
+                    play_shown = true;
+                    _TexMan.SFX_button.play();
+                }
+            }
+
+            SDL_SetRenderTarget(_Renderer, NULL);
+            _Screen.renderClean(0, 0, _Renderer, 3);
+
+            Texture fontTex{};
+            double faded{static_cast<double>(std::min(static_cast<Uint32>(5000), animTimer.getTicks())) / 5000.0};
+            fontTex.loadFromRenderedText("A game by that guy -> @snej55", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, _Height * 3 - 50, _Renderer);
+
+            fontTex.loadFromRenderedText("Uh oh. You have $0 left.", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, 50, _Renderer);
+
+            fontTex.loadFromRenderedText("GAME OVER!", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, 80, _Renderer);
+
+            fontTex.loadFromRenderedText("Play again?", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, 150, _Renderer);
+
+            SDL_RenderPresent(_Renderer);
+        } while (running);
+        return playAgain;
     }
 };
 
