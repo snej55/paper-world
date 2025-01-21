@@ -113,6 +113,8 @@ public:
                 leaf->pos.x += std::sin(leaf->anim->getFrame() * 0.08) * 0.8 * time_step - 0.5 * time_step * average_gust * 0.1;
                 leaf->vel.y = std::min(0.2, leaf->vel.y + 0.005 / (average_gust * 0.1) * time_step);
                 leaf->anim->tick(time_step);
+                leaf->anim->getTex()->setAlpha(static_cast<Uint8>(static_cast<int>((17.0 - leaf->anim->getFrame()) / 17.0 * 255.0)));
+                leaf->anim->getTex()->setBlendMode(SDL_BLENDMODE_BLEND);
                 leaf->anim->render(static_cast<int>(leaf->pos.x), static_cast<int>(leaf->pos.y), scrollX, scrollY, renderer);
                 if (leaf->anim->getFinished())
                 {

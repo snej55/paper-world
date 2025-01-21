@@ -30,6 +30,7 @@ public:
     ~Anim();
 
     void setTex(Texture* texture);
+    Texture* getTex() {return _texture;}
 
     SDL_RendererFlip getFlipped() {return _flipped;}
     void setFlipped(SDL_RendererFlip flip) {_flipped = flip;}

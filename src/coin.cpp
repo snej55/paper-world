@@ -119,7 +119,7 @@ void CoinManager::renderCoin(Coin* coin, const int scrollX, const int scrollY, S
     coin->anim->render(static_cast<int>(coin->pos.x), static_cast<int>(coin->pos.y), scrollX, scrollY, renderer);
 }
 
-void CoinManager::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, void* world, TexMan* texman, SDL_Rect* player_rect)
+void CoinManager::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, void* world, TexMan* texman, SDL_Rect* player_rect, double& last_coin)
 {
     for (std::size_t i{0}; i < _Coins.size(); ++i)
     {
@@ -143,6 +143,7 @@ void CoinManager::update(const double& time_step, const int scrollX, const int s
                     double speed(Util::random() * 2.0 + 1.0);
                     addGlow(coin->pos, {std::cos(angle) * speed, std::sin(angle) * speed});
                 }
+                last_coin = 1.0;
                 delete coin->anim;
                 delete coin;
                 _Coins[i] = nullptr;

@@ -23,6 +23,8 @@
 #include "./coin.hpp"
 #include "./buttons.hpp"
 #include "./shockwaves.hpp"
+#include "./stars.hpp"
+// #include "./clouds.hpp"
 
 using json = nlohmann::json;
 
@@ -43,6 +45,7 @@ private:
     LavaManager* _LavaManager{nullptr};
     CoinManager _CoinManager{};
     ShockWaveManager _ShockWaveManager{};
+    StarManager _StarManager{100};
 
     std::vector<std::string> _levels {"data/maps/0.json", "data/maps/1.json"};
     int _level{0};
@@ -204,6 +207,7 @@ public:
         // _LavaManager->loadFromFile("data/maps/1.json");
         loadLevel(0);
         //loadLevel(0);
+        _StarManager.setTex(&(_TexMan.lightTex));
 
         _CoinManager.setTex(&(_TexMan.coin), &(_TexMan.lightTex));
 
@@ -390,6 +394,11 @@ public:
             SDL_SetRenderDrawColor(_Renderer, 0x00, 0x00, 0x00, 0xFF);
             SDL_RenderClear(_Renderer);
 
+            SDL_SetRenderDrawBlendMode(_Renderer, SDL_BLENDMODE_NONE);
+
+            // SDL_Rect stretchRect{0, 0, _Width, _Height};
+            // SDL_RenderCopyEx(_Renderer, _TexMan.black.getTexture(), NULL, &stretchRect, 0, NULL, SDL_FLIP_NONE);
+
             // do updateing here
             vec2<double> player_pos{_Player.getCenter()};
             if (_Player.getAd() > 120)
@@ -420,6 +429,14 @@ public:
 
             screen_shake = std::max(0.0, screen_shake - time_step);
             vec2<int> render_scroll{static_cast<int>(scroll.x + Util::random() * screen_shake - screen_shake / 2.0), static_cast<int>(scroll.y + Util::random() * screen_shake - screen_shake / 2.0)};
+
+            _StarManager.update(time_step, render_scroll.x, render_scroll.y, _Width, _Height, _Renderer);
+            _TexMan.moon.render(_Width - 32, 32, _Renderer);
+
+            // _TexMan.black.setAlpha(150);
+            // _TexMan.black.setBlendMode(SDL_BLENDMODE_BLEND);
+            // SDL_RenderCopyEx(_Renderer, _TexMan.black.getTexture(), NULL, &stretchRect, 0, NULL, SDL_FLIP_NONE);
+
             // fairly obvious what this does
             _World.handleSprings(time_step);
             _World.render(render_scroll.x, render_scroll.y, _Window, _Renderer, &_TexMan, _Width, _Height);
@@ -452,7 +469,7 @@ public:
             _World.updateLeaves(time_step, render_scroll.x, render_scroll.y, _Width, _Height, &_TexMan, _Renderer);
             _Player.updateParticles(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan);
             // for testing
-            _CoinManager.update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan, _Player.getRect());
+            _CoinManager.update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_World, &_TexMan, _Player.getRect(), last_coin);
             _WaterManager->update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_TexMan, &_Player);
             _LavaManager->update(time_step, render_scroll.x, render_scroll.y, _Renderer, &_TexMan, &_Player);
             _ShockWaveManager.update(time_step, render_scroll.x, render_scroll.y, _Renderer);

@@ -70,9 +70,9 @@ void Water::update(const double& time_step, const int scrollX, const int scrollY
         }
         if (std::abs(spring->target_y - spring->pos.y) < 3.0)
         {
-            spring->vel += std::sin(time * 0.002 + spring->pos.x * 0.6) * 0.05;
-            spring->vel += std::cos(time * 0.005 + spring->pos.x * 0.8) * 0.02;
-            spring->vel += std::cos(time * 0.006 + spring->pos.x * 0.7) * 0.03;
+            spring->vel += std::sin(time * 0.002 + spring->pos.x * 0.6) * 0.05 * time_step;
+            spring->vel += std::cos(time * 0.005 + spring->pos.x * 0.8) * 0.02 * time_step;
+            spring->vel += std::cos(time * 0.006 + spring->pos.x * 0.7) * 0.03 * time_step;
             // spring->vel += std::sin(time * 0.004 + spring->pos.x * 0.6) * 0.08;
             // spring->vel += std::cos(time * 0.007 + spring->pos.x * 0.8) * 0.04;
             // spring->vel += std::cos(time * 0.008 + spring->pos.x * 0.7) * 0.06;
@@ -282,15 +282,15 @@ void Lava::update(const double& time_step, const int scrollX, const int scrollY,
                     spring->vel += (std::max(-3.0, std::min(8.0, player->getVelY() * 3.0)) + -std::abs(std::max(-3.0, std::min(3.0, player->getVelX())))) * 0.5 * time_step;
             }
         }
-        if (Util::random() * 7000.0 < 128.0 / time_step)
+        if (Util::random() * 7000.0 / time_step < 128.0)
         {
             addGlow(spring->pos, {0.0, Util::random() * -1.0});
         }
         if (std::abs(spring->target_y - spring->pos.y) < 3.0)
         {
-            spring->vel += std::sin(time * 0.002 + spring->pos.x * 0.6) * 0.05;
-            spring->vel += std::cos(time * 0.005 + spring->pos.x * 0.8) * 0.02;
-            spring->vel += std::cos(time * 0.006 + spring->pos.x * 0.7) * 0.03;
+            spring->vel += std::sin(time * 0.002 + spring->pos.x * 0.6) * 0.05 * time_step;
+            spring->vel += std::cos(time * 0.005 + spring->pos.x * 0.8) * 0.02 * time_step;
+            spring->vel += std::cos(time * 0.006 + spring->pos.x * 0.7) * 0.03 * time_step;
             // spring->vel += std::sin(time * 0.004 + spring->pos.x * 0.6) * 0.08;
             // spring->vel += std::cos(time * 0.007 + spring->pos.x * 0.8) * 0.04;
             // spring->vel += std::cos(time * 0.008 + spring->pos.x * 0.7) * 0.06;

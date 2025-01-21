@@ -62,7 +62,7 @@ public:
 
     void renderCoin(Coin* coin, const int scrollX, const int scrollY, SDL_Renderer* renderer);
 
-    void update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, void* world, TexMan* texman, SDL_Rect* player_rect);
+    void update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, void* world, TexMan* texman, SDL_Rect* player_rect, double& last_coin);
 };
 
 #endif
