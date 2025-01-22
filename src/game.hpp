@@ -424,7 +424,7 @@ public:
             scroll.x = std::max(static_cast<double>(TILE_SIZE), std::min(scroll.x, static_cast<double>(LEVEL_WIDTH * CHUNK_SIZE * TILE_SIZE - TILE_SIZE)));
             scroll.y = std::max(0.0, std::min(scroll.y, static_cast<double>(LEVEL_HEIGHT * CHUNK_SIZE * TILE_SIZE - _Height)));
             _Player.update(time_step, _World, &screen_shake, &_TexMan, _ShockWaveManager);
-            if (_Player.getAd() == 0)
+            if (_Player.getAd() == 0 && !changing)
             {
                 _TexMan.SFX_death_0.play();
                 _TexMan.SFX_sword_slash.play();
@@ -432,7 +432,7 @@ public:
                 int num{(std::rand() % 10) + 5};
                 for (int i{0}; i < num; ++i)
                 {
-                    _CoinManager.addCoin(_Player.getLastPos(), {Util::random() * 2.0 - 1.0, Util::random() * -1.0});
+                    // _CoinManager.addCoin(_Player.getLastPos(), {Util::random() * 2.0 - 1.0, Util::random() * -1.0});
                     _CoinManager.setScore(_CoinManager.getScore() - (static_cast<int>(Util::random() * 5.0) + 10));
                 }
                 _TexMan.SFX_money_gain.play();
@@ -476,6 +476,7 @@ public:
                 {
                     changing = true;
                     screen_shake = std::max(screen_shake, 32.0);
+                    _TexMan.SFX_portal_0.play();
                     // _Player.setAd(1.0);
                     fading = true;
                 }

@@ -18,8 +18,8 @@ ParticleSpawner::~ParticleSpawner()
             delete _particles[i];
         _particles[i] = nullptr;
     }
-    delete _particles;
-    delete _palette;
+    delete[] _particles;
+    delete[] _palette;
 }
 
 void ParticleSpawner::setSpawning(int spawning, vec2<double> vel, SDL_Color color)
@@ -142,7 +142,7 @@ SmokeSpawner::~SmokeSpawner()
             delete _smoke[i];
         _smoke[i] = nullptr;
     }
-    delete _smoke;
+    delete[] _smoke;
 }
 
 void SmokeSpawner::setSpawning(int spawning, vec2<double> vel, SDL_Color color)
@@ -260,7 +260,7 @@ FireSpawner::~FireSpawner()
             delete _fire[i];
         _fire[i] = nullptr;
     }
-    delete _fire;
+    delete[] _fire;
 }
 
 bool FireSpawner::isDead(Fire* fire)

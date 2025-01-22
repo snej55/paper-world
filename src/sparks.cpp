@@ -86,9 +86,9 @@ void SparkManager::update(const double& time_step, const int scrollX, const int 
                 renderSpark(spark, scrollX, scrollY, renderer);
             } else {
                 delete spark;
-                spark = nullptr;
+                _Sparks[i] = nullptr;
             }
         }
     }
-    _Sparks.erase(std::remove_if(_Sparks.begin(), _Sparks.end(), [](Spark* spark){return !(spark->alive);}), _Sparks.end());
+    _Sparks.erase(std::remove_if(_Sparks.begin(), _Sparks.end(), [](Spark* spark){return spark == nullptr;}), _Sparks.end());
 }
