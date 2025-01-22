@@ -47,7 +47,7 @@ private:
     ShockWaveManager _ShockWaveManager{};
     StarManager _StarManager{100};
 
-    std::vector<std::string> _levels {"data/maps/0.json", "data/maps/1.json"};
+    std::vector<std::string> _levels {"data/maps/0.json", "data/maps/1.json", "data/maps/2.json", "data/maps/4.json", "data/maps/5.json", "data/maps/6.json", "data/maps/7.json", "data/maps/8.json", "data/maps/9.json", "data/maps/10.json"};
     int _level{0};
 
     int _Width {SCR_WIDTH};
@@ -220,7 +220,7 @@ public:
         // _WaterManager->loadFromFile("data/maps/1.json");
         // _LavaManager = new LavaManager{};
         // _LavaManager->loadFromFile("data/maps/1.json");
-        loadLevel(0);
+        loadLevel(_level);
         //loadLevel(0);
         _StarManager.setTex(&(_TexMan.lightTex));
 
@@ -421,7 +421,7 @@ public:
                 scroll.x += (player_pos.x - static_cast<double>(_Width) / 2.0 - scroll.x) / 40.0 * time_step;
                 scroll.y += (player_pos.y - static_cast<double>(_Height) / 2.0 - scroll.y) / 50.0 * time_step;
             }
-            scroll.x = std::max(static_cast<double>(TILE_SIZE), std::min(scroll.x, static_cast<double>(LEVEL_WIDTH * CHUNK_SIZE * TILE_SIZE - TILE_SIZE)));
+            scroll.x = std::max(static_cast<double>(TILE_SIZE), std::min(scroll.x, static_cast<double>(LEVEL_WIDTH * CHUNK_SIZE * TILE_SIZE - TILE_SIZE - _Width)));
             scroll.y = std::max(0.0, std::min(scroll.y, static_cast<double>(LEVEL_HEIGHT * CHUNK_SIZE * TILE_SIZE - _Height)));
             _Player.update(time_step, _World, &screen_shake, &_TexMan, _ShockWaveManager);
             if (_Player.getAd() == 0 && !changing)
@@ -432,7 +432,7 @@ public:
                 int num{(std::rand() % 10) + 5};
                 for (int i{0}; i < num; ++i)
                 {
-                    // _CoinManager.addCoin(_Player.getLastPos(), {Util::random() * 2.0 - 1.0, Util::random() * -1.0});
+                    _CoinManager.addCoin(_Player.getLastPos(), {Util::random() * 2.0 - 1.0, Util::random() * -1.0});
                     _CoinManager.setScore(_CoinManager.getScore() - (static_cast<int>(Util::random() * 5.0) + 10));
                 }
                 _TexMan.SFX_money_gain.play();
@@ -597,7 +597,7 @@ public:
     void setWindowTitle(float avgFPS)
     {
         std::stringstream caption;
-        caption << "Paper World at " << avgFPS << " FPS (Avg)";
+        caption << "Defblade at " << avgFPS << " FPS (Avg)";
         SDL_SetWindowTitle(_Window, caption.str().c_str());
     }
 

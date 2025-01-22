@@ -1,7 +1,6 @@
 # TODO
 Today/Tommorow:
  - Signs/boxes small_decor
- - Enemy levels (dark) and platforming levels (light)
 
 Wednesday/Thursday
  - Soundtrack
@@ -25,11 +24,8 @@ Extra:
  - Wind tunnel (to carry you up)
  - Cloth (hard)
 
-Evorush
-Wildside
-Geocell
-Crossember
-Defblade
-Maniascape
-Grimluster
-Roguebooty
+Release:
+ - Remove FPS counter
+ - Fix DLLS
+ - You Win
+ - Check & playthrough levels. Check they are possible and check for mishaps.

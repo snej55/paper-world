@@ -23,10 +23,10 @@ ENTITIES = {'slime', 'bat', 'turtle'}
 
 class Editor:
     def __init__(self):
-        self.path = 'data/maps/1.json'
+        self.path = 'data/maps/10.json'
 
-        self.display = pygame.display.set_mode((1000, 800))
-        self.screen = pygame.Surface((500, 400))
+        self.display = pygame.display.set_mode((1600, 1000))
+        self.screen = pygame.Surface((800, 500))
         self.dt = 1
         self.last_time = time.time() - 1 / 60
         self.clock = pygame.time.Clock()
@@ -187,8 +187,8 @@ class Editor:
         sys.exit()
     
     def update(self):
-        self.scroll.x += (int(self.controls['right']) - int(self.controls['left'])) * 2 * self.dt
-        self.scroll.y += (int(self.controls['down']) - int(self.controls['up'])) * 2 * self.dt
+        self.scroll.x += (int(self.controls['right']) - int(self.controls['left'])) * 5 * self.dt
+        self.scroll.y += (int(self.controls['down']) - int(self.controls['up'])) * 5 * self.dt
 
         mouse_pos = pygame.mouse.get_pos()
         mouse_pos = [math.floor((mouse_pos[0] / 2 + self.scroll.x) / TILE_SIZE), math.floor((mouse_pos[1] / 2 + self.scroll.y) / TILE_SIZE)]
