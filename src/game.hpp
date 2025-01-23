@@ -24,6 +24,7 @@
 #include "./buttons.hpp"
 #include "./shockwaves.hpp"
 #include "./stars.hpp"
+#include "./audio.hpp"
 // #include "./clouds.hpp"
 
 using json = nlohmann::json;
@@ -53,7 +54,7 @@ private:
     int _Width {SCR_WIDTH};
     int _Height {SCR_HEIGHT};
 
-    Mix_Chunk* music{NULL};
+    Music* _Music{nullptr};
 
     bool _closed{false};
 
@@ -106,7 +107,6 @@ public:
         delete _WaterManager;
         delete _LavaManager;
         _TexMan.free();
-        Mix_FreeChunk(music);
         std::cout << "Closing\n";
         SDL_DestroyRenderer(_Renderer);
         std::cout << "Destroyed renderer!\n";
@@ -221,17 +221,12 @@ public:
         // _LavaManager = new LavaManager{};
         // _LavaManager->loadFromFile("data/maps/1.json");
         loadLevel(_level);
+        
+        _Music = &(_TexMan.MUS_Menu);
         //loadLevel(0);
         _StarManager.setTex(&(_TexMan.lightTex));
 
         _CoinManager.setTex(&(_TexMan.coin), &(_TexMan.lightTex));
-
-        music = Mix_LoadWAV("data/audio/hit/hit_0.wav");
-        if (music == NULL)
-        {
-            success = false;
-            std::cout << "Error loading music\n";
-        }
 
         if (success)
             std::cout << "Loaded!\n";
@@ -719,6 +714,11 @@ public:
             } else {
                 _TexMan.logo.render(_Width / 2 - 60, _Height / 2 - 60, _Renderer);
             }
+
+            if (animTimer.getTicks() > 3000)
+            {
+                _Music->play();
+            }
             
             if (play_shown)
             {
@@ -744,6 +744,9 @@ public:
             SDL_RenderPresent(_Renderer);
         } while (running);
         _TexMan.SFX_portal_0.play();
+        _Music->stop();
+        _Music = &(_TexMan.MUS_Level1);
+        _Music->play();
         return false;
     }
 

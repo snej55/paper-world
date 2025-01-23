@@ -49,4 +49,53 @@ public:
     }
 };
 
+class Music
+{
+private:
+    Mix_Music* _Music {nullptr};
+
+public:
+    Music()
+    {
+    }
+
+    Music(std::string path)
+    {
+        loadFromFile(path);
+    }
+
+    ~Music()
+    {
+        free();
+    }
+
+    void free()
+    {
+        if (_Music != nullptr)
+        {
+            Mix_FreeMusic(_Music);
+            _Music = nullptr;
+        }
+    }
+
+    void loadFromFile(std::string path)
+    {
+        free();
+        _Music = Mix_LoadMUS(path.c_str());
+    }
+
+    void play()
+    {
+        if (Mix_PlayingMusic() == 0)
+        {
+            Mix_PlayMusic(_Music, -1);
+        }
+    }
+
+    void stop()
+    {
+        Mix_HaltMusic();
+    }
+};
+
 #endif

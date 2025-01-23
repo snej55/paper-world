@@ -26,6 +26,8 @@ Extra:
 
 Release:
  - Remove FPS counter
- - Fix DLLS
  - You Win
+ - Fading sword
+ - Linux build
+ - Option to turn off music
  - Check & playthrough levels. Check they are possible and check for mishaps.

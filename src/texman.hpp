@@ -98,6 +98,9 @@ public:
     Sound SFX_intro{};
     Sound SFX_button{};
 
+    Music MUS_Menu{};
+    Music MUS_Level1{};
+
     TTF_Font* baseFont{nullptr};
     TTF_Font* baseFontBold{nullptr};
 
@@ -179,6 +182,8 @@ public:
             SFX_portal_1.free();
             SFX_intro.free();
             SFX_button.free();
+            MUS_Level1.free();
+            MUS_Menu.free();
 
             TTF_CloseFont(baseFont);
             TTF_CloseFont(baseFontBold);
@@ -264,6 +269,8 @@ public:
         SFX_portal_1.loadFromFileWAV("data/audio/misc/next_level_1.wav");
         SFX_intro.loadFromFileWAV("data/audio/misc/intro.wav");
         SFX_button.loadFromFileWAV("data/audio/misc/button.wav");
+        MUS_Menu.loadFromFile("data/audio/music/menu.wav");
+        MUS_Level1.loadFromFile("data/audio/music/level1.wav");
 
         baseFont = TTF_OpenFont("data/fonts/PixelOperator.ttf", 20);
         baseFontBold = TTF_OpenFont("data/fonts/PixelOperator-Bold.ttf", 20);

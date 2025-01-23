@@ -13,5 +13,5 @@
 # all : $(OBJS)
 # 	$(CC) $(OBJS) $(COMPILER_FLAGS) -I$(INCLUDE) -L$(LIB) -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -o $(BIN)/$(OBJ_NAME)
 all:
-	cd bin; ninja
+	cd bin; ninja -j4
 	.\bin\main
