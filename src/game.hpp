@@ -47,7 +47,7 @@ private:
     ShockWaveManager _ShockWaveManager{};
     StarManager _StarManager{100};
 
-    std::vector<std::string> _levels {"data/maps/0.json", "data/maps/1.json", "data/maps/2.json", "data/maps/4.json", "data/maps/5.json", "data/maps/6.json", "data/maps/7.json", "data/maps/8.json", "data/maps/9.json", "data/maps/10.json"};
+    std::vector<std::string> _levels {"data/maps/0.json", "data/maps/1.json", "data/maps/2.json", "data/maps/4.json", "data/maps/5.json", "data/maps/6.json", "data/maps/7.json", "data/maps/8.json", "data/maps/9.json", "data/maps/10.json", "data/maps/11.json", "data/maps/12.json", "data/maps/13.json"};
     int _level{0};
 
     int _Width {SCR_WIDTH};
