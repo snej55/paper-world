@@ -25,6 +25,7 @@
 #include "./shockwaves.hpp"
 #include "./stars.hpp"
 #include "./audio.hpp"
+#include "./popups.hpp"
 // #include "./clouds.hpp"
 
 using json = nlohmann::json;
@@ -47,8 +48,9 @@ private:
     CoinManager _CoinManager{};
     ShockWaveManager _ShockWaveManager{};
     StarManager _StarManager{100};
+    PopUpManager _PopUpManager{};
 
-    std::vector<std::string> _levels {"data/maps/0.json", "data/maps/1.json", "data/maps/2.json", "data/maps/4.json", "data/maps/5.json", "data/maps/6.json", "data/maps/7.json", "data/maps/8.json", "data/maps/9.json", "data/maps/10.json", "data/maps/11.json", "data/maps/12.json", "data/maps/13.json"};
+    std::vector<std::string> _levels {"data/maps/0.json", "data/maps/1.json", "data/maps/2.json"};//, "data/maps/4.json", "data/maps/5.json", "data/maps/6.json", "data/maps/7.json", "data/maps/8.json", "data/maps/9.json", "data/maps/10.json", "data/maps/11.json", "data/maps/12.json", "data/maps/13.json"};
     int _level{0};
 
     int _Width {SCR_WIDTH};
@@ -56,7 +58,11 @@ private:
 
     Music* _Music{nullptr};
 
+    SDL_Surface* _windowIcon{nullptr};
+
     bool _closed{false};
+
+    bool _volume{true};
 
     double _playerHealth{100.0};
     vec2<double> _portal_pos{0.0, 0.0};
@@ -122,7 +128,7 @@ public:
     {
         std::cout << "Initializing...\n";
         bool success {true};
-        _Window = SDL_CreateWindow("Paper World", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+        _Window = SDL_CreateWindow("Defblade", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
         if (_Window == NULL)
         {
             std::cout << "INIT::ERROR Failed to create SDL_Window! SDL_Error: " << SDL_GetError() << '\n';
@@ -212,6 +218,9 @@ public:
         _TexMan.load(_Window, _Renderer);
         _Player.loadAnim(&_TexMan);
         _ShockWaveManager.setTex(&(_TexMan.shockwave));
+
+        _windowIcon = IMG_Load("data/images/ui/icon.png");
+        SDL_SetWindowIcon(_Window, _windowIcon);
 
         // _World.loadFromFile("data/maps/1.json");
         // setPlayerSpawnPos("data/maps/1.json");
@@ -566,6 +575,12 @@ public:
                     nextLevel();
                     scroll = {_Player.getCenter().x - static_cast<double>(_Width) / 2.0, _Player.getCenter().y - static_cast<double>(_Height) / 2.0};
                     _Player.setHealth(_Player.getMaxHealth());
+                    if (checkWin())
+                    {
+                        bool play_again{win()};
+                        running = false;
+                        return play_again;
+                    }
                 }
             }
 
@@ -585,6 +600,7 @@ public:
                 running = false;
                 return play_again;
             }
+            handleVolume();
         } while (running);
         return false;
     }
@@ -592,7 +608,7 @@ public:
     void setWindowTitle(float avgFPS)
     {
         std::stringstream caption;
-        caption << "Defblade at " << avgFPS << " FPS (Avg)";
+        caption << "Defblade";
         SDL_SetWindowTitle(_Window, caption.str().c_str());
     }
 
@@ -613,6 +629,15 @@ public:
         SDL_RenderFillRect(_Renderer, &fillRect);
     }
 
+    bool checkWin()
+    {
+        if (_level >= _levels.size())
+        {
+            return true;
+        }
+        return false;
+    }
+
     bool menu()
     {
         SDL_Event e;
@@ -629,8 +654,16 @@ public:
         animTimer.start();
         bool logo_shown{false};
         bool play_shown{false};
+        bool music_shown{false};
+
+        Timer popUpTimer{};
+        popUpTimer.start();
 
         Button playButton{{0, 0}, &(_TexMan.uiPlay)};
+        Button musicButton{{0, 0}, &(_TexMan.buttonMusic)};
+
+        _Music->stop();
+        _Music = &(_TexMan.MUS_Menu);
 
         do {
             while (SDL_PollEvent(&e) != 0)
@@ -688,6 +721,11 @@ public:
                     {
                         running = false;
                     }
+                    if (Util::checkCollision(&mouseRect, musicButton.getRect()))
+                    {
+                        _volume = !_volume;
+                        std::cout << _volume << "\n";
+                    }
                 }
             }
 
@@ -724,6 +762,13 @@ public:
             {
                 playButton.setPos(vec2<int>{_Width / 2 - 35, _Height / 2 - 5});
                 playButton.update(time_step, mouseX / 3, mouseY / 3, _Renderer);
+                SDL_Rect mouseRect{mouseX / 3, mouseY / 3, 1, 1};
+                if (popUpTimer.getTicks() > 700)
+                {
+                    popUpTimer.start();
+                    std::vector<std::string> phrases {"Certain death!", "AAAARRGGHH!!!", "Beware!", "Pain!", "Enter at own risk!", "NOOO!", "Help!", "You will die.", "RUN!", "You will NOT survive.", "Don't click it!", "Uh Oh.", "Save yourself!", "Bolt!", "Scram!", "Flee!", "Escape!", "Retreat!", "Stay away!", "Die!", "Steer Clear!", "2.5m Social Distancing!", "Don't touch this!"};
+                    _PopUpManager.addPopUp({static_cast<double>(_Width * 2) * Util::random() + static_cast<double>(_Width / 6), static_cast<double>(_Height * 3 - 100)}, phrases[std::rand() % static_cast<int>(phrases.size())]);
+                }
             } else {
                 playButton.setExpand(-35.0);
                 if (animTimer.getTicks() > 2000)
@@ -733,8 +778,23 @@ public:
                 }
             }
 
+            if (music_shown)
+            {
+                musicButton.setPos(vec2<int>{_Width - 35, _Height - 100 / 3});
+                musicButton.update(time_step, 0, 0, _Renderer);
+            } else {
+                musicButton.setExpand(-35.0);
+                if (animTimer.getTicks() > 3000)
+                {
+                    music_shown = true;
+                    _TexMan.SFX_button.play();
+                }
+            }
+
             SDL_SetRenderTarget(_Renderer, NULL);
             _Screen.renderClean(0, 0, _Renderer, 3);
+
+            _PopUpManager.update(time_step, _Renderer, _TexMan.baseFontBold);
 
             Texture fontTex{};
             double faded{static_cast<double>(std::min(static_cast<Uint32>(5000), animTimer.getTicks())) / 5000.0};
@@ -742,6 +802,7 @@ public:
             fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, _Height * 3 - 50, _Renderer);
 
             SDL_RenderPresent(_Renderer);
+            handleVolume();
         } while (running);
         _TexMan.SFX_portal_0.play();
         _Music->stop();
@@ -874,8 +935,150 @@ public:
             fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, 150, _Renderer);
 
             SDL_RenderPresent(_Renderer);
+            handleVolume();
         } while (running);
         return playAgain;
+    }
+
+    bool win()
+    {
+        SDL_Event e;
+        bool running {true};
+
+        Timer timer;
+        timer.start();
+        double time_step {1.0};
+
+        int mouseX, mouseY;
+        int windowX, windowY;
+
+        Timer animTimer{};
+        animTimer.start();
+        bool play_shown{false};
+
+        Button playButton{{0, 0}, &(_TexMan.uiPlay)};
+
+        bool playAgain{false};
+
+        do {
+            while (SDL_PollEvent(&e) != 0)
+            {
+                if (e.type == SDL_QUIT)
+                {
+                    return false;
+                } else if (e.type == SDL_MOUSEMOTION)
+                {
+                    SDL_GetGlobalMouseState(&mouseX, &mouseY);
+                    mouseX -= windowX;
+                    mouseY -= windowY;
+                } else if (e.type == SDL_KEYDOWN)
+                {
+                    switch (e.key.keysym.sym)
+                    {
+                        case (SDLK_RETURN):
+                            running = false;
+                            playAgain = true;
+                        default:
+                            break;
+                    }
+                } else if (e.type == SDL_KEYUP)
+                {
+                    switch (e.key.keysym.sym)
+                    {
+                        default:
+                            break;
+                    }
+                } else if (e.type == SDL_WINDOWEVENT)
+                {
+                    // handle window events
+                    switch (e.window.event)
+                    {
+                        case (SDL_WINDOWEVENT_RESIZED):
+                            _Width = e.window.data1 / 3;
+                            _Height = e.window.data2 / 3;
+                            _Screen.free();
+                            _Screen.createBlank(_Width, _Height, _Renderer, SDL_TEXTUREACCESS_TARGET);
+                            SDL_RenderPresent(_Renderer);
+                            break;
+                        case (SDL_WINDOWEVENT_SIZE_CHANGED):
+                            _Width = e.window.data1 / 3;
+                            _Height = e.window.data2 / 3;
+                            _Screen.free();
+                            _Screen.createBlank(_Width, _Height, _Renderer, SDL_TEXTUREACCESS_TARGET);
+                            SDL_RenderPresent(_Renderer);
+                            break;
+                        default:
+                            break;
+                    }
+                } else if (e.type == SDL_MOUSEBUTTONDOWN)
+                {
+                    SDL_Rect mouseRect{mouseX / 3, mouseY / 3, 1, 1};
+                    if (Util::checkCollision(&mouseRect, playButton.getRect()))
+                    {
+                        playAgain = true;
+                        running = false;
+                    }
+                }
+            }
+
+            time_step = timer.getTicks() / 1000.0 * 60.0;
+            time_step = std::min(time_step, 3.0);
+            timer.start();
+
+            SDL_GetWindowPosition(_Window, &windowX, &windowY);
+            // set screen as render target
+            _Screen.setAsRenderTarget(_Renderer);
+
+            // clear screen (0x1f, 0x24, 0x4b)
+            SDL_SetRenderDrawColor(_Renderer, 0x00, 0x00, 0x00, 0xFF);
+            SDL_RenderClear(_Renderer);
+            
+            if (play_shown)
+            {
+                playButton.setPos(vec2<int>{_Width / 2 - 35, _Height / 2 - 5});
+                playButton.update(time_step, mouseX / 3, mouseY / 3, _Renderer);
+            } else {
+                playButton.setExpand(-35.0);
+                if (animTimer.getTicks() > 2000)
+                {
+                    play_shown = true;
+                    _TexMan.SFX_button.play();
+                }
+            }
+
+            SDL_SetRenderTarget(_Renderer, NULL);
+            _Screen.renderClean(0, 0, _Renderer, 3);
+
+            Texture fontTex{};
+            double faded{static_cast<double>(std::min(static_cast<Uint32>(5000), animTimer.getTicks())) / 5000.0};
+            fontTex.loadFromRenderedText("A game by @snej55", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, _Height * 3 - 50, _Renderer);
+
+            fontTex.loadFromRenderedText("'Imagine dying.'.", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, 50, _Renderer);
+            fontTex.loadFromRenderedText(" - @snej55 c. 2025", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2 + 20, 70, _Renderer);
+
+            fontTex.loadFromRenderedText("You Win!", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, 100, _Renderer);
+
+            fontTex.loadFromRenderedText("Play again?", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, 150, _Renderer);
+
+            SDL_RenderPresent(_Renderer);
+            handleVolume();
+        } while (running);
+        return playAgain;
+    }
+
+    void handleVolume()
+    {
+        if (!_volume)
+        {
+            Mix_VolumeMusic(0);
+        } else {
+            Mix_VolumeMusic(MIX_MAX_VOLUME);
+        }
     }
 };
 

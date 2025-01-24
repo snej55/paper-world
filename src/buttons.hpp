@@ -43,7 +43,7 @@ public:
         SDL_Rect mouseRect {mouseX, mouseY, 1, 1};
         if (Util::checkCollision(&mouseRect, &_rect))
         {
-            _vel = (8.0 - _expand) * 0.8 * time_step;
+            _vel = (8.0 * (static_cast<double>(_tex->getWidth()) / 70.0) - _expand) * 0.8 * time_step;
             _tex->setColor(255, 255, 255);
         } else {
             _tex->setColor(220, 220, 220);

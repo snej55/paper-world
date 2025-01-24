@@ -66,6 +66,7 @@ public:
     Texture playerHealthBar{};
     Texture uiPlay{};
     Texture logo{};
+    Texture buttonMusic{};
 
     // Background
     Texture backdropTex{};
@@ -132,6 +133,7 @@ public:
             shockwave.free();
             circle.free();
             backdropTex.free();
+            buttonMusic.free();
             cloud_dark.free();
             cloud_light.free();
             leafTex.free();
@@ -249,6 +251,7 @@ public:
         confirm(cloud_light.loadFromFile("data/images/background/clouds_light.png", window, renderer), success);
         confirm(black.loadFromFile("data/images/vfx/black.png", window, renderer), success);
         confirm(moon.loadFromFile("data/images/background/moon.png", window, renderer), success);
+        confirm(buttonMusic.loadFromFile("data/images/ui/music.png", window, renderer), success);
         SFX_death_0.loadFromFileWAV("data/audio/death/death_0.wav");
         SFX_hit_0.loadFromFileWAV("data/audio/hit/hit_0.wav");
         SFX_hit_1.loadFromFileWAV("data/audio/hit/hit_1.wav");

@@ -11,7 +11,7 @@
 # =============================================================================
 
 # =============================================================================
-# Project: PaperWorld
+# Project: Defblade
 # Configurations: 
 # =============================================================================
 
@@ -36,97 +36,103 @@ include CMakeFiles/rules.ninja
 
 cmake_ninja_workdir = C$:/Users/AnkenWannePC/vs_projects/paper-world/bin/
 # =============================================================================
-# Object build statements for EXECUTABLE target main
+# Object build statements for EXECUTABLE target Defblade
 
 
 #############################################
-# Order-only phony target for main
+# Order-only phony target for Defblade
 
-build cmake_object_order_depends_target_main: phony || .
+build cmake_object_order_depends_target_Defblade: phony || .
 
-build CMakeFiles/main.dir/main.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/main.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\main.cpp.obj.d
+build CMakeFiles/Defblade.dir/main.cpp.obj: CXX_COMPILER__Defblade_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/main.cpp || cmake_object_order_depends_target_Defblade
+  DEP_FILE = CMakeFiles\Defblade.dir\main.cpp.obj.d
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir
+  OBJECT_DIR = CMakeFiles\Defblade.dir
+  OBJECT_FILE_DIR = CMakeFiles\Defblade.dir
 
-build CMakeFiles/main.dir/src/anim.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/anim.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\src\anim.cpp.obj.d
+build CMakeFiles/Defblade.dir/src/anim.cpp.obj: CXX_COMPILER__Defblade_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/anim.cpp || cmake_object_order_depends_target_Defblade
+  DEP_FILE = CMakeFiles\Defblade.dir\src\anim.cpp.obj.d
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\src
+  OBJECT_DIR = CMakeFiles\Defblade.dir
+  OBJECT_FILE_DIR = CMakeFiles\Defblade.dir\src
 
-build CMakeFiles/main.dir/src/sparks.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/sparks.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\src\sparks.cpp.obj.d
+build CMakeFiles/Defblade.dir/src/sparks.cpp.obj: CXX_COMPILER__Defblade_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/sparks.cpp || cmake_object_order_depends_target_Defblade
+  DEP_FILE = CMakeFiles\Defblade.dir\src\sparks.cpp.obj.d
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\src
+  OBJECT_DIR = CMakeFiles\Defblade.dir
+  OBJECT_FILE_DIR = CMakeFiles\Defblade.dir\src
 
-build CMakeFiles/main.dir/src/entities.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/entities.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\src\entities.cpp.obj.d
+build CMakeFiles/Defblade.dir/src/entities.cpp.obj: CXX_COMPILER__Defblade_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/entities.cpp || cmake_object_order_depends_target_Defblade
+  DEP_FILE = CMakeFiles\Defblade.dir\src\entities.cpp.obj.d
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\src
+  OBJECT_DIR = CMakeFiles\Defblade.dir
+  OBJECT_FILE_DIR = CMakeFiles\Defblade.dir\src
 
-build CMakeFiles/main.dir/src/health_bars.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/health_bars.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\src\health_bars.cpp.obj.d
+build CMakeFiles/Defblade.dir/src/health_bars.cpp.obj: CXX_COMPILER__Defblade_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/health_bars.cpp || cmake_object_order_depends_target_Defblade
+  DEP_FILE = CMakeFiles\Defblade.dir\src\health_bars.cpp.obj.d
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\src
+  OBJECT_DIR = CMakeFiles\Defblade.dir
+  OBJECT_FILE_DIR = CMakeFiles\Defblade.dir\src
 
-build CMakeFiles/main.dir/src/particles.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/particles.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\src\particles.cpp.obj.d
+build CMakeFiles/Defblade.dir/src/particles.cpp.obj: CXX_COMPILER__Defblade_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/particles.cpp || cmake_object_order_depends_target_Defblade
+  DEP_FILE = CMakeFiles\Defblade.dir\src\particles.cpp.obj.d
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\src
+  OBJECT_DIR = CMakeFiles\Defblade.dir
+  OBJECT_FILE_DIR = CMakeFiles\Defblade.dir\src
 
-build CMakeFiles/main.dir/src/player.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/player.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\src\player.cpp.obj.d
+build CMakeFiles/Defblade.dir/src/player.cpp.obj: CXX_COMPILER__Defblade_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/player.cpp || cmake_object_order_depends_target_Defblade
+  DEP_FILE = CMakeFiles\Defblade.dir\src\player.cpp.obj.d
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\src
+  OBJECT_DIR = CMakeFiles\Defblade.dir
+  OBJECT_FILE_DIR = CMakeFiles\Defblade.dir\src
 
-build CMakeFiles/main.dir/src/timer.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/timer.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\src\timer.cpp.obj.d
+build CMakeFiles/Defblade.dir/src/timer.cpp.obj: CXX_COMPILER__Defblade_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/timer.cpp || cmake_object_order_depends_target_Defblade
+  DEP_FILE = CMakeFiles\Defblade.dir\src\timer.cpp.obj.d
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\src
+  OBJECT_DIR = CMakeFiles\Defblade.dir
+  OBJECT_FILE_DIR = CMakeFiles\Defblade.dir\src
 
-build CMakeFiles/main.dir/src/weapons.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/weapons.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\src\weapons.cpp.obj.d
+build CMakeFiles/Defblade.dir/src/weapons.cpp.obj: CXX_COMPILER__Defblade_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/weapons.cpp || cmake_object_order_depends_target_Defblade
+  DEP_FILE = CMakeFiles\Defblade.dir\src\weapons.cpp.obj.d
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\src
+  OBJECT_DIR = CMakeFiles\Defblade.dir
+  OBJECT_FILE_DIR = CMakeFiles\Defblade.dir\src
 
-build CMakeFiles/main.dir/src/water.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/water.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\src\water.cpp.obj.d
+build CMakeFiles/Defblade.dir/src/water.cpp.obj: CXX_COMPILER__Defblade_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/water.cpp || cmake_object_order_depends_target_Defblade
+  DEP_FILE = CMakeFiles\Defblade.dir\src\water.cpp.obj.d
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\src
+  OBJECT_DIR = CMakeFiles\Defblade.dir
+  OBJECT_FILE_DIR = CMakeFiles\Defblade.dir\src
 
-build CMakeFiles/main.dir/src/coin.cpp.obj: CXX_COMPILER__main_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/coin.cpp || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\src\coin.cpp.obj.d
+build CMakeFiles/Defblade.dir/src/coin.cpp.obj: CXX_COMPILER__Defblade_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/src/coin.cpp || cmake_object_order_depends_target_Defblade
+  DEP_FILE = CMakeFiles\Defblade.dir\src\coin.cpp.obj.d
   INCLUDES = -IC:/Users/AnkenWannePC/vs_projects/paper-world/include
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\src
+  OBJECT_DIR = CMakeFiles\Defblade.dir
+  OBJECT_FILE_DIR = CMakeFiles\Defblade.dir\src
+
+build CMakeFiles/Defblade.dir/resources.rc.obj: RC_COMPILER__Defblade_unscanned_ C$:/Users/AnkenWannePC/vs_projects/paper-world/bin/resources.rc || cmake_object_order_depends_target_Defblade
+  DEP_FILE = CMakeFiles\Defblade.dir\resources.rc.obj.d
+  INCLUDES = -I C:/Users/AnkenWannePC/vs_projects/paper-world/include
+  OBJECT_DIR = CMakeFiles\Defblade.dir
+  OBJECT_FILE_DIR = CMakeFiles\Defblade.dir
 
 
 # =============================================================================
-# Link build statements for EXECUTABLE target main
+# Link build statements for EXECUTABLE target Defblade
 
 
 #############################################
-# Link the executable main.exe
+# Link the executable Defblade.exe
 
-build main.exe: CXX_EXECUTABLE_LINKER__main_ CMakeFiles/main.dir/main.cpp.obj CMakeFiles/main.dir/src/anim.cpp.obj CMakeFiles/main.dir/src/sparks.cpp.obj CMakeFiles/main.dir/src/entities.cpp.obj CMakeFiles/main.dir/src/health_bars.cpp.obj CMakeFiles/main.dir/src/particles.cpp.obj CMakeFiles/main.dir/src/player.cpp.obj CMakeFiles/main.dir/src/timer.cpp.obj CMakeFiles/main.dir/src/weapons.cpp.obj CMakeFiles/main.dir/src/water.cpp.obj CMakeFiles/main.dir/src/coin.cpp.obj
+build Defblade.exe: CXX_EXECUTABLE_LINKER__Defblade_ CMakeFiles/Defblade.dir/main.cpp.obj CMakeFiles/Defblade.dir/src/anim.cpp.obj CMakeFiles/Defblade.dir/src/sparks.cpp.obj CMakeFiles/Defblade.dir/src/entities.cpp.obj CMakeFiles/Defblade.dir/src/health_bars.cpp.obj CMakeFiles/Defblade.dir/src/particles.cpp.obj CMakeFiles/Defblade.dir/src/player.cpp.obj CMakeFiles/Defblade.dir/src/timer.cpp.obj CMakeFiles/Defblade.dir/src/weapons.cpp.obj CMakeFiles/Defblade.dir/src/water.cpp.obj CMakeFiles/Defblade.dir/src/coin.cpp.obj CMakeFiles/Defblade.dir/resources.rc.obj
   LINK_LIBRARIES = -lmingw32  -lSDL2main  -lSDL2  -lSDL2_image  -lSDL2_mixer  -lSDL2_ttf  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   LINK_PATH = -LC:/Users/AnkenWannePC/vs_projects/paper-world/lib
-  OBJECT_DIR = CMakeFiles\main.dir
+  OBJECT_DIR = CMakeFiles\Defblade.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
-  TARGET_FILE = main.exe
-  TARGET_IMPLIB = libmain.dll.a
-  TARGET_PDB = main.exe.dbg
+  TARGET_FILE = Defblade.exe
+  TARGET_IMPLIB = libDefblade.dll.a
+  TARGET_PDB = Defblade.exe.dbg
 
 
 #############################################
@@ -155,7 +161,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # =============================================================================
 # Target aliases.
 
-build main: phony main.exe
+build Defblade: phony Defblade.exe
 
 # =============================================================================
 # Folder targets.
@@ -165,7 +171,7 @@ build main: phony main.exe
 #############################################
 # Folder: C:/Users/AnkenWannePC/vs_projects/paper-world/bin
 
-build all: phony main.exe
+build all: phony Defblade.exe
 
 # =============================================================================
 # Built-in targets

@@ -2,11 +2,6 @@
 Today/Tommorow:
  - Signs/boxes small_decor
 
-Wednesday/Thursday
- - Soundtrack
- - Fix DLLs
- - Get some playtesters.
-
 Week 2:
  - Lasers/Guns
  - Shop
@@ -25,9 +20,16 @@ Extra:
  - Cloth (hard)
 
 Release:
- - Remove FPS counter
- - You Win
- - Fading sword
- - Linux build
- - Option to turn off music
+ - 20 - 30 levels minimum
  - Check & playthrough levels. Check they are possible and check for mishaps.
+ - Linux build
+
+Extra
+ - Fading sword
+ - Moving Spike balls
+
+Media:
+ - Trailer/Demo
+ - Logo/Icon for ship
+ - Itch.io site
+ - Jan's site
