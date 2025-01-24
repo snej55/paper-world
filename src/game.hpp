@@ -50,7 +50,7 @@ private:
     StarManager _StarManager{100};
     PopUpManager _PopUpManager{};
 
-    std::vector<std::string> _levels {"data/maps/0.json", "data/maps/1.json", "data/maps/2.json"};//, "data/maps/4.json", "data/maps/5.json", "data/maps/6.json", "data/maps/7.json", "data/maps/8.json", "data/maps/9.json", "data/maps/10.json", "data/maps/11.json", "data/maps/12.json", "data/maps/13.json"};
+    std::vector<std::string> _levels {"data/maps/0.json", "data/maps/1.json", "data/maps/2.json"}, "data/maps/4.json", "data/maps/5.json", "data/maps/6.json", "data/maps/7.json", "data/maps/8.json", "data/maps/9.json", "data/maps/10.json", "data/maps/11.json", "data/maps/12.json", "data/maps/13.json"};
     int _level{0};
 
     int _Width {SCR_WIDTH};
@@ -766,7 +766,7 @@ public:
                 if (popUpTimer.getTicks() > 700)
                 {
                     popUpTimer.start();
-                    std::vector<std::string> phrases {"Certain death!", "AAAARRGGHH!!!", "Beware!", "Pain!", "Enter at own risk!", "NOOO!", "Help!", "You will die.", "RUN!", "You will NOT survive.", "Don't click it!", "Uh Oh.", "Save yourself!", "Bolt!", "Scram!", "Flee!", "Escape!", "Retreat!", "Stay away!", "Die!", "Steer Clear!", "2.5m Social Distancing!", "Don't touch this!"};
+                    std::vector<std::string> phrases {"Certain death!", "AAAARRGGHH!!!", "Beware!", "Pain!", "Enter at own risk!", "NOOO!", "Help!", "You will die.", "RUN!", "You will NOT survive.", "Don't click it!", "Uh Oh.", "Save yourself!", "Bolt!", "Scram!", "Flee!", "Escape!", "Retreat!", "Stay away!", "Die!", "Steer Clear!", "2.5m Social Distancing please!", "Don't touch this!"};
                     _PopUpManager.addPopUp({static_cast<double>(_Width * 2) * Util::random() + static_cast<double>(_Width / 6), static_cast<double>(_Height * 3 - 100)}, phrases[std::rand() % static_cast<int>(phrases.size())]);
                 }
             } else {
