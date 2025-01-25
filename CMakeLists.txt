@@ -6,7 +6,7 @@ project(Defblade VERSION 1.0
 set(CMAKE_CPP_COMPILER g++)
 
 # for release
-#set(CMAKE_CXX_FLAGS -mwindows)
+set(CMAKE_CXX_FLAGS -mwindows)
 
 # sources
 set(SOURCES main.cpp src/anim.cpp src/sparks.cpp src/entities.cpp src/health_bars.cpp src/particles.cpp src/player.cpp src/timer.cpp src/weapons.cpp src/water.cpp src/coin.cpp)

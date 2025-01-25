@@ -50,7 +50,7 @@ private:
     StarManager _StarManager{100};
     PopUpManager _PopUpManager{};
 
-    std::vector<std::string> _levels {"data/maps/0.json", "data/maps/1.json", "data/maps/2.json"}, "data/maps/4.json", "data/maps/5.json", "data/maps/6.json", "data/maps/7.json", "data/maps/8.json", "data/maps/9.json", "data/maps/10.json", "data/maps/11.json", "data/maps/12.json", "data/maps/13.json"};
+    std::vector<std::string> _levels {"data/maps/0.json", "data/maps/1.json", "data/maps/2.json", "data/maps/3.json", "data/maps/other_1.json", "data/maps/other_2.json", "data/maps/4.json", "data/maps/5.json", "data/maps/6.json", "data/maps/other_3.json", "data/maps/7.json", "data/maps/8.json", "data/maps/9.json", "data/maps/10.json", "data/maps/11.json", "data/maps/12.json", "data/maps/13.json", "data/maps/14.json", "data/maps/15.json"};
     int _level{0};
 
     int _Width {SCR_WIDTH};

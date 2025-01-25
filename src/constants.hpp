@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-inline constexpr int START_COINS{2000};
+inline constexpr int START_COINS{1000};
 
 inline constexpr int TILE_SIZE {8};
 inline constexpr int CHUNK_SIZE {9};
