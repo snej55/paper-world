@@ -336,6 +336,9 @@ public:
                         case SDLK_x:
                             _Player.attackSword(&_TexMan);
                             break;
+                        case SDLK_j:
+                            _Player.attackSword(&_TexMan);
+                            break;
                         default:
                             break;
                     }
@@ -830,6 +833,10 @@ public:
         Button playButton{{0, 0}, &(_TexMan.uiPlay)};
 
         bool playAgain{false};
+
+        _Music->stop();
+        _Music = &(_TexMan.MUS_Menu);
+        _Music->play();
 
         do {
             while (SDL_PollEvent(&e) != 0)
