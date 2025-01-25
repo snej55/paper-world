@@ -1066,7 +1066,7 @@ public:
             fontTex.loadFromRenderedText(" - @snej55 c. 2025", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
             fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2 + 20, 70, _Renderer);
 
-            fontTex.loadFromRenderedText("You Win!", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
+            fontTex.loadFromRenderedText("You Win! (Underwhelming I know right)", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);
             fontTex.render(static_cast<int>((double)_Width * 3.0 / 2.0) - fontTex.getWidth() / 2, 100, _Renderer);
 
             fontTex.loadFromRenderedText("Play again?", SDL_Color{static_cast<Uint8>(static_cast<int>(faded * 246.0)), static_cast<Uint8>(static_cast<int>(faded * 231.0)), static_cast<Uint8>(static_cast<int>(faded * 156.0)), 0xFF}, _TexMan.baseFontBold, _Renderer);

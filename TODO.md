@@ -29,7 +29,5 @@ Extra
  - Moving Spike balls
 
 Media:
- - Trailer/Demo
  - Logo/Icon for ship
  - Itch.io site
- - Jan's site

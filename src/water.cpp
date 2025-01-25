@@ -49,7 +49,6 @@ void Water::updateSpring(WaterSpring* spring, WaterSpring* left, WaterSpring* ri
     }
     spring->vel += (dh - spring->vel) * time_step * _tension * 1.1;
     spring->pos.y += spring->vel / 2.0 * time_step;
-    spring->vel += (spring->vel * 0.95 - spring->vel) * time_step;
 }
 
 void Water::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, Player* player)
@@ -231,7 +230,6 @@ void Lava::updateSpring(WaterSpring* spring, WaterSpring* left, WaterSpring* rig
     }
     spring->vel += (dh - spring->vel) * time_step * _tension * 1.1;
     spring->pos.y += spring->vel / 2.0 * time_step;
-    spring->vel += (spring->vel * 0.95 - spring->vel) * time_step;
 }
 
 void Lava::update(const double& time_step, const int scrollX, const int scrollY, SDL_Renderer* renderer, TexMan* texman, Player* player)
