@@ -29,5 +29,4 @@ Extra
  - Moving Spike balls
 
 Media:
- - Logo/Icon for ship
- - Itch.io site
+ - Add to AUR and stuff
