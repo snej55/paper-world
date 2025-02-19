@@ -13,6 +13,7 @@ More information on the website ([Defblade on itch.io](https://snej55.itch.io/de
 [Defblade on itch.io](https://snej55.itch.io/defblade) (You can download it here but this is the official site).
 
 ## Linux build instructions
+### Try the binaries first!
 
 You should be able to just download the binaries from [itch.io](https://snej55.itch.io/defblade), but in case that doesn't work:
 
