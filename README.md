@@ -1,5 +1,4 @@
 # Defblade 
-![icon](https://github.com/snej55/paper-world/blob/main/data/images/ui/icon.png)
 
 Defblade is a game made from scratch with C++ and SDL2. Inspired by this color palette: [Paper 8 Palette - Lospec Palette List](https://lospec.com/palette-list/paper-8).
 
