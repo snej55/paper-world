@@ -19,7 +19,7 @@ You should be able to just download the binaries from [itch.io](https://snej55.i
 
 1. Download linux build from itch
 
-2. Make sure sdl2 libraries are installed.
+2. Make sure sdl2 libraries (sdl2, sdl2-image, sdl2-mixer and sdl2-ttf) are installed.
 
 3. Install cmake and ninja-build
 
