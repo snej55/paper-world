@@ -5,7 +5,7 @@
 #ifndef POLYGONS_H
 #define POLYGONS_H
 
-#include "SDL2/SDL.h"
+#include <SDL2/SDL.h>
 #include <vector>
 #include <array>
 

@@ -1,8 +1,8 @@
 #ifndef TEXMAN_H
 #define TEXMAN_H
 
-#include "SDL2/SDL_mixer.h"
-#include "SDL2/SDL_ttf.h"
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "./texture.hpp"
 #include "./audio.hpp"

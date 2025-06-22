@@ -1,7 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "SDL2/SDL.h"
+#include <SDL2/SDL.h>
 
 #include "./util.hpp"
 #include "./vec2.hpp"

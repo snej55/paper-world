@@ -1,7 +1,7 @@
 #ifndef ENTITIES_H
 #define ENTITIES_H
 
-#include "SDL2/SDL.h"
+#include <SDL2/SDL.h>
 #include "JSON/json.hpp"
 
 #include <string>
