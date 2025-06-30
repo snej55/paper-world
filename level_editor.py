@@ -152,7 +152,7 @@ class Editor:
                 tile_surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
                 tile_surf.blit(sheet, (-x * TILE_SIZE, -y * TILE_SIZE))
                 tile_surf.set_colorkey((0, 0, 0))
-                tiles.append(tile_surf.copy())
+                tiles.append(tile_surf)
         return tiles
 
     def load_sheet(self, sheet, tile_size):
@@ -161,7 +161,7 @@ class Editor:
             tile_surf = pygame.Surface(tile_size)
             tile_surf.blit(sheet, (-x * tile_size[0], 0))
             tile_surf.set_colorkey((0, 0, 0))
-            tiles.append(tile_surf.copy())
+            tiles.append(tile_surf)
         return tiles
     
     def auto_tile(self):
